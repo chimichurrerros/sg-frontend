@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { Tooltip } from "@/components/ui/tooltip";
+import { Heading, Button, Stack } from "@chakra-ui/react";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <h1>Bigotires</h1>
-    </>
+    <Stack gap="2" align="flex-start">
+      <Heading size="2xl">Bigotires ERP</Heading>
+      <Tooltip content="This is the tooltip message!" showArrow>
+        <Button colorPalette="teal" size="md">
+          Hover Me
+        </Button>
+      </Tooltip>
+    </Stack>
   );
 }
 
