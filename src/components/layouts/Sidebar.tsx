@@ -83,6 +83,7 @@ export const Sidebar = ({ collapsed }: Props) => {
         overflowY="auto"
         overflowX="hidden"
         py="8px"
+        px="8px"
       >
         {NAV_CONFIG.map((item) => {
           const active = isActive(item.path);
@@ -110,15 +111,16 @@ export const Sidebar = ({ collapsed }: Props) => {
               {/* Item row */}
               <Box
                 display="flex"
-               
+                borderRadius="full"
+                // marginInline="8px"
                 alignItems="center"
-                gap="10px"
+                gap={collapsed ? "0" : "10px"}
                 px="12px"
                 h="36px"
                 cursor="pointer"
                 bg={active || groupActive ? "brand.primary" : "transparent"}
-                color={active || groupActive ? "white" : "#c8c8c8"}
-                _hover={{ bg: active ? "brand.primary" : "rgba(255,255,255,.07)" }}
+                color={active || groupActive ? "white" : "black"}
+                _hover={{ bg: active ? "brand.primary" : "brand.primary/20" }}
                 transition="background .15s, color .15s"
                 whiteSpace="nowrap"
                 position="relative"
@@ -133,7 +135,7 @@ export const Sidebar = ({ collapsed }: Props) => {
                   as={item.icon}
                   boxSize="15px"
                   flexShrink={0}
-                  color={active || groupActive ? "white" : "#888"}
+                  color={active || groupActive ? "white" : "#000"}
                 />
                 <Text
                   fontSize="13px"
@@ -169,8 +171,13 @@ export const Sidebar = ({ collapsed }: Props) => {
                         pr="12px"
                         h="32px"
                         cursor="pointer"
-                        color={isActive(child.path) ? "brand.secondary" : "#999"}
-                        _hover={{ bg: "rgba(255,255,255,.07)", color: "#ddd" }}
+                        color={
+                          isActive(child.path) ? "brand.secondary" : "#000"
+                        }
+                        _hover={{
+                          bg: "rgba(255,255,255,.07)",
+                          color: "brand.secondary",
+                        }}
                         fontSize="12px"
                         transition="background .15s, color .15s"
                         onClick={() => child.path && navigate(child.path)}

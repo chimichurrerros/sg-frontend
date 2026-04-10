@@ -38,7 +38,9 @@ export const LoginPage = () => {
         navigate("/dash", { replace: true });
       },
       onError: () => {
-        setAuthError("Credenciales inválidas. Verifique su correo y contraseña.");
+        setAuthError(
+          "Credenciales inválidas. Verifique su correo y contraseña.",
+        );
       },
     });
   };
@@ -56,10 +58,7 @@ export const LoginPage = () => {
             Iniciar Sesión
           </Text>
 
-          <Box
-            as="form"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <Box as="form" onSubmit={handleSubmit(onSubmit)}>
             <VStack gap={4}>
               <Field.Root invalid={!!errors.email}>
                 <Field.Label>Correo electrónico</Field.Label>
@@ -72,22 +71,21 @@ export const LoginPage = () => {
 
               <Field.Root invalid={!!errors.password}>
                 <Field.Label>Contraseña</Field.Label>
-                <PasswordInput
-                  {...register("password")}
-                />
+                <PasswordInput {...register("password")} />
                 <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
               </Field.Root>
 
               <VStack w="full" gap={2}>
                 <Button
                   type="submit"
+                  size="xl"
                   w="full"
                   bgColor="brand.primary"
                   loading={isPending}
                 >
                   Acceder
                 </Button>
-                
+
                 {authError && (
                   <Text color="red.500" fontSize="xs" textAlign="center">
                     {authError}
