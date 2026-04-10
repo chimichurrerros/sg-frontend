@@ -11,16 +11,17 @@
 
 > [!WARNING]
 > Use Conventional Commits
-[Conventional Commits Reference](https://www.conventionalcommits.org/en/v1.0.0/) 
+> [Conventional Commits Reference](https://www.conventionalcommits.org/en/v1.0.0/)
 
 **Install Dependencies**
 
 ```bash
-pnpm install 
+pnpm install
 ```
 
 ---
 
 ### TODO
+
 - [] Add more commands references as needed
 - [] Add missing future dependency stack
