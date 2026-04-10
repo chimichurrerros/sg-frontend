@@ -1,17 +1,8 @@
-import { Tooltip } from "@/components/ui/tooltip";
-import { Heading, Button, Stack } from "@chakra-ui/react";
+import { RouterProvider } from "react-router-dom";
+import { router } from "@/routes";
 
 function App() {
-  return (
-    <Stack gap="2" align="flex-start">
-      <Heading size="2xl">Bigotires ERP</Heading>
-      <Tooltip content="This is the tooltip message!" showArrow>
-        <Button colorPalette="teal" size="md">
-          Hover Me
-        </Button>
-      </Tooltip>
-    </Stack>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
