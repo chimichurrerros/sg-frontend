@@ -20,10 +20,9 @@ export const HomePage = () => {
       {/* <p>{user?.email} — {user?.roleName}</p> */}
       {isAdmin && <Link to="/register">Register new user</Link>}
       <ErrorDialog trigger={<Button mt={4}>Mostrar error</Button>}  />
-      <DestructiveActionDialog trigger={<Button mt={4}>Mostrar dialog destructivo</Button>} title="ELIMINAR A FULANO DEL SISTEMA" description="Estas a punto de eliminar a FULANO del sistema, esta acción es irreversible"/>
+      <DestructiveActionDialog trigger={<Button mt={4} variant="outline" colorPalette="red">Mostrar dialog destructivo</Button>} title="ELIMINAR A FULANO DEL SISTEMA" description="Estas a punto de eliminar a FULANO del sistema, esta acción es irreversible"/>
       <AlertDialog trigger={<Button mt={4}>Mostrar dialog de alerta</Button>} title="Este es un dialogo de alerta" description="No estas autorizado a realizar esa acción, no tienes los persmisos necesarios"/>
       <ConfirmActionDialog trigger={<Button mt={4}>Mostrar dialog de confirmación</Button>} title="Confirmar acción" description="Estas a punto de realizar esta acción, ¿deseas continuar?"/>
-
     </Box>
   );
 };

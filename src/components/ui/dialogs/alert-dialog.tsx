@@ -1,4 +1,3 @@
-
 import { Button, CloseButton } from "@chakra-ui/react/button";
 import { Dialog } from "@chakra-ui/react/dialog";
 import { Icon } from "@chakra-ui/react/icon";
@@ -29,26 +28,23 @@ export const AlertDialog = ({
                 {trigger || <Button variant="outline">Abrir</Button>}
             </Dialog.Trigger>
             <Portal>
-                <Dialog.Backdrop bg="blackAlpha.600" />
+                <Dialog.Backdrop /> {/* Sin forzar color */}
                 <Dialog.Positioner 
                     display="flex" 
                     alignItems="center" 
                     justifyContent="center"
                 >
-                    <Dialog.Content 
-                        borderRadius="md"
-                        boxShadow="lg"
-                    >
+                    <Dialog.Content>
                         <Dialog.Header display="flex" alignItems="center" gap={2}>
                             <Icon color="yellow.500" boxSize={6}>
                                 <InfoIcon />
                             </Icon>
-                            <Dialog.Title fontSize="lg" fontWeight="semibold" color="gray.800">
+                            <Dialog.Title fontSize="lg" fontWeight="semibold">
                                 {title}
                             </Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body pb={4}>
-                            <Text color="gray.600" fontSize="sm">
+                            <Text fontSize="sm">
                                 {description}
                             </Text>
                         </Dialog.Body>
@@ -56,7 +52,6 @@ export const AlertDialog = ({
                             <Dialog.ActionTrigger asChild>
                                 <Button
                                     variant="surface"
-                                    colorScheme="yellow"
                                     colorPalette="yellow"
                                     onClick={onAccept}
                                 >
@@ -65,11 +60,7 @@ export const AlertDialog = ({
                             </Dialog.ActionTrigger>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
-                            <CloseButton 
-                                size="sm" 
-                                color="gray.500"  
-                                _hover={{ color: "gray.700", bg: "gray.100" }}
-                            />
+                            <CloseButton size="sm" />
                         </Dialog.CloseTrigger>
                     </Dialog.Content>
                 </Dialog.Positioner>

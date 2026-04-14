@@ -1,4 +1,3 @@
-
 import { Button, CloseButton } from "@chakra-ui/react/button";
 import { Dialog } from "@chakra-ui/react/dialog";
 import { Icon } from "@chakra-ui/react/icon";
@@ -13,10 +12,6 @@ interface ErrorDialogProps {
     trigger?: React.ReactNode;
 }
 
-/**
- * Error dialog
- * trigger = the element that will trigger the dialog, if not provided, it will be a button with the text "Open"
- */
 export const ErrorDialog = ({
     title = "Ha ocurrido un error",
     description = "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
@@ -29,26 +24,23 @@ export const ErrorDialog = ({
                 {trigger || <Button variant="outline">Abrir</Button>}
             </Dialog.Trigger>
             <Portal>
-                <Dialog.Backdrop bg="blackAlpha.600" />
+                <Dialog.Backdrop />
                 <Dialog.Positioner 
                     display="flex" 
                     alignItems="center" 
                     justifyContent="center"
                 >
-                    <Dialog.Content 
-                        borderRadius="md"
-                        boxShadow="lg"
-                    >
+                    <Dialog.Content>
                         <Dialog.Header display="flex" alignItems="center" gap={2}>
                             <Icon color="red.500" boxSize={6}>
                                 <SquareX />
                             </Icon>
-                            <Dialog.Title fontSize="lg" fontWeight="semibold" color="gray.800">
+                            <Dialog.Title fontSize="lg" fontWeight="semibold">
                                 {title}
                             </Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body pb={4}>
-                            <Text color="gray.600" fontSize="sm">
+                            <Text fontSize="sm">
                                 {description}
                             </Text>
                         </Dialog.Body>
@@ -56,8 +48,6 @@ export const ErrorDialog = ({
                             <Dialog.ActionTrigger asChild>
                                 <Button
                                     variant="surface"
-                                    colorScheme="red"
-                                    color="white"
                                     colorPalette="red"
                                     onClick={onAccept}
                                 >
@@ -67,11 +57,7 @@ export const ErrorDialog = ({
                             </Dialog.ActionTrigger>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
-                            <CloseButton 
-                                size="sm" 
-                                color="gray.500"  // Color del botón de cierre
-                                _hover={{ color: "gray.700", bg: "gray.100" }}
-                            />
+                            <CloseButton size="sm" />
                         </Dialog.CloseTrigger>
                     </Dialog.Content>
                 </Dialog.Positioner>
