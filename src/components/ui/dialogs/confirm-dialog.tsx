@@ -1,30 +1,31 @@
-import {
-    Button,
-    CloseButton,
-    Dialog,
-    Portal,
-    Text,
-    Icon,
-} from "@chakra-ui/react";
-import { ArrowRight, TriangleAlert } from "lucide-react";
+import { Button, CloseButton } from "@chakra-ui/react/button";
+import { Dialog } from "@chakra-ui/react/dialog";
+import { Portal } from "@chakra-ui/react/portal";
+import { Text } from "@chakra-ui/react/text"
+import { ArrowRight } from "lucide-react";
+import type React from "react";
 
-interface ErrorDialogProps {
-    title?: string;
+
+interface confirmDialogProps {
+    title: string;
     description?: string;
+    cancelText?: string;
+    onCancel?: () => void;
+    acceptText?: string;
     onAccept?: () => void;
-    trigger?: React.ReactNode;
+    trigger?: React.ReactNode
 }
 
-/**
- * Error dialog
- * trigger = the element that will trigger the dialog, if not provided, it will be a button with the text "Open"
- */
-export const ErrorDialog = ({
-    title = "Ha ocurrido un error",
-    description = "Hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.",
+export const ConfirmActionDialog = ({
+    title,
+    description = "Confirmar acción",
+    cancelText = "Cancelar",
+    acceptText = "Confirmar",
     onAccept,
+    onCancel,
     trigger,
-}: ErrorDialogProps) => {
+
+}: confirmDialogProps) => {
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>
@@ -32,19 +33,17 @@ export const ErrorDialog = ({
             </Dialog.Trigger>
             <Portal>
                 <Dialog.Backdrop bg="blackAlpha.600" />
-                <Dialog.Positioner 
-                    display="flex" 
-                    alignItems="center" 
+                <Dialog.Positioner
+                    display="flex"
+                    alignItems="center"
                     justifyContent="center"
                 >
-                    <Dialog.Content 
+                    <Dialog.Content
                         borderRadius="md"
                         boxShadow="lg"
                     >
                         <Dialog.Header display="flex" alignItems="center" gap={2}>
-                            <Icon color="red.500" boxSize={6}>
-                                <TriangleAlert />
-                            </Icon>
+
                             <Dialog.Title fontSize="lg" fontWeight="semibold" color="gray.800">
                                 {title}
                             </Dialog.Title>
@@ -58,19 +57,30 @@ export const ErrorDialog = ({
                             <Dialog.ActionTrigger asChild>
                                 <Button
                                     variant="surface"
-                                    colorScheme="red"
-                                    color="white"
-                                    colorPalette="red"
-                                    onClick={onAccept}
+                                    colorScheme="gray"
+                                    colorPalette="gray"
+                                    onClick={onCancel}
                                 >
-                                    Aceptar
-                                    <ArrowRight size={16} style={{ marginLeft: 8 }} />
+                                    {cancelText}
                                 </Button>
                             </Dialog.ActionTrigger>
+                            <Dialog.ActionTrigger asChild>
+                                <Button
+                                    variant="surface"
+                                    colorScheme="blue"
+                                    colorPalette="blue"
+                                    onClick={onAccept}
+                                >
+                                    {acceptText}
+                                    <ArrowRight size={16} style={{ marginLeft: 8 }} />
+
+                                </Button>
+                            </Dialog.ActionTrigger>
+
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
-                            <CloseButton 
-                                size="sm" 
+                            <CloseButton
+                                size="sm"
                                 color="gray.500"  // Color del botón de cierre
                                 _hover={{ color: "gray.700", bg: "gray.100" }}
                             />
@@ -81,3 +91,4 @@ export const ErrorDialog = ({
         </Dialog.Root>
     );
 };
+
