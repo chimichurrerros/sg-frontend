@@ -1,28 +1,11 @@
-import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Box } from "@chakra-ui/react";
-import { Sidebar } from "./Sidebar";
-import { TopBar } from "./TopBar";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useState } from "react";
+import { Outlet }   from "react-router-dom";
+import { Box }      from "@chakra-ui/react";
+import { Sidebar }  from "./Sidebar";
+import { TopBar }   from "./TopBar";
 
 export const HomeLayout = () => {
-  const { getLocalStorage, saveLocalStorage } = useLocalStorage();
-
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    const preferences = getLocalStorage("appConfig");
-    return preferences?.saveSidebarState ? preferences?.lastSidebarState : false;
-  });
-
-  // Sincronizar con localStorage
-  useEffect(() => {
-    const preferences = getLocalStorage("appConfig");
-
-    saveLocalStorage("appConfig", {
-      ...preferences,
-      lastSidebarState: collapsed,
-    });
-  }, [collapsed]);
-
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Box display="flex" h="100vh" overflow="hidden">
