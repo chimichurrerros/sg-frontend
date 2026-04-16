@@ -1,7 +1,11 @@
 import {
   Home,
   ShoppingCart,
+  Package,
+  Landmark,
+  Users,
   UserCog,
+  FileText,
   Settings,
   Plus,
   List,
