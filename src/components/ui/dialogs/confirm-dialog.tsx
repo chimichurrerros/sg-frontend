@@ -12,9 +12,13 @@ interface confirmDialogProps {
     onCancel?: () => void;
     acceptText?: string;
     onAccept?: () => void;
-    trigger?: React.ReactNode
+    children?: React.ReactNode;
+    trigger?: React.ReactNode;
 }
-
+/*
+    Dialog to confirm an action, with a cancel and accept button
+    children can be used to add additional content to the dialog, like a form or something else
+    */
 export const ConfirmActionDialog = ({
     title,
     description = "Confirmar acción",
@@ -22,10 +26,11 @@ export const ConfirmActionDialog = ({
     acceptText = "Confirmar",
     onAccept,
     onCancel,
+    children,
     trigger,
 }: confirmDialogProps) => {
     return (
-        <Dialog.Root>
+        <Dialog.Root >
             <Dialog.Trigger asChild>
                 {trigger || <Button variant="outline">Abrir</Button>}
             </Dialog.Trigger>
@@ -46,6 +51,7 @@ export const ConfirmActionDialog = ({
                             <Text fontSize="sm">
                                 {description}
                             </Text>
+                            {children}
                         </Dialog.Body>
                         <Dialog.Footer>
                             <Dialog.ActionTrigger asChild>
