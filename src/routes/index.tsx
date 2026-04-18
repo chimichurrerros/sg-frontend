@@ -7,6 +7,7 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import NewSalePage from "@/pages/Sales/NewSalePage";
+import BudgetsPage from "@/pages/Sales/BudgetsPage";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
           { path: "/register", element: <RegisterPage /> },
           { path: "/dash/configuraciones", element: <ConfigurationsPage /> },
           { path: "/dash/ventas/nueva", element: <NewSalePage /> },
+          { path: "/dash/ventas/presupuestos", element: <BudgetsPage /> },
 
         ],
       },

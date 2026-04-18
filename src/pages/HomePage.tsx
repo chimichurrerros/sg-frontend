@@ -12,7 +12,7 @@ export const HomePage = () => {
   const { data: user, isLoading } = useMe();
   const isAdmin  = useAuthStore((s) => s.isAdmin);
 
-  if (isLoading) return <LoadingScreen message="Cargando HomePage, espere un momento por favor..."/>;
+  if (isLoading) return <LoadingScreen message="Cargando HomePage, espere un momento por favor..." height="full"/>;
 
   return (
     <Box>
