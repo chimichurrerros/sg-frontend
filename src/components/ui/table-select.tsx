@@ -23,9 +23,9 @@ export interface tableSelectProps<T extends { id: number }> {
 
 /**
  * Generic Table, works with a type T
- * labels: list of label(label name = name of the data in table header, prop name = the name of the object property ej:
+ * labels: list of label(label name = name of the data in table header, prop name = the name of the object property, textIfNull: Text shown if the object data was null ej:
  *  obj : {name : "Peristocles"}
- *  his label should be {labelName: "Nombre", propName: "name"}
+ *  his label should be {labelName: "Nombre", propName: "name" ,textIfNull: "Sin nombre"}
  * onSelect: do smth when the row is selected
  * onDoubleClick: do smth when you press Enter having a selected row or when you double click a row
  * noItemsComponent: Component shown when there aren't data to show in the table( i recommend EmptyState component from chakra ui)
