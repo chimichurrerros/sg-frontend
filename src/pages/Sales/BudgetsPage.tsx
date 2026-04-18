@@ -20,7 +20,7 @@ export default function BudgetsPage() {
 
     const mock_labels: label<Budget>[] = [
         { labelName: "Cliente", propName: "client" },
-        { labelName: "Concepto", propName: "concept" },
+        { labelName: "Concepto", propName: "concept", textIfNull: "Sin Concepto" },
         { labelName: "Monto", propName: "amount" },
         { labelName: "Fecha de Creación", propName: "creationDate" },
         { labelName: "Fecha de Expiración", propName: "expirationDate" },
@@ -48,7 +48,6 @@ export default function BudgetsPage() {
         {
             id: 3,
             client: "Acme Corp",
-            concept: "Mantenimiento de Infraestructura",
             amount: 1500,
             creationDate: "2023-01-01",
             expirationDate: "2023-01-31",

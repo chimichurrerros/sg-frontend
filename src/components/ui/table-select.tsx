@@ -6,6 +6,7 @@ import { LoadingScreen } from "./screens/loading-screen";
 export interface label<T extends { id: number }> {
     labelName: string,
     propName: keyof T
+    textIfNull?: string
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -114,7 +115,7 @@ export default function TableSelect<T extends { id: number }>({ labels, data, on
                             ref={selected?.id === item.id ? selectedRowRef : null}
                             onDoubleClick={() => onDoubleClick && onDoubleClick(item)}
                         >
-                            {labels && labels.map((label: label<T>, index: number) => <Table.Cell key={index}>{String(item[label.propName])}</Table.Cell>)}
+                            {labels && labels.map((label: label<T>, index: number) => <Table.Cell key={index}>{String(item[label.propName] || label.textIfNull || "-")}</Table.Cell>)}
                         </Table.Row>
                     )}
                     {!loading && noItemsComponent && data && data.length === 0 &&
