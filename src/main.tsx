@@ -4,7 +4,6 @@ import App from "./App";
 import { ComponentProvider } from "@/components/ui/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
-import { Theme } from "@chakra-ui/react";
 
 const queryClient = new QueryClient();
 
@@ -12,11 +11,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ComponentProvider>
-        <Theme appearance="light">
-          <Toaster />
-          <App />
-        </Theme>
+        <Toaster />
+        <App />
       </ComponentProvider>
     </QueryClientProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
