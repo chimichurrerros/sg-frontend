@@ -63,7 +63,7 @@ export default function BudgetsPage() {
     function handlePageChange(newPage: number) {
         if (!pagination) return;
         if (newPage > pagination?.totalPages || newPage < 1) return;
-        setPagination({ ...pagination, currentPage: newPage })
+        setPagination({ ...pagination, currentPage: newPage }) // or do a query with newpage
     }
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
@@ -88,7 +88,7 @@ export default function BudgetsPage() {
 
 
             {/* Table */}
-            <Box display="flex" flexDirection="column" gap={5} alignContent="center"  w="full">
+            <Box display="flex" flexDirection="column" gap={5} alignContent="center" w="full">
                 <TableSelect
                     labels={mock_labels}
                     data={mock_data}
