@@ -1,9 +1,11 @@
 import { Box } from "@chakra-ui/react/box";
-import {  EmptyState, IconButton, Input, InputGroup, Text, VStack } from "@chakra-ui/react";
+import { EmptyState, IconButton, Input, InputGroup, Text, VStack } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import { CalendarOff, CalendarPlus, DollarSign } from "lucide-react";
 import React from "react";
 import TableSelect, { type label } from "@/components/ui/table-select";
+import type { PaginationType } from "@/types/types";
+import PaginationControl from "@/components/ui/pagination-control";
 
 interface Budget {
     id: number;
@@ -17,6 +19,7 @@ interface Budget {
 
 export default function BudgetsPage() {
     const [selected, setSelected] = React.useState<Budget | null>(null);
+    const [pagination, setPagination] = React.useState<PaginationType | null>({ totalPages: 10, totalRecords: 20000, records: 3, currentPage: 1, pageSize: 5 });
 
     const mock_labels: label<Budget>[] = [
         { labelName: "Cliente", propName: "client" },
@@ -55,6 +58,13 @@ export default function BudgetsPage() {
         }
     ];
 
+    ///useEffect who changes the data when the pagination changes useEffec(()=>{},[pagination])
+
+    function handlePageChange(newPage: number) {
+        if (!pagination) return;
+        if (newPage > pagination?.totalPages || newPage < 1) return;
+        setPagination({ ...pagination, currentPage: newPage })
+    }
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
             <Text fontWeight="bold" fontSize="3xl">Listado de Presupuestos</Text>
@@ -78,8 +88,8 @@ export default function BudgetsPage() {
 
 
             {/* Table */}
-            <Box>
-                <TableSelect 
+            <Box display="flex" flexDirection="column" gap={5} alignContent="center"  w="full">
+                <TableSelect
                     labels={mock_labels}
                     data={mock_data}
                     onSelect={(item: Budget | null) => { console.log("se seleccionó: ", item); setSelected(item) }}
@@ -101,7 +111,14 @@ export default function BudgetsPage() {
                         </EmptyState.Root>
                     }
                 />
-
+                <PaginationControl
+                    pagination={pagination}
+                    variant={"outline"}
+                    buttonColor="brand.secondary"
+                    onPageChange={handlePageChange}
+                    btnSize={"sm"}
+                    showTextRegistros={true}
+                />
             </Box>
         </Box>
 

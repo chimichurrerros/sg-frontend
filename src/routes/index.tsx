@@ -22,9 +22,9 @@ export const router = createBrowserRouter([
         children: [
           { path: "/dash", element: <HomePage /> },
           { path: "/register", element: <RegisterPage /> },
-          { path: "/dash/configuraciones", element: <ConfigurationsPage /> },
-          { path: "/dash/ventas/nueva", element: <NewSalePage /> },
-          { path: "/dash/ventas/presupuestos", element: <BudgetsPage /> },
+          { path: "/configuraciones", element: <ConfigurationsPage /> },
+          { path: "/ventas/nueva", element: <NewSalePage /> },
+          { path: "/ventas/presupuestos", element: <BudgetsPage /> },
 
         ],
       },

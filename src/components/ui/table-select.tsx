@@ -7,6 +7,8 @@ export interface label<T extends { id: number }> {
     labelName: string,
     propName: keyof T
     textIfNull?: string
+    isComponent?:boolean
+    render?: (value: T[keyof T], item: T) => React.ReactNode 
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -19,6 +21,8 @@ export interface tableSelectProps<T extends { id: number }> {
     minheight?: string
     loadingMessage?: string
     loading: boolean
+    
+    
 }
 
 /**
@@ -115,7 +119,7 @@ export default function TableSelect<T extends { id: number }>({ labels, data, on
                             ref={selected?.id === item.id ? selectedRowRef : null}
                             onDoubleClick={() => onDoubleClick && onDoubleClick(item)}
                         >
-                            {labels && labels.map((label: label<T>, index: number) => <Table.Cell key={index}>{String(item[label.propName] || label.textIfNull || "-")}</Table.Cell>)}
+                            {labels && labels.map((label: label<T>, index: number) => <Table.Cell key={index}>{label.isComponent && label.render ? label.render(item[label.propName], item) : String(item[label.propName] || label.textIfNull || "-")}</Table.Cell>)}
                         </Table.Row>
                     )}
                     {!loading && noItemsComponent && data && data.length === 0 &&
