@@ -22,11 +22,11 @@ export default function BudgetsPage() {
     const [pagination, setPagination] = React.useState<PaginationType | null>({ totalPages: 10, totalRecords: 20000, records: 3, currentPage: 1, pageSize: 5 });
 
     const mock_labels: label<Budget>[] = [
-        { labelName: "Cliente", propName: "client" },
+        { labelName: "Cliente", propName: "client", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return a.client.localeCompare(b.client)}},
         { labelName: "Concepto", propName: "concept", textIfNull: "Sin Concepto" },
-        { labelName: "Monto", propName: "amount" },
-        { labelName: "Fecha de Creación", propName: "creationDate" },
-        { labelName: "Fecha de Expiración", propName: "expirationDate" },
+        { labelName: "Monto", propName: "amount", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return Number(a.amount)-Number(b.amount)}},
+        { labelName: "Fecha de Creación", propName: "creationDate" , isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()}},
+        { labelName: "Fecha de Expiración", propName: "expirationDate", isSortable:true,sortFunction: (a:Budget,b:Budget)=>{return new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime()}},
         { labelName: "Estado", propName: "state" }
     ];
     const mock_data: Budget[] = [
@@ -35,7 +35,7 @@ export default function BudgetsPage() {
             client: "John Doe",
             concept: "Servicio de Consultoría",
             amount: 1000,
-            creationDate: "2023-01-01",
+            creationDate: "2023-01-02",
             expirationDate: "2023-01-31",
             state: "Pendiente"
         },
@@ -45,15 +45,15 @@ export default function BudgetsPage() {
             concept: "Desarrollo de Software",
             amount: 2000,
             creationDate: "2023-01-01",
-            expirationDate: "2023-01-31",
+            expirationDate: "2023-02-31",
             state: "Aprobado"
         },
         {
             id: 3,
             client: "Acme Corp",
             amount: 1500,
-            creationDate: "2023-01-01",
-            expirationDate: "2023-01-31",
+            creationDate: "2023-01-03",
+            expirationDate: "2023-03-31",
             state: "Rechazado"
         }
     ];
