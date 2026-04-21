@@ -8,6 +8,7 @@ import {
   User,
   Building2,
   Truck,
+  CalendarRange,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -39,9 +40,20 @@ export const NAV_CONFIG: NavItem[] = [
         id: "nueva-venta",
         label: "Nueva Venta",
         icon: Plus,
-        path: "/dash/ventas/nueva",
+        path: "/ventas/nueva",
       },
-      { id: "listado", label: "Listado", icon: List, path: "/dash/ventas" },
+      {
+        id: "listado",
+        label: "Listado",
+        icon: List,
+        path: "/ventas"
+      },
+      {
+        id: "presupuestos",
+        label: "Presupuestos",
+        icon: CalendarRange,
+        path: "/ventas/presupuestos"
+      }
     ],
   },
   // { id: "compras", label: "Compras", icon: Package, path: "/dash/compras" },
@@ -63,13 +75,13 @@ export const NAV_CONFIG: NavItem[] = [
         id: "sucursales",
         label: "Sucursales",
         icon: Building2,
-        path: "/dash/sucursales",
+        path: "/sucursales",
       },
       {
         id: "proveedores",
         label: "Proveedores",
         icon: Truck,
-        path: "/dash/proveedores",
+        path: "/proveedores",
       },
     ],
   },
@@ -83,6 +95,6 @@ export const NAV_CONFIG: NavItem[] = [
     id: "configuraciones",
     label: "Configuraciones",
     icon: Settings,
-    path: "/dash/configuraciones",
+    path: "/configuraciones",
   },
 ];
