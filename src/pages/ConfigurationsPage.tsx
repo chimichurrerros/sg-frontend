@@ -24,7 +24,7 @@ export default function ConfigurationsPage() {
     function handleResetToDefault() {
         const resetConfig: AppConfigurations = {
             saveSidebarState: true,
-            lastSidebarState: false  // Resetear también el último estado
+            lastSidebarState: false  
         };
 
         saveLocalStorage("appConfig", resetConfig);
@@ -102,6 +102,7 @@ export default function ConfigurationsPage() {
                         <Checkbox.Root checked={config.saveSidebarState} onCheckedChange={(checked) => {
                             setConfig({ ...config, saveSidebarState: !config.saveSidebarState });
                             saveLocalStorage("appConfig", {
+                                ...config,
                                 saveSidebarState: checked.checked
                             });
                         }}>

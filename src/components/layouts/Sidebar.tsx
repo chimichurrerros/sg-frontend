@@ -117,6 +117,7 @@ export const Sidebar = ({ collapsed }: Props) => {
                 gap={collapsed ? "0" : "10px"}
                 px="12px"
                 h="36px"
+                minW="39px"
                 cursor="pointer"
                 bg={active || groupActive ? "brand.primary" : "transparent"}
                 color={active || groupActive ? "white" : "black"}
@@ -124,6 +125,8 @@ export const Sidebar = ({ collapsed }: Props) => {
                 transition="background .15s, color .15s"
                 whiteSpace="nowrap"
                 position="relative"
+                alignContent="center"
+                justifyContent="center"
                 title={collapsed ? item.label : undefined}
                 onClick={() =>
                   item.children
