@@ -12,6 +12,8 @@ export interface label<T extends { id: number }> {
     isSortable?: boolean
     sortFunction?: (a: T, b: T) => number
     render?: (value: T[keyof T], item: T) => React.ReactNode
+    // isEditable?: boolean
+    // onCellEdit?: (id: number, newValue: any, data: T[],setFinalData:(data:T[])=>void) => void 
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -37,8 +39,9 @@ export interface tableSelectProps<T extends { id: number }> {
  * height & minHeight : customize the table height and minHeight
  * loading message: message shown in the loading screen component
  * loading: loading state, if true, LoadingScreen is showed with the loading message
- * 
+ * if you want a scroll you must pass he height arg
  * Pagination must be managed outside of this component
+ * 
  */
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
@@ -54,7 +57,7 @@ export default function TableSelect<T extends { id: number }>(
     const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
     const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc")
     const [sortHeader, setSortHeader] = useState<number | null>(null);
-    const [finalData,setFinalData] = useState(data);
+    const [finalData, setFinalData] = useState(data);
 
     const moverArriba = () => {
         if (!selected) { setSelected(finalData[0]); onSelect(finalData[0]); return; }
@@ -110,18 +113,18 @@ export default function TableSelect<T extends { id: number }>(
         const Icon = sortIcon[sortDirection]
         return <Icon size="16px" />
     }
-    function sortfinalData(sortFunction:((a:T,b:T)=>number) ){
+    function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
         setFinalData(finalData.sort(sortFunction))
-        if(sortDirection === "Desc"){
-          setFinalData( finalData.reverse())
+        if (sortDirection === "Desc") {
+            setFinalData(finalData.reverse())
         }
     }
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "fit-content"} minHeight={minheight || "auto"} >
+        <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "40vh"} minHeight={minheight || "auto"} >
 
             <Table.Root size="sm" stickyHeader >
                 <Table.Header >
-                    <Table.Row bg="bg.subtle">
+                    <Table.Row bg="bg.subtle" hidden={loading}>
                         {labels && labels.map((label: label<T>, index: number) =>
                             <Table.ColumnHeader
                                 key={index}
@@ -133,7 +136,7 @@ export default function TableSelect<T extends { id: number }>(
                                     if (!label.isSortable) return;
                                     if (sortHeader === index) { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") }
                                     else { setSortHeader(index) }
-                                    if(label.sortFunction) sortfinalData(label.sortFunction)
+                                    if (label.sortFunction) sortfinalData(label.sortFunction)
                                 }
                                 }
                                 _hover={{
@@ -156,19 +159,27 @@ export default function TableSelect<T extends { id: number }>(
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body>
+                <Table.Body >
                     {loading &&
                         <Table.Row>
-                            <Table.Cell colSpan={labels.length} p={8} >
-                                <LoadingScreen message={loadingMessage} height="50%" />
+                            <Table.Cell
+                                colSpan={labels.length}
+                                height={`calc(${height} - 1vh)`}
+                                border="hidden"
+                                verticalAlign="middle"
+                                textAlign="center"
+                            >
+                                <LoadingScreen message={loadingMessage} />
                             </Table.Cell>
-                        </Table.Row>}
+                        </Table.Row>
+                    }
                     {finalData && !loading && finalData.length > 0 && finalData.sort().map((item: T) =>
                         <Table.Row
                             key={item.id}
                             onClick={() => {
                                 if (selected && selected.id === item.id) {
                                     setSelected(null);
+                                    onSelect(null)
                                 } else {
                                     setSelected(item);
                                     onSelect(item);
@@ -189,7 +200,12 @@ export default function TableSelect<T extends { id: number }>(
                             }
 
                         >
-                            {labels && labels.map((label: label<T>, index: number) => <Table.Cell key={index}>{label.isComponent && label.render ? label.render(item[label.propName], item) : String(item[label.propName] || label.textIfNull || "-")}</Table.Cell>)}
+                            {labels && labels.map((label: label<T>, index: number) =>
+                                <Table.Cell key={index}>
+                                    {label.isComponent && label.render ?
+                                        label.render(item[label.propName], item) :
+                                            String(item[label.propName] || label.textIfNull || "-")
+                                    }</Table.Cell>)}
                         </Table.Row>
                     )}
                     {!loading && noItemsComponent && finalData && finalData.length === 0 &&

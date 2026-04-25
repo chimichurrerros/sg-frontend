@@ -17,7 +17,7 @@ import {
 import { CircleDollarSign,  Printer } from "lucide-react";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type {  VentaForm } from "@/types/types.ts";
+import type {  VentaForm } from "@/types/sales.ts";
 import ProductsTable from "./components/ProductsTable";
 
 function MySelect({

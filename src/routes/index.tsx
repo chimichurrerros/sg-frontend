@@ -8,6 +8,7 @@ import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import NewSalePage from "@/pages/Sales/NewSalePage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
+import BranchesListPage from "@/pages/Branches/BranchesListPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
           { path: "/configuraciones", element: <ConfigurationsPage /> },
           { path: "/ventas/nueva", element: <NewSalePage /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
+          { path: "/sucursales", element: <BranchesListPage /> },
 
         ],
       },
