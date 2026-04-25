@@ -7,7 +7,9 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import NewSalePage from "@/pages/Sales/NewSalePage";
+import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
+import { AddProducts } from "@/pages/Catalog/AddProduct";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
 
 export const router = createBrowserRouter([
@@ -26,13 +28,12 @@ export const router = createBrowserRouter([
           { path: "/configuraciones", element: <ConfigurationsPage /> },
           { path: "/ventas/nueva", element: <NewSalePage /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
+          { path: "/dash/catalogo", element: <CatalogPage /> },
+          { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
           { path: "/sucursales", element: <BranchesListPage /> },
-
         ],
       },
     ],
   },
   { path: "*", element: <Navigate to="/login" replace /> },
 ]);
-
-
