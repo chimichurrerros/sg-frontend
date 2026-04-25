@@ -90,12 +90,6 @@ export const NAV_CONFIG: NavItem[] = [
         icon: ClipboardList,
         path: "/dash/catalogo",
       },
-      {
-        id: "catalogo",
-        label: "Catálogo",
-        icon: ClipboardList,
-        path: "/dash/catalogo",
-      },
     ],
   },
   // {

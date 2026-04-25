@@ -1,11 +1,32 @@
-import { catalogApi } from "@/api/catalog.api";
-import { useQuery } from "@tanstack/react-query";
+import {
+  catalogApi,
+  type ProductBrandRequestDTO,
+  type ProductCategoryRequestDTO,
+  type ProductRequestDTO,
+} from "@/api/catalog.api";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const catalogKeys = {
+  products: ["products"] as const,
   categories: ["categories"] as const,
   brands: ["brands"] as const,
 };
 
+/* ===== Products ===== */
+export const useAllProducts = () => {
+  return useQuery({
+    queryKey: catalogKeys.products,
+    queryFn: catalogApi.getAllProducts,
+  });
+};
+
+export const useCreateProduct = () => {
+  return useMutation({
+    mutationFn: (data: ProductRequestDTO) => catalogApi.createProduct(data),
+  });
+};
+
+/* ===== Product Categories ===== */
 export const useAllCategories = () => {
   return useQuery({
     queryKey: catalogKeys.categories,
@@ -13,9 +34,23 @@ export const useAllCategories = () => {
   });
 };
 
+export const useCreateCategory = () => {
+  return useMutation({
+    mutationFn: (data: ProductCategoryRequestDTO) =>
+      catalogApi.createCategory(data),
+  });
+};
+
+/* ===== Product Brands ===== */
 export const useAllBrands = () => {
   return useQuery({
     queryKey: catalogKeys.brands,
     queryFn: catalogApi.getAllBrands,
+  });
+};
+
+export const useCreateBrand = () => {
+  return useMutation({
+    mutationFn: (data: ProductBrandRequestDTO) => catalogApi.createBrand(data),
   });
 };
