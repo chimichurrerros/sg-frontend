@@ -10,6 +10,7 @@ import NewSalePage from "@/pages/Sales/NewSalePage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
+import BranchesListPage from "@/pages/Branches/BranchesListPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
+          { path: "/sucursales", element: <BranchesListPage /> },
         ],
       },
     ],

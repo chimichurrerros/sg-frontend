@@ -1,11 +1,12 @@
 import { Box } from "@chakra-ui/react/box";
-import { EmptyState, IconButton, Input, InputGroup, Text, VStack } from "@chakra-ui/react";
+import { IconButton, Input, InputGroup, Text } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import { CalendarOff, CalendarPlus, DollarSign } from "lucide-react";
 import React from "react";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import type { PaginationType } from "@/types/types";
 import PaginationControl from "@/components/ui/pagination-control";
+import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 
 interface Budget {
     id: number;
@@ -19,14 +20,14 @@ interface Budget {
 
 export default function BudgetsPage() {
     const [selected, setSelected] = React.useState<Budget | null>(null);
-    const [pagination, setPagination] = React.useState<PaginationType | null>({ totalPages: 10, totalRecords: 20000, records: 3, currentPage: 1, pageSize: 5 });
+    const [pagination, setPagination] = React.useState<PaginationType | null>({ totalPages: 10, totalElements: 20000, currentPage: 1, pageSize: 5 });
 
     const mock_labels: label<Budget>[] = [
-        { labelName: "Cliente", propName: "client" },
+        { labelName: "Cliente", propName: "client", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return a.client.localeCompare(b.client)}},
         { labelName: "Concepto", propName: "concept", textIfNull: "Sin Concepto" },
-        { labelName: "Monto", propName: "amount" },
-        { labelName: "Fecha de Creación", propName: "creationDate" },
-        { labelName: "Fecha de Expiración", propName: "expirationDate" },
+        { labelName: "Monto", propName: "amount", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return Number(a.amount)-Number(b.amount)}},
+        { labelName: "Fecha de Creación", propName: "creationDate" , isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()}},
+        { labelName: "Fecha de Expiración", propName: "expirationDate", isSortable:true,sortFunction: (a:Budget,b:Budget)=>{return new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime()}},
         { labelName: "Estado", propName: "state" }
     ];
     const mock_data: Budget[] = [
@@ -35,7 +36,7 @@ export default function BudgetsPage() {
             client: "John Doe",
             concept: "Servicio de Consultoría",
             amount: 1000,
-            creationDate: "2023-01-01",
+            creationDate: "2023-01-02",
             expirationDate: "2023-01-31",
             state: "Pendiente"
         },
@@ -45,15 +46,90 @@ export default function BudgetsPage() {
             concept: "Desarrollo de Software",
             amount: 2000,
             creationDate: "2023-01-01",
-            expirationDate: "2023-01-31",
+            expirationDate: "2023-02-31",
             state: "Aprobado"
         },
         {
             id: 3,
             client: "Acme Corp",
             amount: 1500,
-            creationDate: "2023-01-01",
+            creationDate: "2023-01-03",
+            expirationDate: "2023-03-31",
+            state: "Rechazado"
+        },     {
+            id: 4,
+            client: "John Doe",
+            concept: "Servicio de Consultoría",
+            amount: 1000,
+            creationDate: "2023-01-02",
             expirationDate: "2023-01-31",
+            state: "Pendiente"
+        },
+        {
+            id: 6,
+            client: "Jane Smith",
+            concept: "Desarrollo de Software",
+            amount: 2000,
+            creationDate: "2023-01-01",
+            expirationDate: "2023-02-31",
+            state: "Aprobado"
+        },
+        {
+            id: 5,
+            client: "Acme Corp",
+            amount: 1500,
+            creationDate: "2023-01-03",
+            expirationDate: "2023-03-31",
+            state: "Rechazado"
+        },     {
+            id: 8,
+            client: "John Doe",
+            concept: "Servicio de Consultoría",
+            amount: 1000,
+            creationDate: "2023-01-02",
+            expirationDate: "2023-01-31",
+            state: "Pendiente"
+        },
+        {
+            id: 9,
+            client: "Jane Smith",
+            concept: "Desarrollo de Software",
+            amount: 2000,
+            creationDate: "2023-01-01",
+            expirationDate: "2023-02-31",
+            state: "Aprobado"
+        },
+        {
+            id: 10,
+            client: "Acme Corp",
+            amount: 1500,
+            creationDate: "2023-01-03",
+            expirationDate: "2023-03-31",
+            state: "Rechazado"
+        },     {
+            id: 11,
+            client: "John Doe",
+            concept: "Servicio de Consultoría",
+            amount: 1000,
+            creationDate: "2023-01-02",
+            expirationDate: "2023-01-31",
+            state: "Pendiente"
+        },
+        {
+            id: 12,
+            client: "Jane Smith",
+            concept: "Desarrollo de Software",
+            amount: 2000,
+            creationDate: "2023-01-01",
+            expirationDate: "2023-02-31",
+            state: "Aprobado"
+        },
+        {
+            id: 13,
+            client: "Acme Corp",
+            amount: 1500,
+            creationDate: "2023-01-03",
+            expirationDate: "2023-03-31",
             state: "Rechazado"
         }
     ];
@@ -96,19 +172,11 @@ export default function BudgetsPage() {
                     onDoubleClick={(item: Budget) => console.log("se hizo dobleclic en ", item)}
                     loading={false}
                     noItemsComponent={
-                        <EmptyState.Root size="md">
-                            <EmptyState.Content>
-                                <EmptyState.Indicator>
-                                    <CalendarOff size={32} />
-                                </EmptyState.Indicator>
-                                <VStack textAlign="center" gap={1}>
-                                    <EmptyState.Title fontSize="md">Sin Presupuestos</EmptyState.Title>
-                                    <EmptyState.Description fontSize="sm">
-                                        No hay presupuestos disponibles para mostrar, crea uno nuevo o limpia los filtros de búsqueda
-                                    </EmptyState.Description>
-                                </VStack>
-                            </EmptyState.Content>
-                        </EmptyState.Root>
+                        <EmptyDataScreen 
+                        title="Sin Presupuestos" 
+                        message="No hay presupuestos disponibles para mostrar, crea uno nuevo o limpia los filtros de búsqueda"
+                        icon = {<CalendarOff size={32} />}
+                        />
                     }
                 />
                 <PaginationControl
