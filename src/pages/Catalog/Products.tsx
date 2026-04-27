@@ -31,7 +31,7 @@ export const Products = () => {
 
   if (error) {
     console.log("Error: " + error);
-    return;
+    return null;
   }
 
   return (
