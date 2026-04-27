@@ -9,6 +9,7 @@ import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import NewSalePage from "@/pages/Sales/NewSalePage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
+import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,8 @@ export const router = createBrowserRouter([
           { path: "/configuraciones", element: <ConfigurationsPage /> },
           { path: "/ventas/nueva", element: <NewSalePage /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
+          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
+
           { path: "/sucursales", element: <BranchesListPage /> },
 
         ],

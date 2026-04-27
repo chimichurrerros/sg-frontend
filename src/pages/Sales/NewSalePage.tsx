@@ -7,130 +7,44 @@ import {
   Input,
   Button,
   Stack,
-  Select,
-  RadioGroup,
-  createListCollection,
-
   IconButton,
   NumberInput,
 } from "@chakra-ui/react";
-import { CircleDollarSign,  Printer } from "lucide-react";
+import { CircleDollarSign, Printer } from "lucide-react";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type {  VentaForm } from "@/types/sales.ts";
+import { paymentOptions, saleConditionOptions, type PaymentMethod, type Sale, type SaleCondition } from "@/types/sales.ts";
 import ProductsTable from "./components/ProductsTable";
+import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
+import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 
-function MySelect({
-  placeholder,
-  options,
-  width = "200px",
-  defaultValue,
-  value,
-  onValueChange,
-}: {
-  placeholder?: string;
-  options: { label: string; value: string }[];
-  width?: string;
-  defaultValue?: string;
-  value?: string;
-  onValueChange?: (value: string) => void;
-}) {
-  const collection = createListCollection({
-    items: options.map((opt) => ({
-      label: opt.label,
-      value: opt.value,
-    })),
-  });
-
-  const selectedValue = value ? [value] : defaultValue ? [defaultValue] : undefined;
-
-  return (
-    <Select.Root
-      collection={collection}
-      value={selectedValue}
-      onValueChange={(e) => onValueChange?.(e.value[0])}
-      width={width}
-    >
-      <Select.HiddenSelect />
-      <Select.Control>
-        <Select.Trigger>
-          <Select.ValueText placeholder={placeholder} />
-        </Select.Trigger>
-      </Select.Control>
-      <Select.Positioner>
-        <Select.Content>
-          {collection.items.map((item) => (
-            <Select.Item item={item} key={item.value}>
-              {item.label}
-              <Select.ItemIndicator />
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select.Positioner>
-    </Select.Root>
-  );
-}
-
-function MyRadioGroup({
-  defaultValue,
-  value,
-  onValueChange,
-}: {
-  defaultValue?: string;
-  value?: string;
-  onValueChange?: (value: string) => void;
-}) {
-  return (
-    <RadioGroup.Root
-      value={value || defaultValue}
-      onValueChange={(e: any) => onValueChange?.(e.value)}
-    >
-      <Stack direction="row" gap={4}>
-        <RadioGroup.Item value="contado">
-          <RadioGroup.ItemHiddenInput />
-          <RadioGroup.ItemIndicator />
-          <RadioGroup.ItemText>Contado</RadioGroup.ItemText>
-        </RadioGroup.Item>
-
-        <RadioGroup.Item value="credito">
-          <RadioGroup.ItemHiddenInput />
-          <RadioGroup.ItemIndicator />
-          <RadioGroup.ItemText>Crédito</RadioGroup.ItemText>
-        </RadioGroup.Item>
-      </Stack>
-    </RadioGroup.Root>
-  );
+const SALE_TEMPLATE: Sale = {
+  customer: {
+    name: "",
+    ruc: { number: "", dv: "" }
+  },
+  sale: {
+    date: new Date().toLocaleDateString(),
+    cashierNumber: 3
+  },
+  pay: {
+    method: "Efectivo",
+    condition: "Contado"
+  },
+  products: [],
+  totals: {
+    subtotal: 0,
+    iva: 5,
+    total: 0,
+    amount: 0,
+    change: 0,
+  }
 }
 
 export default function NewSalePage() {
-  const [selectedClient, setSelectedClient] = useState("ninguno");
-  const [ventaForm, setVentaForm] = useState<VentaForm>({
-    cliente: {
-      nombreRazonSocial: "",
-      ruc: {
-        numero: "",
-        digitoVerificador: "",
-      },
-    },
-    venta: {
-      numeroFactura: "001 - 001 - 00000001",
-      numeroVenta: 2312,
-      fecha: new Date(),
-      cajaNumero: 3,
-    },
-    pago: {
-      metodo: "efectivo",
-      condicion: "contado",
-    },
-    productos: [],
-    totales: {
-      subtotal: 0,
-      iva: 0,
-      total: 0,
-      importe: 0,
-      vuelto: 0,
-    },
-  });
+  const [selectedClient, setSelectedClient] = useState("Ninguno");
+  const [saleForm, setSaleForm] = useState<Sale>(SALE_TEMPLATE);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -138,36 +52,34 @@ export default function NewSalePage() {
     triggerRef.current?.click();
   });
 
-
-
   const handleClientSelect = (value: string) => {
     setSelectedClient(value);
-    if (value === "ninguno") {
-      setVentaForm({
-        ...ventaForm,
-        cliente: {
-          nombreRazonSocial: "",
+    if (value === "Ninguno") {
+      setSaleForm({
+        ...saleForm,
+        customer: {
+          name: "",
           ruc: {
-            numero: "",
-            digitoVerificador: "",
+            number: "",
+            dv: "",
           },
         },
       });
     } else {
-      const clientData: Record<string, { nombre: string; ruc: string; digito: string }> = {
-        juan: { nombre: "Juan Pérez", ruc: "1234567", digito: "8" },
-        maria: { nombre: "María Gómez", ruc: "2345678", digito: "9" },
-        carlos: { nombre: "Carlos López", ruc: "3456789", digito: "0" },
+      const clientData: Record<string, { name: string; ruc: string; digit: string }> = {
+        juan: { name: "Juan Pérez", ruc: "1234567", digit: "8" },
+        maria: { name: "María Gómez", ruc: "2345678", digit: "9" },
+        carlos: { name: "Carlos López", ruc: "3456789", digit: "0" },
       };
       const client = clientData[value];
       if (client) {
-        setVentaForm({
-          ...ventaForm,
-          cliente: {
-            nombreRazonSocial: client.nombre,
+        setSaleForm({
+          ...saleForm,
+          customer: {
+            name: client.name,
             ruc: {
-              numero: client.ruc,
-              digitoVerificador: client.digito,
+              number: client.ruc,
+              dv: client.digit,
             },
           },
         });
@@ -175,90 +87,90 @@ export default function NewSalePage() {
     }
   };
 
-  const updateClienteNombre = (value: string) => {
-    setVentaForm({
-      ...ventaForm,
-      cliente: {
-        ...ventaForm.cliente,
-        nombreRazonSocial: value,
+  const updateCustomerName = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      customer: {
+        ...saleForm.customer,
+        name: value,
       },
     });
   };
 
-  const updateRucNumero = (value: string) => {
+  const updateRucNumber = (value: string) => {
     if (/^\d*$/.test(value) && value.length <= 7) {
-      setVentaForm({
-        ...ventaForm,
-        cliente: {
-          ...ventaForm.cliente,
+      setSaleForm({
+        ...saleForm,
+        customer: {
+          ...saleForm.customer,
           ruc: {
-            ...ventaForm.cliente.ruc,
-            numero: value,
+            ...saleForm.customer.ruc,
+            number: value,
           },
         },
       });
     }
   };
 
-  const updateRucDigito = (value: string) => {
+  const updateRucDigit = (value: string) => {
     if (/^\d*$/.test(value) && value.length <= 1) {
-      setVentaForm({
-        ...ventaForm,
-        cliente: {
-          ...ventaForm.cliente,
+      setSaleForm({
+        ...saleForm,
+        customer: {
+          ...saleForm.customer,
           ruc: {
-            ...ventaForm.cliente.ruc,
-            digitoVerificador: value,
+            ...saleForm.customer.ruc,
+            dv: value,
           },
         },
       });
     }
   };
 
-  const updateMetodoPago = (value: string) => {
-    setVentaForm({
-      ...ventaForm,
-      pago: {
-        ...ventaForm.pago,
-        metodo: value as "efectivo" | "tarjeta" | "transferencia",
+  const updatePaymentMethod = (value: PaymentMethod) => {
+    setSaleForm({
+      ...saleForm,
+      pay: {
+        ...saleForm.pay,
+        method: value,
       },
     });
   };
 
-  const updateCondicionVenta = (value: string) => {
-    setVentaForm({
-      ...ventaForm,
-      pago: {
-        ...ventaForm.pago,
-        condicion: value as "contado" | "credito",
+  const updateSaleCondition = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      pay: {
+        ...saleForm.pay,
+        condition: value as SaleCondition,
       },
     });
   };
 
-  const updateImporte = (value: string) => {
-    const importeNum = parseFloat(value) || 0;
-    const vuelto = importeNum - ventaForm.totales.total;
-    setVentaForm({
-      ...ventaForm,
-      totales: {
-        ...ventaForm.totales,
-        importe: importeNum,
-        vuelto: vuelto > 0 ? vuelto : 0,
+  const updateAmount = (value: string) => {
+    const amountNum = parseFloat(value) || 0;
+    const change = amountNum - saleForm.totals.total;
+    setSaleForm({
+      ...saleForm,
+      totals: {
+        ...saleForm.totals,
+        amount: amountNum,
+        change: change > 0 ? change : 0,
       },
     });
   };
 
-  const isClientEditable = selectedClient === "ninguno";
+  const isClientEditable = selectedClient === "Ninguno";
 
   return (
     <Box p={2}>
       <Flex justify="space-between" align="center" mb={4}>
         <Text fontSize="2xl" fontWeight="bold">
-          Nueva Venta (N° XXXX)
+          Nueva Venta {saleForm.sale.saleNumber && `(N° ${saleForm.sale.saleNumber})`}
         </Text>
         <Flex align="center" gap={3}>
           <Text fontWeight="bold" fontSize="sm">FACTURA N°</Text>
-          <Input value={ventaForm.venta.numeroFactura} w="170px" size="sm" readOnly />
+          <Input value={saleForm.sale.bill?.number || "-"} w="170px" size="sm" readOnly />
           <IconButton size="md" padding={4} variant="outline">
             <Printer /> Imprimir Factura Legal
           </IconButton>
@@ -268,12 +180,12 @@ export default function NewSalePage() {
       <Flex gap={4} align="flex-end" mb={6} wrap="wrap">
         <Box flex={2} minW="200px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Cargar Cliente</Text>
-          <MySelect
-            placeholder="Seleccionar cliente"
+          <ComboboxWrapper
+            placeholder="Buscar cliente..."
             value={selectedClient}
             onValueChange={handleClientSelect}
             options={[
-              { label: "Ninguno", value: "ninguno" },
+              { label: "Ninguno", value: "Ninguno" },
               { label: "Juan Pérez", value: "juan" },
               { label: "María Gómez", value: "maria" },
               { label: "Carlos López", value: "carlos" },
@@ -286,8 +198,8 @@ export default function NewSalePage() {
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Nombre/Razón Social</Text>
           <Input
             size="sm"
-            value={ventaForm.cliente.nombreRazonSocial}
-            onChange={(e) => updateClienteNombre(e.target.value)}
+            value={saleForm.customer.name}
+            onChange={(e) => updateCustomerName(e.target.value)}
             readOnly={!isClientEditable}
             bg={!isClientEditable ? "gray.100" : "white"}
           />
@@ -299,9 +211,9 @@ export default function NewSalePage() {
             <Input
               w="140px"
               size="sm"
-              value={ventaForm.cliente.ruc.numero}
+              value={saleForm.customer.ruc.number}
               placeholder="0000000"
-              onChange={(e) => updateRucNumero(e.target.value)}
+              onChange={(e) => updateRucNumber(e.target.value)}
               readOnly={!isClientEditable}
               bg={!isClientEditable ? "gray.100" : "white"}
             />
@@ -309,9 +221,9 @@ export default function NewSalePage() {
             <Input
               w="50px"
               size="sm"
-              value={ventaForm.cliente.ruc.digitoVerificador}
+              value={saleForm.customer.ruc.dv}
               placeholder="DV"
-              onChange={(e) => updateRucDigito(e.target.value)}
+              onChange={(e) => updateRucDigit(e.target.value)}
               readOnly={!isClientEditable}
               bg={!isClientEditable ? "gray.100" : "white"}
               maxLength={1}
@@ -320,30 +232,27 @@ export default function NewSalePage() {
         </Box>
 
         <Box minW="130px">
-          <Text fontSize="xs" fontWeight="medium" color="gray.600">Método Pago</Text>
-          <MySelect
-            value={ventaForm.pago.metodo}
-            onValueChange={updateMetodoPago}
-            options={[
-              { label: "Efectivo", value: "efectivo" },
-              { label: "Tarjeta", value: "tarjeta" },
-              { label: "Transferencia", value: "transferencia" },
-            ]}
+          <Text fontSize="xs" fontWeight="medium" color="gray.600">Método de Pago</Text>
+          <SelectWrapper
+            value={saleForm.pay.method}
+            onValueChange={updatePaymentMethod}
+            options={paymentOptions}
             width="100%"
           />
         </Box>
 
         <Box minW="150px">
-          <Text fontSize="xs" fontWeight="medium" color="gray.600">Condición Venta</Text>
-          <MyRadioGroup 
-            value={ventaForm.pago.condicion}
-            onValueChange={updateCondicionVenta}
+          <Text fontSize="xs" fontWeight="medium" color="gray.600">Condición de Venta</Text>
+          <RadioGroupWrapper
+            value={saleForm.pay.condition}
+            onValueChange={updateSaleCondition}
+            options={saleConditionOptions}
           />
         </Box>
       </Flex>
 
       <Flex gap={6} h="full" align="flex-start">
-        <ProductsTable products={ventaForm.productos}/>
+        <ProductsTable products={saleForm.products} />
         <Box
           w="260px"
           p={3}
@@ -356,37 +265,37 @@ export default function NewSalePage() {
           <Stack gap={3} h="full" justify="space-between">
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Nro de Venta</Text>
-              <Text fontWeight="medium">{ventaForm.venta.numeroVenta}</Text>
+              <Text fontWeight="medium">{saleForm.sale.saleNumber}</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Fecha</Text>
-              <Text fontWeight="medium">{ventaForm.venta.fecha.toLocaleDateString()}</Text>
+              <Text fontWeight="medium">{saleForm.sale.date}</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Caja N°</Text>
-              <Text fontWeight="medium">{ventaForm.venta.cajaNumero}</Text>
+              <Text fontWeight="medium">{saleForm.sale.cashierNumber}</Text>
             </Flex>
             <Box borderTop="1px solid" borderColor="gray.100" my={1} />
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Subtotal</Text>
-              <Text>{ventaForm.totales.subtotal.toLocaleString()} GS.</Text>
+              <Text>{saleForm.totals.subtotal.toLocaleString()} GS.</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">IVA (10%)</Text>
-              <Text>{ventaForm.totales.iva.toLocaleString()} GS.</Text>
+              <Text>{saleForm.totals.iva.toLocaleString()} GS.</Text>
             </Flex>
             <Box borderTop="1px solid" borderColor="gray.200" my={1} />
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Total</Text>
-              <Text color="green.600">{ventaForm.totales.total.toLocaleString()} GS.</Text>
+              <Text color="green.600">{saleForm.totals.total.toLocaleString()} GS.</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Importe</Text>
-              <Text color="green.600">{ventaForm.totales.importe.toLocaleString()} GS.</Text>
+              <Text color="green.600">{saleForm.totals.amount.toLocaleString()} GS.</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Vuelto</Text>
-              <Text color="green.600">{ventaForm.totales.vuelto.toLocaleString()} GS.</Text>
+              <Text color="green.600">{saleForm.totals.change.toLocaleString()} GS.</Text>
             </Flex>
           </Stack>
         </Box>
@@ -395,56 +304,30 @@ export default function NewSalePage() {
       <Flex mt={4} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">
         <Flex gap={4} align="center">
           <Text fontSize="3xl" fontWeight="bold">
-            Total a pagar: <Text as="span" color="green.600">{ventaForm.totales.total.toLocaleString()} GS.</Text>
+            Total a pagar: <Text as="span" color="green.600">{saleForm.totals.total.toLocaleString()} GS.</Text>
           </Text>
         </Flex>
 
         <Flex gap={3}>
-          <DestructiveActionDialog 
-            title="Cancelar venta" 
+          <DestructiveActionDialog
+            title="Cancelar Venta"
             description="¿Estás seguro de que deseas cancelar esta venta? Se perderán todos los datos ingresados."
             onAccept={() => {
-              setSelectedClient("ninguno");
-              setVentaForm({
-                cliente: {
-                  nombreRazonSocial: "",
-                  ruc: {
-                    numero: "",
-                    digitoVerificador: "",
-                  },
-                },
-                venta: {
-                  numeroFactura: "001 - 001 - 00000001",
-                  numeroVenta: 2312,
-                  fecha: new Date(),
-                  cajaNumero: 3,
-                },
-                pago: {
-                  metodo: "efectivo",
-                  condicion: "contado",
-                },
-                productos: [],
-                totales: {
-                  subtotal: 0,
-                  iva: 0,
-                  total: 0,
-                  importe: 0,
-                  vuelto: 0,
-                },
-              });
+              setSelectedClient("Ninguno");
+              setSaleForm(SALE_TEMPLATE);
             }}
             trigger={
               <Button variant="outline" size="lg" colorPalette="red">
                 Cancelar
               </Button>
-            } 
+            }
           />
 
           <ConfirmActionDialog
-            title="Confirmar venta"
+            title="Confirmar Venta"
             description="¿Estás seguro de que deseas generar esta venta?"
             onAccept={() => {
-              console.log("Venta confirmada:", ventaForm);
+              console.log("Venta confirmada:", saleForm);
             }}
             trigger={
               <IconButton bg="brand.primary" padding={4} size="lg" color="white" ref={triggerRef}>
@@ -457,8 +340,8 @@ export default function NewSalePage() {
                 Ingresar el importe del cliente.
               </Text>
               <NumberInput.Root
-                value={ventaForm.totales.importe.toString()}
-                onValueChange={(e) => updateImporte(e.value)}
+                value={saleForm.totals.amount.toString()}
+                onValueChange={(e) => updateAmount(e.value)}
                 formatOptions={{
                   style: "currency",
                   currency: "PYG",

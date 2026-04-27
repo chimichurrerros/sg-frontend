@@ -7,6 +7,7 @@ import TableSelect, { type label } from "@/components/ui/table-select";
 import type { PaginationType } from "@/types/types";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
+import { useNavigate } from "react-router-dom";
 
 interface Budget {
     id: number;
@@ -21,7 +22,7 @@ interface Budget {
 export default function BudgetsPage() {
     const [selected, setSelected] = React.useState<Budget | null>(null);
     const [pagination, setPagination] = React.useState<PaginationType | null>({ totalPages: 10, totalElements: 20000, currentPage: 1, pageSize: 5 });
-
+    const navigate = useNavigate()
     const mock_labels: label<Budget>[] = [
         { labelName: "Cliente", propName: "client", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return a.client.localeCompare(b.client)}},
         { labelName: "Concepto", propName: "concept", textIfNull: "Sin Concepto" },
@@ -155,8 +156,9 @@ export default function BudgetsPage() {
                     Aprobar presupuesto
                 </IconButton>
 
-                <IconButton padding={2} bgColor="brand.primary">
+                <IconButton padding={2} bgColor="brand.primary" onClick={()=>navigate("/ventas/presupuestos/crear")}>
                     <CalendarPlus size={20} />
+
                     Nuevo
                 </IconButton>
 
