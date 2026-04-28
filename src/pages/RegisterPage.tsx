@@ -18,7 +18,6 @@ import {
   IconButton,
   Input,
   InputGroup,
-  NativeSelect,
   Pagination,
   Portal,
   Select,
@@ -32,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCcw, Search, UserPlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { LuChevronLeft, LuChevronRight, LuMail } from "react-icons/lu";
 import { Navigate } from "react-router-dom";
 
@@ -65,8 +64,6 @@ export const RegisterPage = () => {
   // Select user from the table
   const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
   useEffect(() => {
-    console.log("click fuera:" + selectedUser);
-
     const handler = () => setSelectedUser(null);
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
@@ -80,10 +77,12 @@ export const RegisterPage = () => {
   const {
     register,
     reset,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { rol: "user" },
   });
 
   // Double-check even if the link is hidden
@@ -105,11 +104,7 @@ export const RegisterPage = () => {
   };
 
   const onSelectUser = (user: UserDto | null) => {
-    console.log("click usuario:" + user);
-    
     setSelectedUser(user);
-    console.log("click usuario selected:" + selectedUser);
-
   };
 
   if (usersError) {
@@ -203,20 +198,39 @@ export const RegisterPage = () => {
 
         <Field.Root invalid={!!errors.rol}>
           <Field.Label>Rol</Field.Label>
-          <NativeSelect.Root>
-            <NativeSelect.Field {...register("rol")}>
-              {roles.items.map((role) => (
-                <option
-                  key={role.value}
-                  value={role.value}
-                  selected={role.selected}
-                >
-                  {role.label}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
+          <Controller
+            name="rol"
+            control={control}
+            render={({ field }) => (
+              <Select.Root
+                collection={roles}
+                value={field.value ? [field.value] : []}
+                onValueChange={(e) => field.onChange(e.value[0])}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Rol" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {roles.items.map((role) => (
+                        <Select.Item item={role} key={role.value}>
+                          {role.label}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+            )}
+          />
           <Field.ErrorText>{errors.rol?.message}</Field.ErrorText>
         </Field.Root>
       </SimpleGrid>

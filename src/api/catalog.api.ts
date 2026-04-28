@@ -20,8 +20,9 @@ export interface ListProductsWrapperDTO {
 export interface ProductRequestDTO {
   productCategoryId: number;
   productBrandId: number;
-  name: string | null;
-  description: string | null;
+  name?: string | null;
+  description?: string | null;
+  barcode: string;
   price: number;
   cost: number;
   minimumStock: number;
@@ -63,6 +64,8 @@ export const catalogApi = {
     apiClient
       .post<ProductRequestDTO>("/api/products", data)
       .then((r) => r.data),
+  deleteProduct: (id: number) =>
+    apiClient.delete(`/api/products/${id}`).then((r) => r.data),
 
   // Categories
   getAllCategories: () =>
@@ -73,6 +76,8 @@ export const catalogApi = {
     apiClient
       .post<ProductCategoryRequestDTO>("/api/product-categories", data)
       .then((r) => r.data),
+  deleteCategory: (id: number) =>
+    apiClient.delete(`/api/product-categories/${id}`).then((r) => r.data),
 
   // Brands
   createBrand: (data: ProductBrandRequestDTO) =>
@@ -83,4 +88,6 @@ export const catalogApi = {
     apiClient
       .get<ListProductBrandsWrapperDTO>("/api/product-brands/all")
       .then((r) => r.data),
+  deleteBrand: (id: number) =>
+    apiClient.delete(`/api/product-brands/${id}`).then((r) => r.data),
 };

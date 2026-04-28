@@ -1,4 +1,4 @@
-import { TableBar } from "@/components/ui/table-bar";
+import TableBar from "@/components/ui/table-bar";
 import { Stack } from "@chakra-ui/react";
 
 export const Services = () => {
