@@ -30,10 +30,11 @@ export default function StockListPage() {
     const deleteItem = useDeleteStockItem();
 
     useEffect(() => {
-        if (allStock?.items) {
-            setItems(allStock.items);
-        }
-    }, [allStock]);
+        console.log("allStock", allStock);
+        if (allStock?.stocks) {
+            setItems(allStock.stocks);
+        }        
+    }, [allStock]);    
 
     useEffect(() => {
         if (isErrorAllStock) {
@@ -122,6 +123,7 @@ export default function StockListPage() {
                 });
                 toaster.create({ title: "Éxito", description: `${selectedProduct?.name} fue creado`, type: "success" });
             }
+            
             setShowForm(false);
             setFormProductId(0);
             setFormBranchId(0);
@@ -129,7 +131,8 @@ export default function StockListPage() {
             setIsEditing(false);
             setEditingItem(null);
             setSelectedItem(null);
-        } catch {
+        } catch (error) {
+            console.error("Error:", error);
             toaster.create({ title: "Error", description: isEditing ? "No se pudo actualizar" : "No se pudo crear", type: "error" });
         }
     };
@@ -256,12 +259,12 @@ export default function StockListPage() {
             </Collapsible.Root>
 
             <TableSelect
-                key={JSON.stringify(filteredItems)}
-                data={filteredItems}
+                key={String(allStock?.stocks.length)} 
+                data={allStock? allStock.stocks : []}
+                height="400px"
                 loading={loadingAllStock}
                 labels={labels}
                 loadingMessage="Cargando inventario..."
-                height="auto"
                 noItemsComponent={
                     <EmptyDataScreen
                         title="No hay productos en inventario"

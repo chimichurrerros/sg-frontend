@@ -19,9 +19,7 @@ export const useCreateStockItem = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: CreateStockItemRequest) => stockApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: stockKeys.stock })
-        },
+        onSuccess: () => {queryClient.invalidateQueries({ queryKey: stockKeys.stock }); queryClient.refetchQueries({ queryKey: stockKeys.stock })},
         retry: RETRIES
     })
 }
@@ -33,7 +31,7 @@ export const useEditStockItem = () => {
         mutationFn: ({ id, data }: { id: number; data: EditStockItemRequest }) =>
             stockApi.edit(id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: stockKeys.stock })
+            {queryClient.invalidateQueries({ queryKey: stockKeys.stock }); queryClient.refetchQueries({ queryKey: stockKeys.stock })}
         },
         retry: RETRIES
     })
@@ -45,7 +43,8 @@ export const useDeleteStockItem = () => {
     return useMutation({
         mutationFn: (id: number) => stockApi.delete(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: stockKeys.stock })
+            queryClient.invalidateQueries({ queryKey: stockKeys.stock });
+            queryClient.refetchQueries({ queryKey: stockKeys.stock });
         },
         retry: RETRIES
     })

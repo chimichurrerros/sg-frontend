@@ -3,7 +3,7 @@ import type { PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 
 export interface StockGetResponse {
-    items: StockItem[];
+    stocks: StockItem[];
     pagination: PaginationType | null;
 }
 
