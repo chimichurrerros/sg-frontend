@@ -1,8 +1,8 @@
 import type { ProductBrandDTO } from "@/api/catalog.api";
-import { TableBar } from "@/components/ui/table-bar";
+import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useAllBrands, useCreateBrand } from "@/queries/catalog.queries";
+import { catalogKeys, useAllBrands, useCreateBrand, useDeleteBrand } from "@/queries/catalog.queries";
 import {
   createBrandSchema,
   type CreateBrandFormData,
@@ -29,6 +29,7 @@ export const Brands = () => {
   // Create new brand
   const [create, setCreate] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ProductBrandDTO | null>(null);
   const queryClient = useQueryClient();
 
   const onCreate = () => {
@@ -36,6 +37,7 @@ export const Brands = () => {
     setCreateError(null);
   };
 
+  const { mutate: deleteBrand } = useDeleteBrand();
   const { mutate: createBrand, isPending } = useCreateBrand();
   const {
     register,
@@ -60,6 +62,23 @@ export const Brands = () => {
   const pageSize = 6;
   const allBrands: ProductBrandDTO[] = data ? data.productBrands.sort() : [];
   const brands = allBrands.slice((page - 1) * pageSize, page * pageSize);
+
+  const handleDelete = () => {
+    if (!selected) return;
+    deleteBrand(selected.id, {
+      onSuccess: () => {
+        toaster.create({ title: `Se ha eliminado ${selected.name} con éxito` });
+        setSelected(null);
+        queryClient.invalidateQueries({ queryKey: catalogKeys.brands });
+      },
+      onError: (error) => {
+        toaster.create({
+          title: `Ha ocurrido un error al eliminar`,
+          description: error.message,
+        });
+      },
+    });
+  };
 
   const handleCreate = (formData: CreateBrandFormData) => {
     setCreateError(null);
@@ -86,7 +105,7 @@ export const Brands = () => {
 
   return (
     <Stack>
-      <TableBar onCreate={onCreate} />
+      <TableBar onCreate={onCreate} onDelete={handleDelete} selected={selected} />
 
       {create && (
         <Flex
@@ -140,7 +159,7 @@ export const Brands = () => {
       <TableSelect
         data={brands}
         labels={brandsLabels}
-        onSelect={() => {}}
+        onSelect={(item) => setSelected(item)}
         loading={isLoading}
       ></TableSelect>
 

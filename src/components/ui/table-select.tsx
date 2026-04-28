@@ -1,9 +1,9 @@
-import { Box, Table } from "@chakra-ui/react"
+import { Box, Table } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LoadingScreen } from "./screens/loading-screen";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { Text } from "@chakra-ui/react"
+import { Text } from "@chakra-ui/react";
 export interface label<T extends { id: number }> {
     labelName: string,
     propName?: keyof T
@@ -41,7 +41,7 @@ export interface tableSelectProps<T extends { id: number }> {
  * loading: loading state, if true, LoadingScreen is showed with the loading message
  * if you want a scroll you must pass he height arg
  * Pagination must be managed outside of this component
- * 
+ *
  */
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
@@ -53,52 +53,67 @@ export default function TableSelect<T extends { id: number }>(
         "Desc": ArrowDown
     }
 
-    const [selected, setSelected] = React.useState<T | null>(null);
-    const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
-    const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc")
-    const [sortHeader, setSortHeader] = useState<number | null>(null);
-    const [finalData, setFinalData] = useState(data);
+  const [selected, setSelected] = React.useState<T | null>(null);
+  const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
+  const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc");
+  const [sortHeader, setSortHeader] = useState<number | null>(null);
+  const [finalData, setFinalData] = useState(data);
 
-    const moverArriba = () => {
-        if (!selected) { setSelected(finalData[0]); onSelect(finalData[0]); return; }
-        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id)
-        if (currentIndex === -1) {
-            setSelected(null);
-            onSelect(null);
-            return;
-        }
-        const newSelected = finalData[Math.max(currentIndex - 1, 0)]
-        setSelected(newSelected);
-        onSelect(newSelected)
-    };
+  useEffect(() => {
+    setFinalData(data);
+  }, [data]);
 
-    const moverAbajo = () => {
-        if (!selected) { if (finalData.length !== 0) { setSelected(finalData[finalData.length - 1]); onSelect(finalData[finalData.length - 1]) }; return; }
-        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id)
-        if (currentIndex === -1) {
-            setSelected(null);
-            onSelect(null);
-            return;
-        }
-        const newSelected = finalData[Math.min(currentIndex + 1, finalData.length - 1)]
-        setSelected(newSelected);
-        onSelect(newSelected)
-    };
+  const moverArriba = () => {
+    if (!selected) {
+      setSelected(finalData[0]);
+      onSelect(finalData[0]);
+      return;
+    }
+    const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+    if (currentIndex === -1) {
+      setSelected(null);
+      onSelect(null);
+      return;
+    }
+    const newSelected = finalData[Math.max(currentIndex - 1, 0)];
+    setSelected(newSelected);
+    onSelect(newSelected);
+  };
 
-    useHotkeys('up', (event) => {
-        event.preventDefault();
-        moverArriba();
-    });
-    useHotkeys('down', (event) => {
-        event.preventDefault();
-        moverAbajo();
-    });
+  const moverAbajo = () => {
+    if (!selected) {
+      if (finalData.length !== 0) {
+        setSelected(finalData[finalData.length - 1]);
+        onSelect(finalData[finalData.length - 1]);
+      }
+      return;
+    }
+    const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+    if (currentIndex === -1) {
+      setSelected(null);
+      onSelect(null);
+      return;
+    }
+    const newSelected =
+      finalData[Math.min(currentIndex + 1, finalData.length - 1)];
+    setSelected(newSelected);
+    onSelect(newSelected);
+  };
 
-    useHotkeys('enter', (event) => {
-        event.preventDefault();
-        if (!selected || !onDoubleClick) return;
-        onDoubleClick(selected);
-    });
+  useHotkeys("up", (event) => {
+    event.preventDefault();
+    moverArriba();
+  });
+  useHotkeys("down", (event) => {
+    event.preventDefault();
+    moverAbajo();
+  });
+
+  useHotkeys("enter", (event) => {
+    event.preventDefault();
+    if (!selected || !onDoubleClick) return;
+    onDoubleClick(selected);
+  });
 
     useEffect(() => {
         if (selectedRowRef.current) {
