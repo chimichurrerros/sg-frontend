@@ -18,6 +18,7 @@ export const Products = () => {
   const { data, isLoading, error } = useAllProducts();
   const productsLabels: label<ProductDTO>[] = [
     { labelName: "ID", propName: "id" },
+    { labelName: "Cód.", propName: "barcode" },
     { labelName: "Nombre", propName: "name" },
     { labelName: "Categoría", propName: "productCategoryName" },
     { labelName: "Marca", propName: "productBrandName" },

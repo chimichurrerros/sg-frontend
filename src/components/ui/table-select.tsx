@@ -125,7 +125,7 @@ export default function TableSelect<T extends { id: number }>(
         }
     }
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "40vh"} minHeight={minheight || "auto"} >
+        <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "40vh"} minHeight={minheight || "auto"} tabIndex={0} >
             <Table.Root size="sm" stickyHeader >
                 <Table.Header >
                     <Table.Row bg="bg.subtle" hidden={loading}>

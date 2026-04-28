@@ -86,7 +86,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     { labelName: "Nombre", propName: "name", textIfNull:"Producto sin nombre"},
     { labelName: "Descripción", propName: "description",
       textIfNull:"Sin Descripción", 
-      transform: (d:string) =>d && d.length >35  ?  d.slice(0,35)+"..." : d},
+      transform: (d:string) =>d && d.length >35  ?  d.slice(0,25)+"..." : d},
 
     {
       labelName: "Cantidad", propName: "quantity",
@@ -263,7 +263,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         </Box>
       </Flex>
 
-      <Box gap={5} h="full" display="flex" flexDirection="row" alignItems="flex-start">
+      <Box gap={3} h="full" display="flex" flexDirection="row" alignItems="flex-start">
         <ProductsTable products={saleForm.products} labels={productsLabel} readOnly={mode !== "create"} onDataChange={
           (newData: ProductSaleDTO[]) => {
             setSaleForm({
@@ -273,7 +273,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
           }} />
 
         <Box
-          w="200px"
+          w="250px"
           p={3}
           border="1px solid"
           borderColor="gray.200"
@@ -286,10 +286,10 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text color="gray.500">Nro de Venta</Text>
               <Text fontWeight="medium">{saleForm.sale.saleNumber}</Text>
             </Flex>}
-            {/* <Flex justify="space-between" fontSize="sm">
+            <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Fecha</Text>
-              <Text fontWeight="medium">{saleForm.sale.date}</Text>
-            </Flex> */}
+              <Text fontWeight="medium">{new Date(saleForm.sale.date).toLocaleDateString()}</Text>
+            </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Caja N°</Text>
               <Text fontWeight="medium">{saleForm.sale.cashierNumber}</Text>

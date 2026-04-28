@@ -35,6 +35,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
 
 
     const labels: label<ProductSelect>[] = [
+        {labelName:"Cód.",propName:"barcode",textIfNull:"---"},
         { labelName: "Nombre", propName: "name"},
         { labelName: "Precio", propName: "price" },
         { labelName: "Stock", propName: "minimumStock" }
@@ -94,7 +95,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     setSelectedProduct(product);
                                     addref.current?.click();
                                 }}
-                                noItemsComponent={<EmptyDataScreen title={"No hay productos registrados"} icon={<FileQuestion/>}message={"No se encontraron productos, prueba a buscar con otro nombre"}/>}
+                                noItemsComponent={<EmptyDataScreen title={"No hay productos registrados o disponibles"} icon={<FileQuestion/>}message={"No se encontraron productos, prueba a buscar con otro nombre"}/>}
                                 height="300px"
                                 loading={loading}
                                 error={error}

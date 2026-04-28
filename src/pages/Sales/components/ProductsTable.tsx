@@ -33,7 +33,6 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
   const generateProductSaleDTO = (product: ProductSelect, quantity: number) => {
     return { ...product, quantity, total: (quantity * product.price) } as ProductSaleDTO
   }
-  useEffect(()=>{},[])
 
   useEffect(() => {
     if(!aviableProducts?.products) return;

@@ -10,7 +10,7 @@ interface emptyDataScreenProps {
     children?: React.ReactNode;
 }
 export default function EmptyDataScreen({ icon, title, message, children }: emptyDataScreenProps) {
-    return (<EmptyState.Root size="md">
+    return (<EmptyState.Root size="md" >
         <EmptyState.Content>
             <EmptyState.Indicator>
                 {icon}
