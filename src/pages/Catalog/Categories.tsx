@@ -1,8 +1,8 @@
 import type { ProductCategoryDTO } from "@/api/catalog.api";
-import { TableBar } from "@/components/ui/table-bar";
+import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useAllCategories, useCreateCategory } from "@/queries/catalog.queries";
+import { catalogKeys, useAllCategories, useCreateCategory, useDeleteCategory } from "@/queries/catalog.queries";
 import {
   createCategorySchema,
   type CreateCategoryFormData,
@@ -29,6 +29,7 @@ export const Categories = () => {
   // Create new category
   const [create, setCreate] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ProductCategoryDTO | null>(null);
   const queryClient = useQueryClient();
 
   const onCreate = () => {
@@ -36,6 +37,7 @@ export const Categories = () => {
     setCreateError(null);
   };
 
+  const { mutate: deleteCategory } = useDeleteCategory();
   const { mutate: createCategory, isPending } = useCreateCategory();
   const {
     register,
@@ -63,6 +65,23 @@ export const Categories = () => {
     : [];
   const categories = allCategories.slice((page - 1) * pageSize, page * pageSize);
 
+  const handleDelete = () => {
+    if (!selected) return;
+    deleteCategory(selected.id, {
+      onSuccess: () => {
+        toaster.create({ title: `Se ha eliminado ${selected.name} con éxito` });
+        setSelected(null);
+        queryClient.invalidateQueries({ queryKey: catalogKeys.categories });
+      },
+      onError: (error) => {
+        toaster.create({
+          title: `Ha ocurrido un error al eliminar`,
+          description: error.message,
+        });
+      },
+    });
+  };
+
   const handleCreate = (formData: CreateCategoryFormData) => {
     setCreateError(null);
 
@@ -88,7 +107,7 @@ export const Categories = () => {
 
   return (
     <Stack>
-      <TableBar onCreate={onCreate} />
+      <TableBar onCreate={onCreate} onDelete={handleDelete} selected={selected} />
 
       {create && (
         <Flex
@@ -142,7 +161,7 @@ export const Categories = () => {
       <TableSelect
         labels={categoriesLabels}
         data={categories}
-        onSelect={() => {}}
+        onSelect={(item) => setSelected(item)}
         loading={isLoading}
       ></TableSelect>
 

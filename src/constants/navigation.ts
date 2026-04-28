@@ -9,7 +9,7 @@ import {
   Building2,
   Truck,
   CalendarRange,
-  ClipboardList,
+  Receipt,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -54,12 +54,18 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Presupuestos",
         icon: CalendarRange,
         path: "/ventas/presupuestos"
-      }
+      },
+       {
+        id: "facturas",
+        label: "Facturas",
+        icon: Receipt,
+        path: "/ventas/facturas"
+      },
     ],
   },
   // { id: "compras", label: "Compras", icon: Package, path: "/dash/compras" },
   // {
-  //   id: "tesoreria",
+  //   id: "tesoreria",4
   //   label: "Tesorería y Bancos",
   //   icon: Landmark,
   //   path: "/dash/tesoreria",
@@ -87,7 +93,7 @@ export const NAV_CONFIG: NavItem[] = [
       {
         id: "catalogo",
         label: "Catálogo",
-        icon: ClipboardList,
+        icon: Receipt,
         path: "/dash/catalogo",
       },
     ],

@@ -26,6 +26,12 @@ export const useCreateProduct = () => {
   });
 };
 
+export const useDeleteProduct = () => {
+  return useMutation({
+    mutationFn: (id: number) => catalogApi.deleteProduct(id), // TODO: delete endpoint should return deleted element
+  });
+};
+
 /* ===== Product Categories ===== */
 export const useAllCategories = () => {
   return useQuery({
@@ -41,6 +47,12 @@ export const useCreateCategory = () => {
   });
 };
 
+export const useDeleteCategory = () => {
+  return useMutation({
+    mutationFn: (id: number) => catalogApi.deleteCategory(id),
+  });
+};
+
 /* ===== Product Brands ===== */
 export const useAllBrands = () => {
   return useQuery({
@@ -52,5 +64,11 @@ export const useAllBrands = () => {
 export const useCreateBrand = () => {
   return useMutation({
     mutationFn: (data: ProductBrandRequestDTO) => catalogApi.createBrand(data),
+  });
+};
+
+export const useDeleteBrand = () => {
+  return useMutation({
+    mutationFn: (id: number) => catalogApi.deleteBrand(id),
   });
 };
