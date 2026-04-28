@@ -1,5 +1,6 @@
 import {
   billDetailsApi,
+  type BillDetailsGetResponse,
   type CreateBillDetailRequest,
   type UpdateBillDetailRequest,
 } from "@/api/bill-details.api";
@@ -12,11 +13,15 @@ export const billDetailsKeys = {
 
 const RETRIES = 2;
 
-export const useBillDetailsByBillId = (billId: number) => {
-  return useQuery({
-    queryKey: billDetailsKeys.billDetails(billId),
+export const useBillDetailsByBillId = (
+  billId: number,
+  params?: { page?: number; pageSize?: number },
+) => {
+  return useQuery<BillDetailsGetResponse>({
+    queryKey: ["billDetails", billId, params?.page, params?.pageSize],
     queryFn: () => billDetailsApi.getByBillId(billId),
     retry: RETRIES,
+    enabled: billId > 0,
   });
 };
 

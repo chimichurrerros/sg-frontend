@@ -7,7 +7,7 @@ import {
   VStack,
   HStack,
 } from "@chakra-ui/react";
-import { ArrowLeft, Save, Plus, Pencil } from "lucide-react";
+import { Save, Plus, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BillDetail } from "@/types/bill-detail";
@@ -22,6 +22,7 @@ import {
   useCreateBillDetail,
   useEditBillDetail,
 } from "@/queries/bill-details.queries";
+import type { PaginationType } from "@/types/types";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 
@@ -50,13 +51,18 @@ export default function BillFormPage() {
   const [formDetailQuantity, setFormDetailQuantity] = useState("");
   const [formDetailPrice, setFormDetailPrice] = useState("");
   const [formDetailTaxRate, setFormDetailTaxRate] = useState("10");
+  const [detailPage, setDetailPage] = useState(1);
+  const [detailPageSize, setDetailPageSize] = useState(10);
 
   const { data: allBills, isPending: loadingBills } = useAllBills();
   const {
     data: billDetailsData,
     isPending: loadingDetails,
     refetch: refetchDetails,
-  } = useBillDetailsByBillId(id ? parseInt(id) : 0);
+  } = useBillDetailsByBillId(id ? parseInt(id) : 0, {
+    page: detailPage,
+    pageSize: detailPageSize,
+  });
   const createBill = useCreateBill();
   const editBill = useEditBill();
   const createDetail = useCreateBillDetail();
@@ -80,9 +86,14 @@ export default function BillFormPage() {
     }
   }, [id, allBills]);
 
+  const [pagination, setPagination] = useState<PaginationType | null>(null);
+
   useEffect(() => {
     if (billDetailsData?.billDetails) {
       setDetails(billDetailsData.billDetails);
+    }
+    if (billDetailsData?.pagination) {
+      setPagination(billDetailsData.pagination);
     }
   }, [billDetailsData]);
 
@@ -434,7 +445,7 @@ export default function BillFormPage() {
             <Text fontWeight="bold" fontSize="lg">
               Detalles de Factura
             </Text>
-            <HStack>
+            {/* <HStack>
               <IconButton
                 aria-label="Editar detalle"
                 disabled={!selectedDetail}
@@ -449,7 +460,7 @@ export default function BillFormPage() {
               >
                 <Plus size={20} />
               </IconButton>
-            </HStack>
+            </HStack> */}
           </HStack>
 
           {showDetailForm && (
@@ -529,6 +540,45 @@ export default function BillFormPage() {
             }
             onSelect={(item) => setSelectedDetail(item)}
           />
+
+          {pagination && (
+            <HStack justifyContent="center" mt={2} gap={4}>
+              <IconButton
+                aria-label="Página anterior"
+                disabled={pagination.currentPage <= 1}
+                onClick={() => setDetailPage(pagination.currentPage - 1)}
+              >
+                <ChevronLeft size={18} />
+              </IconButton>
+              <Text fontSize="sm">
+                {pagination.currentPage + 1} / {pagination.totalPages}
+              </Text>
+              <IconButton
+                aria-label="Página siguiente"
+                disabled={pagination.currentPage >= pagination.totalPages - 1}
+                onClick={() => setDetailPage(pagination.currentPage + 1)}
+              >
+                <ChevronRight size={18} />
+              </IconButton>
+              <select
+                value={detailPageSize}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setDetailPageSize(parseInt(e.target.value));
+                  setDetailPage(0);
+                }}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </HStack>
+          )}
         </Box>
       )}
     </Box>

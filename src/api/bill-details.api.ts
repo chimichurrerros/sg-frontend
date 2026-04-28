@@ -28,15 +28,12 @@ export interface UpdateBillDetailRequest {
 }
 
 export const billDetailsApi = {
-  getByBillId: (
-    billId: number,
-    params?: { page?: number; pageSize?: number },
-  ) =>
-    apiClient
-      .get<BillDetailsGetResponse>("/api/bill-details/by-bill/" + billId, {
-        params,
-      })
-      .then((r) => r.data),
+  getByBillId: (billId: number) => {
+  console.log("fetching details", billId);
+  return apiClient  // 👈 missing return
+    .get<BillDetailsGetResponse>("/api/bill-details/by-bill/" + billId)
+    .then((r) => r.data);
+},
   getById: (id: number) =>
     apiClient
       .get<BillDetailResponse>("/api/bill-details/" + id)
