@@ -93,7 +93,7 @@ export const NAV_CONFIG: NavItem[] = [
       {
         id: "catalogo",
         label: "Catálogo",
-        icon: ClipboardList,
+        icon: Receipt,
         path: "/dash/catalogo",
       },
     ],
