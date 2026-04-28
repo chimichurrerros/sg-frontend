@@ -10,6 +10,8 @@ import NewSalePage from "@/pages/Sales/NewSalePage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
 import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
+import BillsListPage from "@/pages/Sales/Bills/BillsList";
+import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 
 export const router = createBrowserRouter([
   {
@@ -27,15 +29,18 @@ export const router = createBrowserRouter([
           { path: "/configuraciones", element: <ConfigurationsPage /> },
           { path: "/ventas/nueva", element: <NewSalePage /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
+          {
+            path: "/ventas/presupuestos/crear",
+            element: <BudgetSheetPage mode="create" />,
+          },
+          { path: "/ventas/facturas", element: <BillsListPage /> },
+          { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
+          { path: "/ventas/facturas/:id", element: <BillFormPage /> },
 
           { path: "/sucursales", element: <BranchesListPage /> },
-
         ],
       },
     ],
   },
   { path: "*", element: <Navigate to="/login" replace /> },
 ]);
-
-
