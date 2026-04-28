@@ -1,12 +1,12 @@
-import type { PaymentMethod, RUC } from "./sales";
+import type { PaymentMethod, } from "./sales";
 import type { CustomerForSales, Bill } from "./types";
 
 export interface BudgetForm{
-    invoice?: Bill
+    bill?: Bill
     description?: string
     customer?:CustomerForSales
     customerName?:string
-    ruc?:RUC
+    ruc?:string
     creationDate?: string
     expirationDate?:string
     resolutionDate?:string

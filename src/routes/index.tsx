@@ -6,12 +6,12 @@ import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
-import NewSalePage from "@/pages/Sales/NewSalePage";
-import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
 import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
+import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
+import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 
 export const router = createBrowserRouter([
   {
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
           { path: "/dash", element: <HomePage /> },
           { path: "/register", element: <RegisterPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
-          { path: "/ventas/nueva", element: <NewSalePage /> },
+          { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
