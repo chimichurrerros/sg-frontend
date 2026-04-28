@@ -4,7 +4,6 @@ import {
   UserCog,
   Settings,
   Plus,
-  List,
   User,
   Building2,
   Truck,
@@ -44,22 +43,16 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/ventas/nueva",
       },
       {
-        id: "listado",
-        label: "Listado",
-        icon: List,
-        path: "/ventas"
-      },
-      {
         id: "presupuestos",
         label: "Presupuestos",
         icon: CalendarRange,
-        path: "/ventas/presupuestos"
+        path: "/ventas/presupuestos",
       },
-       {
+      {
         id: "facturas",
         label: "Facturas",
         icon: Receipt,
-        path: "/ventas/facturas"
+        path: "/ventas/facturas",
       },
     ],
   },
