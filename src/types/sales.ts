@@ -1,17 +1,19 @@
 import type { Bill } from "./types";
 
 export interface ProductSaleDTO {
-  id: string;
+  id: number;
   code: string;
   description: string;
   unitPrice: number;
-  quantitu: number;
+  quantity: number;
   total: number;
 }
-
-export interface RUC {
-  number: string;
-  dv: string;
+export interface ProductSelect {
+  id: number;
+  code: string;
+  description: string;
+  unitPrice: number;
+  stock: number;
 }
 
 export type PaymentMethod = "Efectivo" | "Tarjeta" | "Transferencia"
@@ -27,7 +29,7 @@ export const paymentOptions: { label: string; value: PaymentMethod }[] = [
 export interface Sale {
   customer: {
     name: string;
-    ruc: RUC;
+    ruc: string;
   };
   sale: {
     bill?: Bill;

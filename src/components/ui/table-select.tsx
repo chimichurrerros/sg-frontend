@@ -6,14 +6,12 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { Text } from "@chakra-ui/react"
 export interface label<T extends { id: number }> {
     labelName: string,
-    propName: keyof T
+    propName?: keyof T
     textIfNull?: string
-    isComponent?: boolean
     isSortable?: boolean
     sortFunction?: (a: T, b: T) => number
-    render?: (value: T[keyof T], item: T) => React.ReactNode
-    // isEditable?: boolean
-    // onCellEdit?: (id: number, newValue: any, data: T[],setFinalData:(data:T[])=>void) => void 
+    isComponent?: boolean
+    render?: ( item: T) => React.ReactNode
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -102,12 +100,17 @@ export default function TableSelect<T extends { id: number }>(
 
     useEffect(() => {
         if (selectedRowRef.current) {
-            selectedRowRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            setTimeout(() => {
+                selectedRowRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 200);
         }
     }, [selected]);
+    useEffect(() => {
+        setFinalData(data);
+    }, [data]);
 
     function getSorticon() {
         const Icon = sortIcon[sortDirection]
@@ -121,7 +124,6 @@ export default function TableSelect<T extends { id: number }>(
     }
     return (
         <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "40vh"} minHeight={minheight || "auto"} >
-
             <Table.Root size="sm" stickyHeader >
                 <Table.Header >
                     <Table.Row bg="bg.subtle" hidden={loading}>
@@ -131,7 +133,6 @@ export default function TableSelect<T extends { id: number }>(
                                 bgColor={sortHeader === index ? "gray.200" : ""}
                                 paddingX={5}
                                 textAlign="left"
-                                userSelect="none"
                                 onClick={() => {
                                     if (!label.isSortable) return;
                                     if (sortHeader === index) { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") }
@@ -168,6 +169,7 @@ export default function TableSelect<T extends { id: number }>(
                                 border="hidden"
                                 verticalAlign="middle"
                                 textAlign="center"
+
                             >
                                 <LoadingScreen message={loadingMessage} />
                             </Table.Cell>
@@ -177,13 +179,16 @@ export default function TableSelect<T extends { id: number }>(
                         <Table.Row
                             key={item.id}
                             onClick={() => {
-                                if (selected && selected.id === item.id) {
-                                    setSelected(null);
-                                    onSelect(null)
-                                } else {
-                                    setSelected(item);
-                                    onSelect(item);
-                                }
+                                setTimeout(() => {
+                                    if (selected && selected.id === item.id) {
+                                        setSelected(null);
+                                        onSelect(null)
+                                    } else {
+                                        setSelected(item);
+                                        onSelect(item);
+                                    }
+                                }, 200)
+
                             }}
                             ref={selected?.id === item.id ? selectedRowRef : null}
                             bg={selected?.id === item.id ? "green.subtle" : "transparent"}
@@ -195,22 +200,21 @@ export default function TableSelect<T extends { id: number }>(
                                 outline: "none"
                             }}
                             cursor="pointer"
-                            userSelect="none"
                             onDoubleClick={() => onDoubleClick && onDoubleClick(item)
                             }
 
                         >
                             {labels && labels.map((label: label<T>, index: number) =>
-                                <Table.Cell key={index}>
+                                <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item)}>
                                     {label.isComponent && label.render ?
-                                        label.render(item[label.propName], item) :
-                                            String(item[label.propName] || label.textIfNull || "-")
+                                        label.render(item) :
+                                        String(label.propName && (item[label.propName] || label.textIfNull || "-"))
                                     }</Table.Cell>)}
                         </Table.Row>
                     )}
                     {!loading && noItemsComponent && finalData && finalData.length === 0 &&
                         <Table.Row>
-                            <Table.Cell colSpan={labels.length} p={8} height="full">
+                            <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
                                 {noItemsComponent}
                             </Table.Cell>
                         </Table.Row>}

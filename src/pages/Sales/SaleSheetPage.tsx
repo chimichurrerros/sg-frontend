@@ -6,27 +6,29 @@ import {
   Text,
   Input,
   Button,
-  Stack,
   IconButton,
   NumberInput,
 } from "@chakra-ui/react";
-import { CircleDollarSign, Printer } from "lucide-react";
-import { useRef, useState } from "react";
+import { CircleDollarSign, Printer, X } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { paymentOptions, saleConditionOptions, type PaymentMethod, type Sale, type SaleCondition } from "@/types/sales.ts";
+import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
 import ProductsTable from "./components/ProductsTable";
 import { SelectWrapper } from "@/components/ui/select-wrapper";
 import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { type EditableLabel } from "@/components/ui/table-edit";
+import { useMask } from "@react-input/mask";
 
 const SALE_TEMPLATE: Sale = {
   customer: {
     name: "",
-    ruc: { number: "", dv: "" }
+    ruc: ""
   },
   sale: {
     date: new Date().toLocaleDateString(),
-    cashierNumber: 3
+    cashierNumber: 3,
+    saleNumber: 0
   },
   pay: {
     method: "Efectivo",
@@ -35,18 +37,64 @@ const SALE_TEMPLATE: Sale = {
   products: [],
   totals: {
     subtotal: 0,
-    iva: 5,
+    iva: 0,
     total: 0,
     amount: 0,
     change: 0,
   }
 }
 
-export default function NewSalePage() {
+interface saleSheetProps {
+  mode: "view" | "create"
+}
+
+export default function SaleSheetPage({ mode }: saleSheetProps) {
   const [selectedClient, setSelectedClient] = useState("Ninguno");
   const [saleForm, setSaleForm] = useState<Sale>(SALE_TEMPLATE);
-
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const rucInputRef = useMask({
+    mask: "nnnnnn-n",
+    replacement: { n: /\d/ },
+    showMask: true,
+  });
+  const [dialogAmount, setDialogAmount] = useState(0);
+
+  useEffect(() => {
+    const subtotal = saleForm.products.reduce((sum, p) => sum + (p.total || 0), 0);
+    const total = subtotal;
+    const change = dialogAmount >= total ? dialogAmount - total : 0;
+
+    setSaleForm(prev => ({
+      ...prev,
+      totals: {
+        ...prev.totals,
+        subtotal,
+        total,
+        amount: dialogAmount,
+        change,
+      }
+    }));
+  }, [saleForm.products, dialogAmount]);
+
+  const productsLabel: EditableLabel<ProductSaleDTO>[] = [
+    { labelName: "Código", propName: "code" },
+    { labelName: "Descripción", propName: "description" },
+    {
+      labelName: "Cantidad", propName: "quantity",
+      isEditable: true, inputType: "number",
+      validate: (value: number | string) => Number(value) > 0,
+      transform: (value: string) => Number(value),
+      onEdit: (item: ProductSaleDTO, newValue: string | number) => { return { ...item, quantity: Number(newValue), total: item.unitPrice * Number(newValue) } }
+    },
+    { labelName: "Precio Unitario", propName: "unitPrice" },
+    { labelName: "Total", propName: "total" },
+    {
+      labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
+        <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setSaleForm({ ...saleForm, products: saleForm.products.filter((p: ProductSaleDTO) => p.id !== item.id) })}>
+          <X />
+        </IconButton>
+    }
+  ];
 
   useHotkeys("ctrl+enter", () => {
     triggerRef.current?.click();
@@ -59,17 +107,14 @@ export default function NewSalePage() {
         ...saleForm,
         customer: {
           name: "",
-          ruc: {
-            number: "",
-            dv: "",
-          },
+          ruc: "",
         },
       });
     } else {
-      const clientData: Record<string, { name: string; ruc: string; digit: string }> = {
-        juan: { name: "Juan Pérez", ruc: "1234567", digit: "8" },
-        maria: { name: "María Gómez", ruc: "2345678", digit: "9" },
-        carlos: { name: "Carlos López", ruc: "3456789", digit: "0" },
+      const clientData: Record<string, { name: string; ruc: string }> = {
+        juan: { name: "Juan Pérez", ruc: "1234567-8" },
+        maria: { name: "María Gómez", ruc: "2345678-9" },
+        carlos: { name: "Carlos López", ruc: "3456789-0" },
       };
       const client = clientData[value];
       if (client) {
@@ -77,10 +122,7 @@ export default function NewSalePage() {
           ...saleForm,
           customer: {
             name: client.name,
-            ruc: {
-              number: client.ruc,
-              dv: client.digit,
-            },
+            ruc: client.ruc,
           },
         });
       }
@@ -95,36 +137,6 @@ export default function NewSalePage() {
         name: value,
       },
     });
-  };
-
-  const updateRucNumber = (value: string) => {
-    if (/^\d*$/.test(value) && value.length <= 7) {
-      setSaleForm({
-        ...saleForm,
-        customer: {
-          ...saleForm.customer,
-          ruc: {
-            ...saleForm.customer.ruc,
-            number: value,
-          },
-        },
-      });
-    }
-  };
-
-  const updateRucDigit = (value: string) => {
-    if (/^\d*$/.test(value) && value.length <= 1) {
-      setSaleForm({
-        ...saleForm,
-        customer: {
-          ...saleForm.customer,
-          ruc: {
-            ...saleForm.customer.ruc,
-            dv: value,
-          },
-        },
-      });
-    }
   };
 
   const updatePaymentMethod = (value: PaymentMethod) => {
@@ -147,38 +159,42 @@ export default function NewSalePage() {
     });
   };
 
-  const updateAmount = (value: string) => {
-    const amountNum = parseFloat(value) || 0;
-    const change = amountNum - saleForm.totals.total;
+  const isClientEditable = selectedClient === "Ninguno";
+
+  const handleRucChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedRuc = e.target.value;
     setSaleForm({
       ...saleForm,
-      totals: {
-        ...saleForm.totals,
-        amount: amountNum,
-        change: change > 0 ? change : 0,
-      },
+      customer: {
+        ...saleForm.customer,
+        ruc: formattedRuc
+      }
     });
   };
 
-  const isClientEditable = selectedClient === "Ninguno";
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString() + " GS.";
+  };
+
+  const isAmountValid = dialogAmount >= saleForm.totals.total;
 
   return (
     <Box p={2}>
       <Flex justify="space-between" align="center" mb={4}>
         <Text fontSize="2xl" fontWeight="bold">
-          Nueva Venta {saleForm.sale.saleNumber && `(N° ${saleForm.sale.saleNumber})`}
+          {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `(N° ${saleForm.sale.saleNumber})` : ""}
         </Text>
         <Flex align="center" gap={3}>
           <Text fontWeight="bold" fontSize="sm">FACTURA N°</Text>
-          <Input value={saleForm.sale.bill?.number || "-"} w="170px" size="sm" readOnly />
-          <IconButton size="md" padding={4} variant="outline">
+          <Input value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"} w="170px" size="sm" readOnly />
+          <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
             <Printer /> Imprimir Factura Legal
           </IconButton>
         </Flex>
       </Flex>
 
-      <Flex gap={4} align="flex-end" mb={6} wrap="wrap">
-        <Box flex={2} minW="200px">
+      <Flex gap={4} align="flex-end" mb={3} wrap="wrap" justifyContent="space-between">
+        <Box flex={1.5} minW="180px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Cargar Cliente</Text>
           <ComboboxWrapper
             placeholder="Buscar cliente..."
@@ -194,7 +210,7 @@ export default function NewSalePage() {
           />
         </Box>
 
-        <Box flex={3} minW="200px">
+        <Box flex={2} minW="180px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Nombre/Razón Social</Text>
           <Input
             size="sm"
@@ -205,30 +221,17 @@ export default function NewSalePage() {
           />
         </Box>
 
-        <Box flex={2} minW="150px">
+        <Box flex={1.2} minW="150px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">RUC</Text>
-          <Flex gap={2}>
-            <Input
-              w="140px"
-              size="sm"
-              value={saleForm.customer.ruc.number}
-              placeholder="0000000"
-              onChange={(e) => updateRucNumber(e.target.value)}
-              readOnly={!isClientEditable}
-              bg={!isClientEditable ? "gray.100" : "white"}
-            />
-            <Text fontSize="sm" fontWeight="bold" alignSelf="center">-</Text>
-            <Input
-              w="50px"
-              size="sm"
-              value={saleForm.customer.ruc.dv}
-              placeholder="DV"
-              onChange={(e) => updateRucDigit(e.target.value)}
-              readOnly={!isClientEditable}
-              bg={!isClientEditable ? "gray.100" : "white"}
-              maxLength={1}
-            />
-          </Flex>
+          <Input
+            ref={rucInputRef}
+            size="sm"
+            placeholder="0000000-0"
+            value={saleForm.customer.ruc}
+            readOnly={!isClientEditable}
+            bg={!isClientEditable ? "gray.100" : "white"}
+            onChange={handleRucChange}
+          />
         </Box>
 
         <Box minW="130px">
@@ -251,10 +254,17 @@ export default function NewSalePage() {
         </Box>
       </Flex>
 
-      <Flex gap={6} h="full" align="flex-start">
-        <ProductsTable products={saleForm.products} />
+      <Box gap={5} h="full" display="flex" flexDirection="row" alignItems="flex-start">
+        <ProductsTable products={saleForm.products} labels={productsLabel} readOnly={mode !== "create"} onDataChange={
+          (newData: ProductSaleDTO[]) => {
+            setSaleForm({
+              ...saleForm,
+              products: newData
+            })
+          }} />
+
         <Box
-          w="260px"
+          w="200px"
           p={3}
           border="1px solid"
           borderColor="gray.200"
@@ -262,11 +272,11 @@ export default function NewSalePage() {
           bg="white"
           h="full"
         >
-          <Stack gap={3} h="full" justify="space-between">
-            <Flex justify="space-between" fontSize="sm">
+          <Box display="flex" flexDirection="column" gap={4} h="full" justifyContent="space-between">
+            {mode === "view" && <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Nro de Venta</Text>
               <Text fontWeight="medium">{saleForm.sale.saleNumber}</Text>
-            </Flex>
+            </Flex>}
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Fecha</Text>
               <Text fontWeight="medium">{saleForm.sale.date}</Text>
@@ -278,46 +288,47 @@ export default function NewSalePage() {
             <Box borderTop="1px solid" borderColor="gray.100" my={1} />
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Subtotal</Text>
-              <Text>{saleForm.totals.subtotal.toLocaleString()} GS.</Text>
+              <Text>{formatCurrency(saleForm.totals.subtotal)}</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
-              <Text color="gray.500">IVA (10%)</Text>
-              <Text>{saleForm.totals.iva.toLocaleString()} GS.</Text>
+              <Text color="gray.500">IVA</Text>
+              <Text>{formatCurrency(saleForm.totals.iva)}</Text>
             </Flex>
             <Box borderTop="1px solid" borderColor="gray.200" my={1} />
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Total</Text>
-              <Text color="green.600">{saleForm.totals.total.toLocaleString()} GS.</Text>
+              <Text color="green.600">{formatCurrency(saleForm.totals.total)}</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Importe</Text>
-              <Text color="green.600">{saleForm.totals.amount.toLocaleString()} GS.</Text>
+              <Text color="green.600">{formatCurrency(saleForm.totals.amount)}</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Vuelto</Text>
-              <Text color="green.600">{saleForm.totals.change.toLocaleString()} GS.</Text>
+              <Text color="green.600">{formatCurrency(saleForm.totals.change)}</Text>
             </Flex>
-          </Stack>
+          </Box>
         </Box>
-      </Flex>
+      </Box>
 
       <Flex mt={4} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">
         <Flex gap={4} align="center">
           <Text fontSize="3xl" fontWeight="bold">
-            Total a pagar: <Text as="span" color="green.600">{saleForm.totals.total.toLocaleString()} GS.</Text>
+            Total a pagar: <Text as="span" color="green.600">{formatCurrency(saleForm.totals.total)}</Text>
           </Text>
         </Flex>
 
-        <Flex gap={3}>
+        {mode === "create" && <Flex gap={3}>
           <DestructiveActionDialog
             title="Cancelar Venta"
             description="¿Estás seguro de que deseas cancelar esta venta? Se perderán todos los datos ingresados."
             onAccept={() => {
               setSelectedClient("Ninguno");
               setSaleForm(SALE_TEMPLATE);
+              setDialogAmount(0);
             }}
             trigger={
-              <Button variant="outline" size="lg" colorPalette="red">
+              <Button variant="surface" size="lg">
                 Cancelar
               </Button>
             }
@@ -330,30 +341,52 @@ export default function NewSalePage() {
               console.log("Venta confirmada:", saleForm);
             }}
             trigger={
-              <IconButton bg="brand.primary" padding={4} size="lg" color="white" ref={triggerRef}>
+              <IconButton 
+                bg="brand.primary" 
+                padding={4} 
+                size="lg" 
+                color="white" 
+                ref={triggerRef} 
+                disabled={saleForm.products.length === 0}
+              >
                 <CircleDollarSign /> Generar Venta
               </IconButton>
             }
           >
             <Box mt={4}>
-              <Text fontSize="sm" fontStyle="italic" color="gray.600">
+              <Text fontSize="sm" color="gray.600" mb={2}>
                 Ingresar el importe del cliente.
               </Text>
               <NumberInput.Root
-                value={saleForm.totals.amount.toString()}
-                onValueChange={(e) => updateAmount(e.value)}
-                formatOptions={{
-                  style: "currency",
-                  currency: "PYG",
-                  currencyDisplay: "code",
-                  currencySign: "accounting",
+                value={dialogAmount.toString()}
+                onValueChange={(e) => {
+                  const val = Number(e.value);
+                  setDialogAmount(isNaN(val) ? 0 : val);
                 }}
               >
-                <NumberInput.Input />
+                <NumberInput.Input onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }} />
               </NumberInput.Root>
+              <Text
+                fontSize="lg"
+                fontStyle="bold"
+                fontWeight="medium"
+                color={isAmountValid ? "green.600" : "red.400"}
+                mt={3}
+              >
+                {isAmountValid ? (
+                  `Vuelto: ${formatCurrency(dialogAmount - saleForm.totals.total)}`
+                ) : (
+                  `Faltan: ${formatCurrency(saleForm.totals.total - dialogAmount)}`
+                )}
+              </Text>
             </Box>
           </ConfirmActionDialog>
-        </Flex>
+        </Flex>}
       </Flex>
     </Box>
   );

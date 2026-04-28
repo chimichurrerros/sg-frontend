@@ -1,4 +1,3 @@
-import type { RUC } from "./sales"
 
 export interface PaginationType{ 
     totalPages: number
@@ -16,5 +15,5 @@ export interface Bill{
 export interface CustomerForSales{
     id:number
     name:string
-    ruc:RUC
+    ruc:string
 }
