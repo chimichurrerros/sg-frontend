@@ -19,6 +19,10 @@ export const createCategorySchema = z.object({
 export type CreateCategoryFormData = z.infer<typeof createCategorySchema>;
 
 export const createProductSchema = z.object({
+  barcode: z
+    .string({ message: "El código de barras es requerido" })
+    .min(1, "El código es requerido")
+    .min(3, "El código debe tener al menos 3 caracteres"),
   name: z
     .string({ message: "El nombre es requerido" })
     .min(1, "El nombre es requerido")
