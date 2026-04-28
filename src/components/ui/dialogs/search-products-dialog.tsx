@@ -21,9 +21,12 @@ interface SearchProductsDialogProps {
     onSelect: (product:ProductSelect,quantity:number)=>void
     selectedProductsIds:number[]  //This is in order to show products that you have not add before
     products:ProductSelect[]
+    loading:boolean
+    isError:boolean
+    error:Error | null
 }
 
-export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products }: SearchProductsDialogProps) => {
+export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError }: SearchProductsDialogProps) => {
 
     const [selectedProduct, setSelectedProduct] = React.useState<ProductSelect | null>(null);
     const addref = React.useRef<HTMLButtonElement>(null);
@@ -32,9 +35,9 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
 
 
     const labels: label<ProductSelect>[] = [
-        { labelName: "Descripción", propName: "description"},
-        { labelName: "Precio", propName: "unitPrice" },
-        { labelName: "Stock", propName: "stock" }
+        { labelName: "Nombre", propName: "name"},
+        { labelName: "Precio", propName: "price" },
+        { labelName: "Stock", propName: "minimumStock" }
     ];
 
     useHotkeys('ctrl+down', (event) => {
@@ -84,7 +87,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                 labels={labels}
                                 data={products
                                     .filter((p:ProductSelect)=>!selectedProductsIds.includes(p.id))
-                                    .filter((p:ProductSelect)=>p.description.toLowerCase().includes(searchParam.toLowerCase()) )
+                                    .filter((p:ProductSelect)=>p.name?.toLowerCase().includes(searchParam.toLowerCase()) )
                                 }
                                 onSelect={setSelectedProduct}
                                 onDoubleClick={(product) => {
@@ -93,7 +96,9 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                 }}
                                 noItemsComponent={<EmptyDataScreen title={"No hay productos registrados"} icon={<FileQuestion/>}message={"No se encontraron productos, prueba a buscar con otro nombre"}/>}
                                 height="300px"
-                                loading={false}
+                                loading={loading}
+                                error={error}
+                                isError={isError}
                             />
                         </Dialog.Body>
                         <Dialog.Footer display="flex" justifyContent="space-between" alignItems="center">
@@ -112,7 +117,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     </NumberInput.IncrementTrigger>
                                 </HStack>
                             </NumberInput.Root>
-                            <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.stock! ? "visible" : "hidden"}>
+                            <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.minimumStock! ? "visible" : "hidden"}>
                                 * La cantidad es mayor al stock disponible del producto seleccionado 
                             </Text>
                             <Box display="flex" gap={2}>
@@ -125,7 +130,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     <Button
                                         variant="surface"
                                         colorPalette="green"
-                                        disabled={!selectedProduct || (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.stock! : false)}
+                                        disabled={!selectedProduct || (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.minimumStock! : false)}
                                         ref={addref}
                                         onClick={()=>selectedProduct && onSelect(selectedProduct,quantity)}
                                     >

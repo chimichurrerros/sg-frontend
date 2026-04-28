@@ -1,4 +1,5 @@
 import { Table, Input, Text, HStack, Box } from "@chakra-ui/react";
+import { Tooltip } from "@/components/ui/tooltip"
 import React, { useState, useEffect, useRef } from "react";
 import { LoadingScreen } from "./screens/loading-screen";
 
@@ -14,11 +15,11 @@ export interface EditableLabel<T extends { id: number }> {
     propName?: keyof T;
     textIfNull?: string;
     isEditable?: boolean;
-    onEdit?:(item:T,newValue:T[keyof T])=>T
+    onEdit?: (item: T, newValue: T[keyof T]) => T
     inputType?: "text" | "number" | "email" | "date";
     validate?: (value: any) => boolean;
     transform?: (value: any) => any;
-    render?: ( item: T) => React.ReactNode;
+    render?: (item: T) => React.ReactNode;
     isComponent?: boolean
 }
 
@@ -91,7 +92,7 @@ export default function TableEditable<T extends { id: number }>({
 
         const newData = data.map(item => {
             if (item.id === editingCell.rowId) {
-                if(label.onEdit) return label.onEdit(item,newValue);
+                if (label.onEdit) return label.onEdit(item, newValue);
                 return { ...item, [editingCell.propName]: newValue };
             }
             return item;
@@ -130,8 +131,8 @@ export default function TableEditable<T extends { id: number }>({
     };
 
     const renderCellContent = (item: T, label: EditableLabel<T>) => {
-        if(label.isComponent && label.render) return label.render(item)
-        if(!label.propName) return;
+        if (label.isComponent && label.render) return label.render(item)
+        if (!label.propName) return;
         const isEditing = editingCell?.rowId === item.id && editingCell?.propName === label.propName;
         const value = item[label.propName];
         const displayValue = value ?? label.textIfNull ?? "-";
@@ -155,13 +156,14 @@ export default function TableEditable<T extends { id: number }>({
                         py={0}
                         variant="flushed"
                         height="28px"
-                        width={`${(String(item[label.propName]).length + 1)*3}px`}
+                        width={`${(String(item[label.propName]).length + 1) * 3}px`}
                         border="1px"
-                        color={!isValid ? "red":""}
+                        color={!isValid ? "red" : ""}
                     />
                 </Box>
             );
         }
+        const finalVal = !displayValue ? label.textIfNull : String(displayValue)
 
         return (
             <HStack
@@ -175,8 +177,8 @@ export default function TableEditable<T extends { id: number }>({
                 cursor={label.isEditable ? "pointer" : "default"}
                 minH="28px"
             >
-                <Text fontSize="sm">{String(displayValue)}</Text>
-                
+                <Text fontSize="sm">{label.transform ? label.transform(finalVal) : finalVal}</Text>
+
             </HStack>
         );
     };
@@ -216,16 +218,19 @@ export default function TableEditable<T extends { id: number }>({
                             h="40px"
                         >
                             {labels.map((label, idx) => (
-                                <Table.Cell
-                                    key={idx}
-                                    paddingY={1}
-                                    paddingX={5}
-                                    // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
-                                    height="40px"
-                                    verticalAlign="middle"
-                                >
-                                    {renderCellContent(item, label)}
-                                </Table.Cell>
+                                
+                                    <Table.Cell
+                                        key={idx}
+                                        paddingY={1}
+                                        paddingX={5}
+                                        // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
+                                        height="40px"
+                                        verticalAlign="middle"
+                                    >
+                                        <Tooltip showArrow={true} content={label.propName && label.labelName+":"+String(item[label.propName]) } disabled={!label.propName || !item[label.propName]}>
+                                         <Text>{renderCellContent(item, label)}</Text>
+                                        </Tooltip>
+                                    </Table.Cell>
                             ))}
                         </Table.Row>
                     ))}

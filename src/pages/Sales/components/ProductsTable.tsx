@@ -10,6 +10,8 @@ import { PackageOpenIcon, Plus } from "lucide-react";
 import type { ProductSaleDTO, ProductSelect } from "@/types/sales";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import { useAllProducts } from "@/queries/catalog.queries";
+import { Spinner } from "@chakra-ui/react";
 //This component is a table where you put product to sell or to make a budget
 interface productsTableProps {
   products: ProductSaleDTO[];
@@ -17,38 +19,31 @@ interface productsTableProps {
   labels: EditableLabel<ProductSaleDTO>[]
   readOnly: boolean
 }
-const mock_products = [
-  { id: 1, description: "Producto 1", unitPrice: 10, stock: 5, code: "123" },
-  { id: 2, description: "Producto 2", unitPrice: 20, stock: 10, code: "321" },
-  { id: 3, description: "Producto 3", unitPrice: 30, stock: 15, code: "213" },
-  { id: 4, description: "Producto 4", unitPrice: 40, stock: 20, code: "333" },
-  { id: 5, description: "Producto 5", unitPrice: 50, stock: 25, code: "111" },
-  { id: 6, description: "Producto 6", unitPrice: 60, stock: 30, code: "222" },
-  { id: 7, description: "Producto 7", unitPrice: 70, stock: 35, code: "432" },
-  { id: 8, description: "Producto 8", unitPrice: 80, stock: 40, code: "234" },
-  { id: 9, description: "Producto 9", unitPrice: 90, stock: 45, code: "342" },
-  { id: 10, description: "Producto 10", unitPrice: 100, stock: 50, code: "444" }
-]
+
 export default function ProductsTable({ products, onDataChange, labels, readOnly }: productsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("")
+  const {data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts} = useAllProducts()
+  
   useHotkeys("ctrl+i", () => {
     if (readOnly) return
     addProdRef.current?.click();
   });
 
   const generateProductSaleDTO = (product: ProductSelect, quantity: number) => {
-    return { ...product, quantity, total: (quantity * product.unitPrice) } as ProductSaleDTO
+    return { ...product, quantity, total: (quantity * product.price) } as ProductSaleDTO
   }
+  useEffect(()=>{},[])
 
   useEffect(() => {
-    const prod = mock_products.find(p => p.code == productCode)
+    if(!aviableProducts?.products) return;
+    const prod = aviableProducts?.products.find(p => p.barcode == productCode)
     if (prod) {
       const exist = products.some(p => p.id === prod.id)
       if (exist) {
-        onDataChange(products.map(p => p.id === prod.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity+1)*p.unitPrice} : p))
+        onDataChange(products.map(p => p.id === prod.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity+1)*p.price} : p))
       } else {
-        onDataChange([...products, { ...prod, quantity: 1, total: prod.unitPrice }])
+        onDataChange([...products, { ...prod, quantity: 1, total: prod.price } as ProductSaleDTO])
       }
       setProductCode("")
     }
@@ -57,13 +52,16 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
   return (<Box flex={1}>
     {!readOnly && <Box display="flex" flexDirection="row" gap={3}>
       <Input placeholder="Insertar código de producto" mb={3} size="sm" value={productCode} onChange={(e) => setProductCode(e.target.value)} />
-      <SearchProductsDialog
-        products={mock_products}
+      { <SearchProductsDialog
+        products={aviableProducts?.products || []}
         onSelect={(product: ProductSelect, quantity: number) => { onDataChange([...products, generateProductSaleDTO(product, quantity)]) }}
         selectedProductsIds={products.map((p: ProductSaleDTO) => p.id)}
-        trigger={<IconButton padding={4} size="sm" variant="surface"
+        loading={loadingProducts}
+        error={errorProducts}
+        isError={isErrorProducts}
+        trigger={<IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts}
           ref={addProdRef}
-        >  <Plus /> Item </IconButton>} />
+        >  {aviableProducts ? <Plus />: <Spinner/>} Item </IconButton>} />}
     </Box>}
     <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden">
       <TableEditable

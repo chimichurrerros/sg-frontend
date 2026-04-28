@@ -1,4 +1,7 @@
+import type { UserDto } from "@/api/users.api.ts";
 import { PasswordInput } from "@/components/ui/password-input";
+import TableSelect, { type label } from "@/components/ui/table-select";
+
 import { toaster } from "@/components/ui/toaster";
 import { useRegister } from "@/queries/auth.queries";
 import { useAllUsers } from "@/queries/users.queries";
@@ -20,9 +23,7 @@ import {
   Portal,
   Select,
   SimpleGrid,
-  Skeleton,
   Stack,
-  Table,
   Text,
   VStack,
   type ListCollection,
@@ -62,18 +63,16 @@ export const RegisterPage = () => {
     />
   ) : undefined;
   // Select user from the table
-  const [selectedUser, setSelectedUser] = useState<string>();
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
   useEffect(() => {
-    const handler = () => setSelectedUser(undefined);
+    console.log("click fuera:" + selectedUser);
+
+    const handler = () => setSelectedUser(null);
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
-  }, []);
+  }, [selectedUser]);
   // List all users
-  const {
-    data: users,
-    isLoading: usersLoading,
-    error: usersError,
-  } = useAllUsers(); // TODO: implement pagination
+  const { data, isLoading: usersLoading, error: usersError } = useAllUsers(); // TODO: implement pagination
   // Pagination
   const [page, setPage] = useState(1);
   const pageSize = 6;
@@ -105,16 +104,27 @@ export const RegisterPage = () => {
     });
   };
 
-  const onSelectUser = (userId: string) => {
-    setSelectedUser((prev) => (prev === userId ? undefined : userId));
+  const onSelectUser = (user: UserDto | null) => {
+    console.log("click usuario:" + user);
+    
+    setSelectedUser(user);
+    console.log("click usuario selected:" + selectedUser);
+
   };
 
   if (usersError) {
     console.log("Ha ocurrido un error al cargar los usuarios: " + usersError);
   }
 
-  const filteredUsers = users
-    ? users.users
+  const usersLabels: label<UserDto>[] = [
+    { labelName: "ID", propName: "id" },
+    { labelName: "Correo", propName: "email" },
+    { labelName: "Rol", propName: "roleName" },
+    { labelName: "Estado", propName: "isActive" },
+  ];
+
+  const users = data
+    ? data.users
         .sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -262,7 +272,7 @@ export const RegisterPage = () => {
             color="brand.primary"
             borderColor="brand.primary"
             variant="outline"
-            disabled={!selectedUser}
+            disabled={selectedUser === null}
           >
             <RefreshCcw />
             Resetear contraseña
@@ -271,81 +281,61 @@ export const RegisterPage = () => {
             color="brand.primary"
             borderColor="brand.primary"
             variant="outline"
-            disabled={!selectedUser}
+            disabled={selectedUser === null}
           >
             <Search />
             Activar / Desactivar
           </Button>
         </Flex>
-        <Skeleton height="150px" loading={usersLoading}>
-          <Stack>
-            <Table.Root variant="outline" boxShadow="none">
-              <Table.ColumnGroup>
-                <Table.Column htmlWidth="20%" />
-                <Table.Column htmlWidth="30%" />
-                <Table.Column htmlWidth="30%" />
-                <Table.Column htmlWidth="20%" />
-              </Table.ColumnGroup>
 
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>ID</Table.ColumnHeader>
-                  <Table.ColumnHeader>Correo</Table.ColumnHeader>
-                  <Table.ColumnHeader>Rol</Table.ColumnHeader>
-                  <Table.ColumnHeader>Activo</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
+        {/* <Table.Column htmlWidth="20%" />
+        <Table.Column htmlWidth="30%" />
+        <Table.Column htmlWidth="30%" />
+        <Table.Column htmlWidth="20%" /> */}
 
-              <Table.Body>
-                {filteredUsers
-                  .slice((page - 1) * pageSize, page * pageSize)
-                  .map((user) => (
-                    <Table.Row key={user.id} onClick={(e) => { e.stopPropagation(); onSelectUser(user.id); }} bg={selectedUser === user.id ? "green.subtle" : undefined} cursor="pointer">
-                      <Table.Cell>{user.id}</Table.Cell>
-                      <Table.Cell>{user.email}</Table.Cell>
-                      <Table.Cell>{user.roleName}</Table.Cell>
-                      <Table.Cell>{user.isActive ? "Sí" : "No"}</Table.Cell>
-                    </Table.Row>
-                  ))}
-              </Table.Body>
-            </Table.Root>
+        <Stack>
+          <TableSelect
+            labels={usersLabels}
+            data={users}
+            loading={usersLoading}
+            onSelect={onSelectUser}
+          ></TableSelect>
 
-            <Pagination.Root
-              count={filteredUsers.length ?? 0}
-              pageSize={pageSize}
-              page={page}
-              onPageChange={(e) => setPage(e.page)}
-              display="flex"
-              justifyContent="center"
-            >
-              <ButtonGroup attached variant="outline" size="sm">
-                <Pagination.PrevTrigger asChild>
-                  <IconButton>
-                    <LuChevronLeft />
+          <Pagination.Root
+            count={users.length ?? 0}
+            pageSize={pageSize}
+            page={page}
+            onPageChange={(e) => setPage(e.page)}
+            display="flex"
+            justifyContent="center"
+          >
+            <ButtonGroup attached variant="outline" size="sm">
+              <Pagination.PrevTrigger asChild>
+                <IconButton>
+                  <LuChevronLeft />
+                </IconButton>
+              </Pagination.PrevTrigger>
+
+              <Pagination.Items
+                render={(page) => (
+                  <IconButton
+                    variant={{ base: "outline", _selected: "solid" }}
+                    zIndex={{ _selected: "1" }}
+                    _selected={{ bg: "brand.primary", color: "white" }}
+                  >
+                    {page.value}
                   </IconButton>
-                </Pagination.PrevTrigger>
+                )}
+              />
 
-                <Pagination.Items
-                  render={(page) => (
-                    <IconButton
-                      variant={{ base: "outline", _selected: "solid" }}
-                      zIndex={{ _selected: "1" }}
-                      _selected={{ bg: "brand.primary", color: "white" }}
-                    >
-                      {page.value}
-                    </IconButton>
-                  )}
-                />
-
-                <Pagination.NextTrigger asChild>
-                  <IconButton>
-                    <LuChevronRight />
-                  </IconButton>
-                </Pagination.NextTrigger>
-              </ButtonGroup>
-            </Pagination.Root>
-          </Stack>
-        </Skeleton>
+              <Pagination.NextTrigger asChild>
+                <IconButton>
+                  <LuChevronRight />
+                </IconButton>
+              </Pagination.NextTrigger>
+            </ButtonGroup>
+          </Pagination.Root>
+        </Stack>
       </Stack>
     </Stack>
   );

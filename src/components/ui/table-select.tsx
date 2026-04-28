@@ -11,7 +11,7 @@ export interface label<T extends { id: number }> {
     isSortable?: boolean
     sortFunction?: (a: T, b: T) => number
     isComponent?: boolean
-    render?: ( item: T) => React.ReactNode
+    render?: (item: T) => React.ReactNode
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -24,10 +24,12 @@ export interface tableSelectProps<T extends { id: number }> {
     minheight?: string
     loadingMessage?: string
     loading: boolean
+    error?: Error | null
+    isError?: boolean
 }
 
 /**
- * Generic Table, works with a type T
+ * Generic Table, works with a type T, this table was thinked to work with api queries(data is a tanstack query state)
  * labels: list of label(label name = name of the finalData in table header, prop name = the name of the object property, textIfNull: Text shown if the object finalData was null ej:
  *  obj : {name : "Peristocles"}
  *  his label should be {labelName: "Nombre", propName: "name" ,textIfNull: "Sin nombre"}
@@ -43,7 +45,7 @@ export interface tableSelectProps<T extends { id: number }> {
  */
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
-        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento...."
+        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false
     }: tableSelectProps<T>) {
 
     const sortIcon = {
@@ -161,6 +163,18 @@ export default function TableSelect<T extends { id: number }>(
                 </Table.Header>
 
                 <Table.Body >
+                    {isError && error && <Table.Row>
+                        <Table.Cell
+                            colSpan={labels.length}
+                            height={`calc(${height} - 1vh)`}
+                            border="hidden"
+                            verticalAlign="middle"
+                            textAlign="center"
+
+                        >
+                            <LoadingScreen message={loadingMessage} />
+                        </Table.Cell>
+                    </Table.Row>}
                     {loading &&
                         <Table.Row>
                             <Table.Cell

@@ -8,6 +8,7 @@ import {
   Button,
   IconButton,
   NumberInput,
+  Spinner,
 } from "@chakra-ui/react";
 import { CircleDollarSign, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
@@ -19,14 +20,16 @@ import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
 import { useMask } from "@react-input/mask";
+import { useCreateSale } from "@/queries/sales.queries";
+import { toaster } from "@/components/ui/toaster";
 
-const SALE_TEMPLATE: Sale = {
+const getSaleTemplate = (): Sale => ({
   customer: {
     name: "",
     ruc: ""
   },
   sale: {
-    date: new Date().toLocaleDateString(),
+    date: new Date().toISOString().split('.')[0], 
     cashierNumber: 3,
     saleNumber: 0
   },
@@ -42,7 +45,7 @@ const SALE_TEMPLATE: Sale = {
     amount: 0,
     change: 0,
   }
-}
+});
 
 interface saleSheetProps {
   mode: "view" | "create"
@@ -50,8 +53,10 @@ interface saleSheetProps {
 
 export default function SaleSheetPage({ mode }: saleSheetProps) {
   const [selectedClient, setSelectedClient] = useState("Ninguno");
-  const [saleForm, setSaleForm] = useState<Sale>(SALE_TEMPLATE);
+  const [saleForm, setSaleForm] = useState<Sale>(getSaleTemplate());
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const createSale = useCreateSale();
+
   const rucInputRef = useMask({
     mask: "nnnnnn-n",
     replacement: { n: /\d/ },
@@ -77,16 +82,20 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }, [saleForm.products, dialogAmount]);
 
   const productsLabel: EditableLabel<ProductSaleDTO>[] = [
-    { labelName: "Código", propName: "code" },
-    { labelName: "Descripción", propName: "description" },
+    { labelName: "Código", propName: "barcode", textIfNull:"-" },
+    { labelName: "Nombre", propName: "name", textIfNull:"Producto sin nombre"},
+    { labelName: "Descripción", propName: "description",
+      textIfNull:"Sin Descripción", 
+      transform: (d:string) =>d && d.length >35  ?  d.slice(0,35)+"..." : d},
+
     {
       labelName: "Cantidad", propName: "quantity",
       isEditable: true, inputType: "number",
       validate: (value: number | string) => Number(value) > 0,
       transform: (value: string) => Number(value),
-      onEdit: (item: ProductSaleDTO, newValue: string | number) => { return { ...item, quantity: Number(newValue), total: item.unitPrice * Number(newValue) } }
+      onEdit: (item: ProductSaleDTO, newValue: string | number | null| undefined) => { if(!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
     },
-    { labelName: "Precio Unitario", propName: "unitPrice" },
+    { labelName: "Precio Unitario", propName: "price" },
     { labelName: "Total", propName: "total" },
     {
       labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
@@ -277,10 +286,10 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text color="gray.500">Nro de Venta</Text>
               <Text fontWeight="medium">{saleForm.sale.saleNumber}</Text>
             </Flex>}
-            <Flex justify="space-between" fontSize="sm">
+            {/* <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Fecha</Text>
               <Text fontWeight="medium">{saleForm.sale.date}</Text>
-            </Flex>
+            </Flex> */}
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Caja N°</Text>
               <Text fontWeight="medium">{saleForm.sale.cashierNumber}</Text>
@@ -324,7 +333,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             description="¿Estás seguro de que deseas cancelar esta venta? Se perderán todos los datos ingresados."
             onAccept={() => {
               setSelectedClient("Ninguno");
-              setSaleForm(SALE_TEMPLATE);
+              setSaleForm(getSaleTemplate());
               setDialogAmount(0);
             }}
             trigger={
@@ -338,7 +347,11 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             title="Confirmar Venta"
             description="¿Estás seguro de que deseas generar esta venta?"
             onAccept={() => {
-              console.log("Venta confirmada:", saleForm);
+              if(!isAmountValid){
+                toaster.create({title:"Monto del importe es menor que el precio a pagar",type: "error"})
+                return;
+              }
+              createSale.mutate(saleForm)
             }}
             trigger={
               <IconButton 
@@ -347,9 +360,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 size="lg" 
                 color="white" 
                 ref={triggerRef} 
-                disabled={saleForm.products.length === 0}
+                disabled={saleForm.products.length === 0 || createSale.isPending }
               >
-                <CircleDollarSign /> Generar Venta
+                {createSale.isPending ? <Spinner/> : <CircleDollarSign />} Generar Venta
               </IconButton>
             }
           >

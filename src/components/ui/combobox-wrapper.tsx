@@ -30,7 +30,6 @@ export function ComboboxWrapper<T extends string>({
 }: ComboboxWrapperProps<T>) {
   const [inputValue, setInputValue] = useState("");
 
-  // Filtrar opciones basado en el inputValue
   const filteredOptions = useMemo(() => {
     if (!inputValue) return options;
     const searchLower = inputValue.toLowerCase();
@@ -48,7 +47,7 @@ export function ComboboxWrapper<T extends string>({
 
   const handleValueChange = (e: { value: string[] }) => {
     onValueChange?.(e.value[0] as T);
-    setInputValue(""); // Limpiar búsqueda al seleccionar
+    setInputValue("");
   };
 
   return (
