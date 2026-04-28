@@ -112,16 +112,6 @@ export const AddProducts = () => {
             />
             <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
           </Field.Root>
-          <Field.Root invalid={!!errors.barcode} required gridColumn="1 / -1">
-            <Field.Label>Código de barras</Field.Label>
-            <Input
-              {...register("barcode")}
-              placeholder="Código de barras del producto"
-              disabled={isPending}
-            />
-            <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
-          </Field.Root>
-
           <Field.Root invalid={!!errors.description} gridColumn="1 / -1">
             <Field.Label>Descripción</Field.Label>
             <Textarea

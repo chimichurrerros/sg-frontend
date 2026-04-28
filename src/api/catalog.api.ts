@@ -27,7 +27,6 @@ export interface ProductRequestDTO {
   price: number;
   cost: number;
   minimumStock: number;
-  barcode: string
 }
 
 export interface ProductCategoryDTO {
