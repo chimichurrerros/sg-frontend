@@ -173,6 +173,8 @@ export default function BudgetsPage() {
                     onSelect={(item: Budget | null) => { console.log("se seleccionó: ", item); setSelected(item) }}
                     onDoubleClick={(item: Budget) => console.log("se hizo dobleclic en ", item)}
                     loading={false}
+                    error={null}
+                    isError={false}
                     noItemsComponent={
                         <EmptyDataScreen 
                         title="Sin Presupuestos" 

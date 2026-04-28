@@ -150,8 +150,7 @@ export default function BranchesListPage() {
                         onAccept={handleDeleteBranch}
                         trigger={<IconButton
                             paddingX={5}
-                            colorPalette="red"
-                            variant="solid"
+                            variant="surface"
                             disabled={!selectedBranch || isPending}
                         >
                             {deleteBranch.isPending ? <Spinner /> : <Trash2Icon size={20} />}

@@ -22,11 +22,11 @@ export default function BudgetSheetPage({ mode }: budgetSheetPageProps) {
             </Text>
             <Flex align="center" gap={3}>
                 <Text fontWeight="bold" fontSize="sm">FACTURA N°</Text>
-                <Input value={budgetForm.invoice?.number || "-"} w="170px" size="sm" readOnly />
-                <IconButton size="md" padding={4} variant="outline" disabled={!budgetForm.invoice}>
+                <Input value={budgetForm.bill?.number || "-"} w="170px" size="sm" readOnly />
+                <IconButton size="md" padding={4} variant="outline" disabled={!budgetForm.bill}>
                     <Printer /> Imprimir Factura Legal
                 </IconButton>
-                {mode === "edit" && <IconButton size="md" padding={4} variant="ghost" disabled={!budgetForm.invoice}>
+                {mode === "edit" && <IconButton size="md" padding={4} variant="ghost" disabled={!budgetForm.bill}>
                     <ExternalLink /> Ver Factura
                 </IconButton>}
             </Flex>
