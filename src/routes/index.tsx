@@ -10,6 +10,7 @@ import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
 import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
+import StockListPage from "@/pages/Stock/StockListPage";
 import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
@@ -41,8 +42,9 @@ export const router = createBrowserRouter([
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
-
           { path: "/sucursales", element: <BranchesListPage /> },
+          { path: "/inventario", element: <StockListPage /> },
+
         ],
       },
     ],

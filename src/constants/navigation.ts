@@ -8,6 +8,8 @@ import {
   Building2,
   Truck,
   CalendarRange,
+  ClipboardList,
+  Package,
   Receipt,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -88,6 +90,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Catálogo",
         icon: Receipt,
         path: "/dash/catalogo",
+      },
+      {
+        id: "inventario",
+        label: "Inventario",
+        icon: Package,
+        path: "/inventario",
       },
     ],
   },
