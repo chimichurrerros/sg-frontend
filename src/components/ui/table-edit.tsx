@@ -184,7 +184,7 @@ export default function TableEditable<T extends { id: number }>({
     };
 
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} width="full" maxWidth="65vw">
+        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} width="full">
             <Table.Root size="sm" stickyHeader>
                 <Table.Header>
                     <Table.Row bg="bg.subtle" hidden={loading}>
