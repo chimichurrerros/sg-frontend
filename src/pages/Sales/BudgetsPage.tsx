@@ -90,48 +90,6 @@ export default function BudgetsPage() {
             creationDate: "2023-01-02",
             expirationDate: "2023-01-31",
             state: "Pendiente"
-        },
-        {
-            id: 9,
-            client: "Jane Smith",
-            concept: "Desarrollo de Software",
-            amount: 2000,
-            creationDate: "2023-01-01",
-            expirationDate: "2023-02-31",
-            state: "Aprobado"
-        },
-        {
-            id: 10,
-            client: "Acme Corp",
-            amount: 1500,
-            creationDate: "2023-01-03",
-            expirationDate: "2023-03-31",
-            state: "Rechazado"
-        },     {
-            id: 11,
-            client: "John Doe",
-            concept: "Servicio de Consultoría",
-            amount: 1000,
-            creationDate: "2023-01-02",
-            expirationDate: "2023-01-31",
-            state: "Pendiente"
-        },
-        {
-            id: 12,
-            client: "Jane Smith",
-            concept: "Desarrollo de Software",
-            amount: 2000,
-            creationDate: "2023-01-01",
-            expirationDate: "2023-02-31",
-            state: "Aprobado"
-        },
-        {
-            id: 13,
-            client: "Acme Corp",
-            amount: 1500,
-            creationDate: "2023-01-03",
-            expirationDate: "2023-03-31",
-            state: "Rechazado"
         }
     ];
 
@@ -173,6 +131,8 @@ export default function BudgetsPage() {
                     onSelect={(item: Budget | null) => { console.log("se seleccionó: ", item); setSelected(item) }}
                     onDoubleClick={(item: Budget) => console.log("se hizo dobleclic en ", item)}
                     loading={false}
+                    error={null}
+                    isError={false}
                     noItemsComponent={
                         <EmptyDataScreen 
                         title="Sin Presupuestos" 
