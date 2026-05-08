@@ -28,8 +28,9 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
-          { path: "/register", element: <RegisterPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
+
+          /* ===== VENTAS ===== */
           { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           {
@@ -39,12 +40,22 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
+          {
+            path: "/ventas/presupuestos/crear",
+            element: <BudgetSheetPage mode="create" />,
+          },
+
+          /* ===== TESORERIA ===== */
+          { path: "/tesoreria/bancos" },
+          { path: "/tesoreria/cuentas-bancarias" },
+          { path: "/tesoreria/movimientos" },
+
+          /* ===== GESTIONES ===== */
+          { path: "/register", element: <RegisterPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
-
         ],
       },
     ],
