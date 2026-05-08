@@ -15,7 +15,9 @@ import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
-import ChecksList from "@/pages/Treasury/Checks/ChecksList";
+import BanksPage from "@/pages/Treasury/BanksPage";
+import BankAccountsPage from "@/pages/Treasury/BankAccountsPage";
+import MovementsPage from "@/pages/Treasury/MovementsPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,8 +31,9 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
-          { path: "/register", element: <RegisterPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
+
+          /* ===== VENTAS ===== */
           { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           {
@@ -40,13 +43,22 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
+          {
+            path: "/ventas/presupuestos/crear",
+            element: <BudgetSheetPage mode="create" />,
+          },
+
+          /* ===== TESORERIA ===== */
+          { path: "/tesoreria/bancos", element: <BanksPage /> },
+          { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
+          { path: "/tesoreria/movimientos", element: <MovementsPage /> },
+
+          /* ===== GESTIONES ===== */
+          { path: "/register", element: <RegisterPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
-          {path: "/tesoreria/cheques", element: <ChecksList />},
-
         ],
       },
     ],
