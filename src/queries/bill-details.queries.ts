@@ -4,6 +4,7 @@ import {
   type CreateBillDetailRequest,
   type UpdateBillDetailRequest,
 } from "@/api/bill-details.api";
+import type { PaginationParams } from "@/types/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const billDetailsKeys = {
@@ -15,7 +16,7 @@ const RETRIES = 2;
 
 export const useBillDetailsByBillId = (
   billId: number,
-  params?: { page?: number; pageSize?: number },
+  params?: PaginationParams,
 ) => {
   return useQuery<BillDetailsGetResponse>({
     queryKey: ["billDetails", billId, params?.page, params?.pageSize],

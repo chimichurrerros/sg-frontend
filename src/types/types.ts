@@ -5,6 +5,10 @@ export interface PaginationType{
     totalElements:number
     currentPage:number
 }
+export interface PaginationParams{
+    page?: number
+    pageSize?: number
+}
    
 export interface Bill{
     id:number

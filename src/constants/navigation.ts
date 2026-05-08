@@ -8,9 +8,10 @@ import {
   Building2,
   Truck,
   CalendarRange,
-  ClipboardList,
   Package,
   Receipt,
+  Landmark,
+  ScrollText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -105,6 +106,20 @@ export const NAV_CONFIG: NavItem[] = [
   //   icon: FileText,
   //   path: "/dash/contabilidad",
   // },
+  {
+    id: "tesoreria",
+    label: "Tesorería y Bancos",
+    icon: Landmark,
+    path: "/tesoreria",
+    children: [
+      {
+        id: "cheques",
+        label: "Cheques",
+        icon: ScrollText,
+        path:"/tesoreria/cheques"
+      },
+    ],
+  },
   {
     id: "configuraciones",
     label: "Configuraciones",

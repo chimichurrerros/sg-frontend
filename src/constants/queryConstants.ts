@@ -1,0 +1,1 @@
+export const RETRIES = 2 ; //query retries
