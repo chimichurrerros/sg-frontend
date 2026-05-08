@@ -15,6 +15,9 @@ import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
+import BanksPage from "@/pages/Treasury/BanksPage";
+import BankAccountsPage from "@/pages/Treasury/BankAccountsPage";
+import MovementsPage from "@/pages/Treasury/MovementsPage";
 
 export const router = createBrowserRouter([
   {
@@ -46,9 +49,9 @@ export const router = createBrowserRouter([
           },
 
           /* ===== TESORERIA ===== */
-          { path: "/tesoreria/bancos" },
-          { path: "/tesoreria/cuentas-bancarias" },
-          { path: "/tesoreria/movimientos" },
+          { path: "/tesoreria/bancos", element: <BanksPage /> },
+          { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
+          { path: "/tesoreria/movimientos", element: <MovementsPage /> },
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },
