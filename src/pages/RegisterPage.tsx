@@ -1,5 +1,6 @@
 import type { UserDto } from "@/api/users.api.ts";
 import { PasswordInput } from "@/components/ui/password-input";
+import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 
 import { toaster } from "@/components/ui/toaster";
@@ -69,7 +70,7 @@ export const RegisterPage = () => {
     return () => document.removeEventListener("click", handler);
   }, [selectedUser]);
   // List all users
-  const { data, isLoading: usersLoading, error: usersError } = useAllUsers(); // TODO: implement pagination
+  const { data, isLoading: usersLoading, isError, error: usersError } = useAllUsers(); // TODO: implement pagination
   // Pagination
   const [page, setPage] = useState(1);
   const pageSize = 6;
@@ -107,9 +108,11 @@ export const RegisterPage = () => {
     setSelectedUser(user);
   };
 
-  if (usersError) {
-    console.log("Ha ocurrido un error al cargar los usuarios: " + usersError);
-  }
+  useEffect(() => {
+    if (isError) {
+      toaster.create({ title: "Ocurrió un error al cargar usuarios", description: usersError?.message || "Error desconocido", type: "error" })
+    }
+  }, [usersError, isError])
 
   const usersLabels: label<UserDto>[] = [
     { labelName: "ID", propName: "id" },
@@ -120,18 +123,18 @@ export const RegisterPage = () => {
 
   const users = data
     ? data.users
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        .filter((u) =>
-          searchEmail !== "" ? u.email.includes(searchEmail) : true,
-        )
-        .filter((u) =>
-          searchRole.length > 0
-            ? searchRole.includes(u.roleName.toLowerCase())
-            : true,
-        )
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .filter((u) =>
+        searchEmail !== "" ? u.email.includes(searchEmail) : true,
+      )
+      .filter((u) =>
+        searchRole.length > 0
+          ? searchRole.includes(u.roleName.toLowerCase())
+          : true,
+      )
     : [];
 
   return (
@@ -313,6 +316,7 @@ export const RegisterPage = () => {
             data={users}
             loading={usersLoading}
             onSelect={onSelectUser}
+            noItemsComponent={<EmptyDataScreen title={"Sin usuarios"} message={"Ocurrió algún error al cargar usuarios"} />}
           ></TableSelect>
 
           <Pagination.Root

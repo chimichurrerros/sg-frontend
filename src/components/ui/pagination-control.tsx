@@ -1,22 +1,45 @@
 "use client"
 
 import type { PaginationType } from "@/types/types";
-import { ButtonGroup, IconButton, Pagination, Skeleton } from "@chakra-ui/react"
-import { Text, Box } from "@chakra-ui/react";
+import { ButtonGroup, IconButton, Pagination } from "@chakra-ui/react"
+import {  Box } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 interface paginationControlProps {
     pagination: PaginationType | null
     defaultPage?: number,
-    variant: "outline" | "solid" | "subtle" | "surface" | "ghost" | "plain";
-    buttonColor: string;
+    variant?: "outline" | "solid" | "subtle" | "surface" | "ghost" | "plain";
+    buttonColor?: string;
     onPageChange: (page: number) => void;
-    btnSize: "sm" | "md" | "lg" | "xl" | "2xl" | "2xs" | "xs";
-    showTextRegistros?: boolean
+    btnSize?: "sm" | "md" | "lg" | "xl" | "2xl" | "2xs" | "xs";
 }
 
-export default function PaginationControl({ pagination, defaultPage = 1, showTextRegistros = false, btnSize = "sm", variant = "solid", buttonColor = "brand.primary", onPageChange }: paginationControlProps) {
-    if (!pagination) return <Skeleton height="32px" width="full" />
+export default function PaginationControl({ pagination, defaultPage = 1, btnSize = "sm", variant = "solid", buttonColor = "brand.primary", onPageChange }: paginationControlProps) {
+    if (!pagination ) return (<Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
+            <Pagination.Root count={1} pageSize={1} defaultPage={1}>
+                <ButtonGroup variant={variant} size={btnSize} alignItems="center" justifyContent="center" width="full">
+                    <Pagination.PrevTrigger asChild>
+                        <IconButton disabled>
+                            <LuChevronLeft />
+                        </IconButton>
+                    </Pagination.PrevTrigger>
+
+                    <Pagination.Items
+                        render={() => (
+                            <IconButton variant={{ base: "ghost", _selected: "solid" }} bg={{ _selected: buttonColor }} disabled >
+                                1
+                            </IconButton>
+                        )}
+                    />
+
+                    <Pagination.NextTrigger asChild>
+                        <IconButton disabled>
+                            <LuChevronRight />
+                        </IconButton>
+                    </Pagination.NextTrigger>
+                </ButtonGroup>
+            </Pagination.Root>
+        </Box>)
 
     return (
         <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
@@ -31,7 +54,7 @@ export default function PaginationControl({ pagination, defaultPage = 1, showTex
                     <Pagination.Items
                         render={(page) => (
                             <IconButton variant={{ base: "ghost", _selected: "solid" }} bg={{ _selected: buttonColor }} >
-                                {page.value}
+                                {page.value} 
                             </IconButton>
                         )}
                     />
@@ -43,8 +66,6 @@ export default function PaginationControl({ pagination, defaultPage = 1, showTex
                     </Pagination.NextTrigger>
                 </ButtonGroup>
             </Pagination.Root>
-            {showTextRegistros && <Text textAlign= "center" color="gray.500" mt={2} fontSize="sm">Mostrando {pagination.records} de {pagination.totalRecords} registros</Text>}
-
         </Box>
     )
 }

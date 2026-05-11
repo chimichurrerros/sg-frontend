@@ -53,67 +53,67 @@ export default function TableSelect<T extends { id: number }>(
         "Desc": ArrowDown
     }
 
-  const [selected, setSelected] = React.useState<T | null>(null);
-  const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
-  const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc");
-  const [sortHeader, setSortHeader] = useState<number | null>(null);
-  const [finalData, setFinalData] = useState(data);
+    const [selected, setSelected] = React.useState<T | null>(null);
+    const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
+    const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc");
+    const [sortHeader, setSortHeader] = useState<number | null>(null);
+    const [finalData, setFinalData] = useState(data);
 
-  useEffect(() => {
-    setFinalData(data);
-  }, [data]);
+    useEffect(() => {
+        setFinalData(data);
+    }, [data]);
 
-  const moverArriba = () => {
-    if (!selected) {
-      setSelected(finalData[0]);
-      onSelect(finalData[0]);
-      return;
-    }
-    const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
-    if (currentIndex === -1) {
-      setSelected(null);
-      onSelect(null);
-      return;
-    }
-    const newSelected = finalData[Math.max(currentIndex - 1, 0)];
-    setSelected(newSelected);
-    onSelect(newSelected);
-  };
+    const moverArriba = () => {
+        if (!selected) {
+            setSelected(finalData[0]);
+            onSelect(finalData[0]);
+            return;
+        }
+        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+        if (currentIndex === -1) {
+            setSelected(null);
+            onSelect(null);
+            return;
+        }
+        const newSelected = finalData[Math.max(currentIndex - 1, 0)];
+        setSelected(newSelected);
+        onSelect(newSelected);
+    };
 
-  const moverAbajo = () => {
-    if (!selected) {
-      if (finalData.length !== 0) {
-        setSelected(finalData[finalData.length - 1]);
-        onSelect(finalData[finalData.length - 1]);
-      }
-      return;
-    }
-    const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
-    if (currentIndex === -1) {
-      setSelected(null);
-      onSelect(null);
-      return;
-    }
-    const newSelected =
-      finalData[Math.min(currentIndex + 1, finalData.length - 1)];
-    setSelected(newSelected);
-    onSelect(newSelected);
-  };
+    const moverAbajo = () => {
+        if (!selected) {
+            if (finalData.length !== 0) {
+                setSelected(finalData[finalData.length - 1]);
+                onSelect(finalData[finalData.length - 1]);
+            }
+            return;
+        }
+        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+        if (currentIndex === -1) {
+            setSelected(null);
+            onSelect(null);
+            return;
+        }
+        const newSelected =
+            finalData[Math.min(currentIndex + 1, finalData.length - 1)];
+        setSelected(newSelected);
+        onSelect(newSelected);
+    };
 
-  useHotkeys("up", (event) => {
-    event.preventDefault();
-    moverArriba();
-  });
-  useHotkeys("down", (event) => {
-    event.preventDefault();
-    moverAbajo();
-  });
+    useHotkeys("up", (event) => {
+        event.preventDefault();
+        moverArriba();
+    });
+    useHotkeys("down", (event) => {
+        event.preventDefault();
+        moverAbajo();
+    });
 
-  useHotkeys("enter", (event) => {
-    event.preventDefault();
-    if (!selected || !onDoubleClick) return;
-    onDoubleClick(selected);
-  });
+    useHotkeys("enter", (event) => {
+        event.preventDefault();
+        if (!selected || !onDoubleClick) return;
+        onDoubleClick(selected);
+    });
 
     useEffect(() => {
         if (selectedRowRef.current) {
@@ -140,116 +140,131 @@ export default function TableSelect<T extends { id: number }>(
         }
     }
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "40vh"} minHeight={minheight || "auto"} tabIndex={0} >
-            <Table.Root size="sm" stickyHeader >
-                <Table.Header >
-                    <Table.Row bg="bg.subtle" hidden={loading}>
-                        {labels && labels.map((label: label<T>, index: number) =>
-                            <Table.ColumnHeader
-                                key={index}
-                                bgColor={sortHeader === index ? "gray.200" : ""}
-                                paddingX={5}
-                                textAlign="left"
-                                onClick={() => {
-                                    if (!label.isSortable) return;
-                                    if (sortHeader === index) { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") }
-                                    else { setSortHeader(index) }
-                                    if (label.sortFunction) sortfinalData(label.sortFunction)
-                                }
-                                }
-                                _hover={{
-                                    bg: "gray.100"
-                                }}
-                            >
-                                <Box
-                                    display="flex"
-                                    flexDirection="row"
-                                    gap={3}
-                                    alignContent="center"
+        <Box flex="1" minHeight="0" my={3}>
+            {loading ? (
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    height="full"
+                    border="1px solid"
+                    borderColor={"gray.300"}
+                    rounded="md"
+                >
+                    <LoadingScreen message={loadingMessage} height={height || "400px"} />
+                </Box>
+            ) : (
+                <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "100%"} minHeight={minheight || "auto"} tabIndex={0} >
+                    <Table.Root size="sm" stickyHeader >
+                        <Table.Header >
+                            <Table.Row bg="bg.subtle" hidden={loading}>
+                                {labels && labels.map((label: label<T>, index: number) =>
+                                    <Table.ColumnHeader
+                                        key={index}
+                                        bgColor={sortHeader === index ? "gray.200" : ""}
+                                        paddingX={5}
+                                        textAlign="left"
+                                        userSelect="none"
+                                        onClick={() => {
+                                            if (!label.isSortable) return;
+                                            if (sortHeader === index) { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") }
+                                            else { setSortHeader(index) }
+                                            if (label.sortFunction) sortfinalData(label.sortFunction)
+                                        }
+                                        }
+                                        _hover={{
+                                            bg: "gray.100"
+                                        }}
+                                    >
+                                        <Box
+                                            display="flex"
+                                            flexDirection="row"
+                                            gap={3}
+                                            alignContent="center"
+                                        >
+
+                                            <Text>{label.labelName}</Text>
+                                            <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
+                                                {label.isSortable && sortHeader === index && getSorticon()}
+                                            </Box>
+                                        </Box>
+                                    </Table.ColumnHeader>)}
+                            </Table.Row>
+                        </Table.Header>
+
+                        <Table.Body >
+                            {isError && error && <Table.Row>
+                                <Table.Cell
+                                    colSpan={labels.length}
+                                    height={`calc(${height} - 1vh)`}
+                                    border="hidden"
+                                    verticalAlign="middle"
+                                    textAlign="center"
+
                                 >
+                                    <LoadingScreen message={loadingMessage} />
+                                </Table.Cell>
+                            </Table.Row>}
+                            {loading &&
+                                <Table.Row>
+                                    <Table.Cell
+                                        colSpan={labels.length}
+                                        height={`calc(${height} - 1vh)`}
+                                        border="hidden"
+                                        verticalAlign="middle"
+                                        textAlign="center"
 
-                                    <Text>{label.labelName}</Text>
-                                    <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
-                                        {label.isSortable && sortHeader === index && getSorticon()}
-                                    </Box>
-                                </Box>
-                            </Table.ColumnHeader>)}
-                    </Table.Row>
-                </Table.Header>
-
-                <Table.Body >
-                    {isError && error && <Table.Row>
-                        <Table.Cell
-                            colSpan={labels.length}
-                            height={`calc(${height} - 1vh)`}
-                            border="hidden"
-                            verticalAlign="middle"
-                            textAlign="center"
-
-                        >
-                            <LoadingScreen message={loadingMessage} />
-                        </Table.Cell>
-                    </Table.Row>}
-                    {loading &&
-                        <Table.Row>
-                            <Table.Cell
-                                colSpan={labels.length}
-                                height={`calc(${height} - 1vh)`}
-                                border="hidden"
-                                verticalAlign="middle"
-                                textAlign="center"
-
-                            >
-                                <LoadingScreen message={loadingMessage} />
-                            </Table.Cell>
-                        </Table.Row>
-                    }
-                    {finalData && !loading && finalData.length > 0 && finalData.sort().map((item: T) =>
-                        <Table.Row
-                            key={item.id}
-                            onClick={() => {
-                                setTimeout(() => {
-                                    if (selected && selected.id === item.id) {
-                                        setSelected(null);
-                                        onSelect(null)
-                                    } else {
-                                        setSelected(item);
-                                        onSelect(item);
-                                    }
-                                }, 200)
-
-                            }}
-                            ref={selected?.id === item.id ? selectedRowRef : null}
-                            bg={selected?.id === item.id ? "green.subtle" : "transparent"}
-                            _hover={{
-                                bg: selected?.id === item.id ? "green.subtle" : "gray.100"
-                            }}
-                            _focus={{
-                                bg: "green.subtle",
-                                outline: "none"
-                            }}
-                            cursor="pointer"
-                            onDoubleClick={() => onDoubleClick && onDoubleClick(item)
+                                    >
+                                        <LoadingScreen message={loadingMessage} />
+                                    </Table.Cell>
+                                </Table.Row>
                             }
+                            {finalData && !loading && finalData.length > 0 && finalData.sort().map((item: T) =>
+                                <Table.Row
+                                    key={item.id}
+                                    onClick={() => {
+                                        setTimeout(() => {
+                                            if (selected && selected.id === item.id) {
+                                                setSelected(null);
+                                                onSelect(null)
+                                            } else {
+                                                setSelected(item);
+                                                onSelect(item);
+                                            }
+                                        }, 200)
 
-                        >
-                            {labels && labels.map((label: label<T>, index: number) =>
-                                <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item)}>
-                                    {label.isComponent && label.render ?
-                                        label.render(item) :
-                                        String(label.propName && (item[label.propName] || label.textIfNull || "-"))
-                                    }</Table.Cell>)}
-                        </Table.Row>
-                    )}
-                    {!loading && noItemsComponent && finalData && finalData.length === 0 &&
-                        <Table.Row>
-                            <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
-                                {noItemsComponent}
-                            </Table.Cell>
-                        </Table.Row>}
-                </Table.Body>
-            </Table.Root>
+                                    }}
+                                    ref={selected?.id === item.id ? selectedRowRef : null}
+                                    bg={selected?.id === item.id ? "green.subtle" : "transparent"}
+                                    _hover={{
+                                        bg: selected?.id === item.id ? "green.subtle" : "gray.100"
+                                    }}
+                                    _focus={{
+                                        bg: "green.subtle",
+                                        outline: "none"
+                                    }}
+                                    cursor="pointer"
+                                    onDoubleClick={() => onDoubleClick && onDoubleClick(item)
+                                    }
 
-        </Table.ScrollArea>
+                                >
+                                    {labels && labels.map((label: label<T>, index: number) =>
+                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item) } px={5}>
+                                            {label.isComponent && label.render ?
+                                                label.render(item) :
+                                                String(label.propName && (item[label.propName] || label.textIfNull || "-"))
+                                            }</Table.Cell>)}
+                                </Table.Row>
+                            )}
+                            {!loading && noItemsComponent && finalData && finalData.length === 0 &&
+                                <Table.Row>
+                                    <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
+                                        {noItemsComponent}
+                                    </Table.Cell>
+                                </Table.Row>}
+                        </Table.Body>
+                    </Table.Root>
+
+                </Table.ScrollArea>)}</Box>
     )
 }

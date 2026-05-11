@@ -82,6 +82,12 @@ export const NAV_CONFIG: NavItem[] = [
         icon: BanknoteArrowUp,
         path: "/tesoreria/movimientos",
       },
+         {
+        id: "cheques",
+        label: "Cheques",
+        icon: ScrollText,
+        path:"/tesoreria/cheques"
+      },
     ],
   },
   // { id: "rrhh", label: "RR.HH.", icon: Users, path: "/dash/rrhh" },
@@ -124,20 +130,6 @@ export const NAV_CONFIG: NavItem[] = [
   //   icon: FileText,
   //   path: "/dash/contabilidad",
   // },
-  {
-    id: "tesoreria",
-    label: "Tesorería y Bancos",
-    icon: Landmark,
-    path: "/tesoreria",
-    children: [
-      {
-        id: "cheques",
-        label: "Cheques",
-        icon: ScrollText,
-        path:"/tesoreria/cheques"
-      },
-    ],
-  },
   {
     id: "configuraciones",
     label: "Configuraciones",
