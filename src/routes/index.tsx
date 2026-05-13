@@ -19,6 +19,7 @@ import BanksPage from "@/pages/Treasury/BanksPage";
 import BankAccountsPage from "@/pages/Treasury/BankAccountsPage";
 import MovementsPage from "@/pages/Treasury/MovementsPage";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
+import CheckView from "@/pages/Treasury/Checks/CheckView";
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
           { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
           { path: "/tesoreria/movimientos", element: <MovementsPage /> },
           { path: "/tesoreria/cheques", element: <ChecksList /> },
+          { path: "/tesoreria/cheques/:id", element: <CheckView /> },
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },
