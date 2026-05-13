@@ -2,7 +2,7 @@ import { Button, CloseButton, IconButton } from "@chakra-ui/react/button";
 import { Dialog } from "@chakra-ui/react/dialog";
 import { Portal } from "@chakra-ui/react/portal";
 import { Text } from "@chakra-ui/react/text"
-import { FileQuestion, Plus } from "lucide-react";
+import { FileQuestion, Plus, RefreshCcw } from "lucide-react";
 import { InputGroup } from "@chakra-ui/react/input-group";
 import React from "react";
 import { LuMinus, LuPlus, LuSearch } from "react-icons/lu";
@@ -118,6 +118,9 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     </NumberInput.IncrementTrigger>
                                 </HStack>
                             </NumberInput.Root>
+                            <IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
+                                <RefreshCcw />
+                            </IconButton>
                             <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.minimumStock! ? "visible" : "hidden"}>
                                 * La cantidad es mayor al stock disponible del producto seleccionado 
                             </Text>

@@ -249,7 +249,7 @@ export default function TableSelect<T extends { id: number }>(
 
                                 >
                                     {labels && labels.map((label: label<T>, index: number) =>
-                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item) } px={5}>
+                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item) } pl={5}>
                                             {label.isComponent && label.render ?
                                                 label.render(item) :
                                                 String(label.propName && (item[label.propName] || label.textIfNull || "-"))
