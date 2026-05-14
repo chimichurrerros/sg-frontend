@@ -4,6 +4,7 @@ import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetChecksKeys } from "@/queries/checks.queries";
+import type { PaginationParams } from "@/types/types";
 import { Box, IconButton, Input, InputGroup, NumberInput, Text } from "@chakra-ui/react";
 import { ArrowDownUp, Banknote, BanknoteX, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -34,13 +35,10 @@ const checkLabels: label<Check>[] = [
     { labelName: "Tipo", propName: "type", isSortable: true, sortFunction: (a: Check, b: Check) => a.type - b.type },
     { labelName: "Estado", propName: "status" },
 ]
-interface Params {
-    page: number;
-    pageSize: number;
-}
+
 export default function ChecksList() {
-    const [params, setParams] = useState<Params>({ page: 1, pageSize: 10 });
-    const { data: checks, isPending, isError, error } = useGetChecksKeys({...params,pageSize: isNaN(params.pageSize) || params.pageSize < 5 || params.pageSize > 30 ? 10 : params.pageSize });
+    const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
+    const { data: checks, isPending, isError, error } = useGetChecksKeys({...params,pageSize: params.pageSize && !isNaN(params.pageSize) && params.pageSize >= 5 && params.pageSize <= 30 ? params.pageSize : 10 });
     const [selected, setSelected] = useState<Check | null>(null);
     const navigate = useNavigate();
     useEffect(() => {

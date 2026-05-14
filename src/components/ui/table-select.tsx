@@ -4,6 +4,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { LoadingScreen } from "./screens/loading-screen";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Text } from "@chakra-ui/react";
+import EmptyDataScreen from "./screens/empty-data-screen";
 export interface label<T extends { id: number }> {
     labelName: string,
     propName?: keyof T
@@ -12,6 +13,7 @@ export interface label<T extends { id: number }> {
     sortFunction?: (a: T, b: T) => number
     isComponent?: boolean
     render?: (item: T) => React.ReactNode
+    transformFunction?: (value: any) => string
 }
 
 export interface tableSelectProps<T extends { id: number }> {
@@ -256,10 +258,10 @@ export default function TableSelect<T extends { id: number }>(
                                             }</Table.Cell>)}
                                 </Table.Row>
                             )}
-                            {!loading && noItemsComponent && finalData && finalData.length === 0 &&
+                            {!loading && finalData && finalData.length === 0 &&
                                 <Table.Row>
                                     <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
-                                        {noItemsComponent}
+                                        {noItemsComponent? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
                                     </Table.Cell>
                                 </Table.Row>}
                         </Table.Body>
