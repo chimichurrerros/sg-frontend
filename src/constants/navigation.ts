@@ -15,6 +15,8 @@ import {
   CreditCard,
   BanknoteArrowUp,
   ScrollText,
+  TableProperties,
+  NotebookPen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -62,7 +64,18 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // { id: "compras", label: "Compras", icon: Package, path: "/dash/compras" },
+  {
+    id: "compras", label: "Compras", icon: NotebookPen, path: "/compras",
+    children: [
+      {
+        id: "cotizaciones-proveedores",
+        label: "Cotizaciones",
+        icon:   TableProperties,
+        path: "/compras/cotizaciones-proveedores"
+      },
+    ]
+
+  },
   {
     id: "tesoreria",
     label: "Tesorería y Bancos",
@@ -82,11 +95,11 @@ export const NAV_CONFIG: NavItem[] = [
         icon: BanknoteArrowUp,
         path: "/tesoreria/movimientos",
       },
-         {
+      {
         id: "cheques",
         label: "Cheques",
         icon: ScrollText,
-        path:"/tesoreria/cheques"
+        path: "/tesoreria/cheques"
       },
     ],
   },
