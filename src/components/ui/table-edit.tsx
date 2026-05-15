@@ -2,6 +2,8 @@ import { Table, Input, Text, HStack, Box } from "@chakra-ui/react";
 import { Tooltip } from "@/components/ui/tooltip"
 import React, { useState, useEffect, useRef } from "react";
 import { LoadingScreen } from "./screens/loading-screen";
+import { getSorticon } from "./table-select";
+import EmptyDataScreen from "./screens/empty-data-screen";
 
 /**
  * validate => validate function when you press intro to modify a field
@@ -21,6 +23,8 @@ export interface EditableLabel<T extends { id: number }> {
     transform?: (value: any) => any;
     render?: (item: T) => React.ReactNode;
     isComponent?: boolean
+    isSortable?: boolean;
+    sortFunction?: (a: T, b: T) => number;
 }
 
 export interface TableEditableProps<T extends { id: number }> {
@@ -47,6 +51,14 @@ export default function TableEditable<T extends { id: number }>({
     const [editingCell, setEditingCell] = useState<{ rowId: number; propName: string } | null>(null);
     const [editValue, setEditValue] = useState<any>("");
     const [isValid, setIsValid] = useState(true);
+    const [sortHeader, setSortHeader] = useState<number | null>(null);
+    const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Asc");
+    const [finalData, setFinalData] = useState<T[]>(data);
+
+    useEffect(() => {
+        setFinalData(data);
+    }, [data]);
+
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -90,7 +102,7 @@ export default function TableEditable<T extends { id: number }>({
             return;
         }
 
-        const newData = data.map(item => {
+        const newData = finalData.map(item => {
             if (item.id === editingCell.rowId) {
                 if (label.onEdit) return label.onEdit(item, newValue);
                 return { ...item, [editingCell.propName]: newValue };
@@ -183,14 +195,42 @@ export default function TableEditable<T extends { id: number }>({
         );
     };
 
+    const sortData = (sortFunction: (a: T, b: T) => number) => {
+        const sortedData = [...finalData].sort((a, b) => {
+            const result = sortFunction(a, b);
+            return sortDirection === "Asc" ? result : -result;
+        });
+        setFinalData(sortedData);
+    };
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} width="full">
+        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} width="100%">
             <Table.Root size="sm" stickyHeader>
                 <Table.Header>
-                    <Table.Row bg="bg.subtle" hidden={loading}>
+                    <Table.Row bg="bg.subtle" hidden={loading} userSelect="none">
                         {labels.map((label, index) => (
-                            <Table.ColumnHeader key={index} paddingX={5} textAlign="left">
-                                <Text fontWeight="semibold">{label.labelName}</Text>
+                            <Table.ColumnHeader key={index} paddingX={5} textAlign="left"
+                                _hover={{
+                                    bg: label.isSortable ? "gray.100" : "transparent",
+                                }}
+                                onClick={() => {
+                                    if (label.isSortable) {
+                                        if (sortHeader === index) { { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") } }
+                                        else { setSortHeader(index) }
+                                        if (label.sortFunction) sortData(label.sortFunction)
+                                    }
+                                }}>
+                                <Box
+                                    display="flex"
+                                    flexDirection="row"
+                                    gap={3}
+                                    alignContent="center"
+                                >
+                                    <Text fontWeight="semibold">{label.labelName}</Text>
+
+                                    <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
+                                        {label.isSortable && sortHeader === index && getSorticon(sortDirection)}
+                                    </Box>
+                                </Box>
                             </Table.ColumnHeader>
                         ))}
                     </Table.Row>
@@ -209,7 +249,7 @@ export default function TableEditable<T extends { id: number }>({
                         </Table.Row>
                     )}
 
-                    {data && !loading && data.length > 0 && data.map((item) => (
+                    {finalData && !loading && finalData.length > 0 && finalData.map((item) => (
                         <Table.Row
                             key={item.id}
                             _hover={{ bg: "gray.50" }}
@@ -218,27 +258,27 @@ export default function TableEditable<T extends { id: number }>({
                             h="40px"
                         >
                             {labels.map((label, idx) => (
-                                
-                                    <Table.Cell
-                                        key={idx}
-                                        paddingY={1}
-                                        paddingX={5}
-                                        // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
-                                        height="40px"
-                                        verticalAlign="middle"
-                                    >
-                                        <Tooltip showArrow={true} content={label.propName && label.labelName+":"+String(item[label.propName]) } disabled={!label.propName || !item[label.propName]}>
-                                         <Text>{renderCellContent(item, label)}</Text>
-                                        </Tooltip>
-                                    </Table.Cell>
+
+                                <Table.Cell
+                                    key={idx}
+                                    paddingY={1}
+                                    paddingX={5}
+                                    // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
+                                    height="40px"
+                                    verticalAlign="middle"
+                                >
+                                    <Tooltip showArrow={true} content={label.propName && label.labelName + ":" + String(item[label.propName])} disabled={!label.propName || !item[label.propName]}>
+                                        <Text>{renderCellContent(item, label)}</Text>
+                                    </Tooltip>
+                                </Table.Cell>
                             ))}
                         </Table.Row>
                     ))}
 
-                    {!loading && noItemsComponent && data.length === 0 && (
+                    {!loading && finalData.length === 0 && (
                         <Table.Row>
                             <Table.Cell colSpan={labels.length} border="hidden">
-                                {noItemsComponent}
+                                {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No hay datos para mostrar" message="Intenta con otros criterios de búsqueda o agregando un dato nuevo" />}
                             </Table.Cell>
                         </Table.Row>
                     )}

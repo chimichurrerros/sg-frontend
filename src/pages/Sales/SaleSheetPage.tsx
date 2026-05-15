@@ -83,7 +83,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
   const productsLabel: EditableLabel<ProductSaleDTO>[] = [
     { labelName: "Código", propName: "barcode", textIfNull:"-" },
-    { labelName: "Nombre", propName: "name", textIfNull:"Producto sin nombre"},
+    { labelName: "Nombre", propName: "name", textIfNull:"Producto sin nombre", isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.name || "").localeCompare(b.name || "") },
     { labelName: "Descripción", propName: "description",
       textIfNull:"Sin Descripción", 
       transform: (d:string) =>d && d.length >35  ?  d.slice(0,25)+"..." : d},
@@ -95,8 +95,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       transform: (value: string) => Number(value),
       onEdit: (item: ProductSaleDTO, newValue: string | number | null| undefined) => { if(!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
     },
-    { labelName: "Precio Unitario", propName: "price" },
-    { labelName: "Total", propName: "total" },
+    { labelName: "Precio Unitario", propName: "price",isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price,},
+    { labelName: "Total", propName: "total",isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull:"0" },
     {
       labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
         <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setSaleForm({ ...saleForm, products: saleForm.products.filter((p: ProductSaleDTO) => p.id !== item.id) })}>
