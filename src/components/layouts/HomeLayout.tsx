@@ -29,7 +29,7 @@ export const HomeLayout = () => {
       <Sidebar collapsed={collapsed} />
       <Box display="flex" flexDirection="column" flex={1} overflow="hidden" minW={0}>
         <TopBar onToggle={() => setCollapsed(c => !c)} />
-        <Box as="main" flex={1} overflow="auto" bg="bg.canvas" p="10px">
+        <Box as="main" flex={1} overflow="auto" bg="bg.canvas" py="10px" px="20px">
           <Outlet />
         </Box>
       </Box>

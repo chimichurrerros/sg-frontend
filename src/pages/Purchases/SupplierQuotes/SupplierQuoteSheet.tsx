@@ -75,14 +75,14 @@ export default function SupplierQuoteSheet({ mode, quoteId }: SupplierQuoteSheet
                     </Box>
                 </Grid>
 
-                <Text fontSize="lg" fontWeight="semibold" mb={4}>Productos</Text>
-
-                <TableEditable
-                    labels={labels} data={products} 
-                    onDataChange={(newData: ProductSupplierQuote[]) => {
-                        setProducts(newData);
-                    }} />
-
+                <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden" height="50vh">
+                    <TableEditable
+                        labels={labels} data={products}
+                        height="100%"
+                        onDataChange={(newData: ProductSupplierQuote[]) => {
+                            setProducts(newData);
+                        }} />
+                </Box>
             </Box>
         </Box>
     )

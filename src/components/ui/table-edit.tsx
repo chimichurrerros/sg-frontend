@@ -1,9 +1,10 @@
-import { Table, Input, Text, HStack, Box } from "@chakra-ui/react";
+import { Table, Input, Text, HStack, Box, Flex } from "@chakra-ui/react";
 import { Tooltip } from "@/components/ui/tooltip"
 import React, { useState, useEffect, useRef } from "react";
 import { LoadingScreen } from "./screens/loading-screen";
 import { getSorticon } from "./table-select";
 import EmptyDataScreen from "./screens/empty-data-screen";
+import { BeanOff } from "lucide-react";
 
 /**
  * validate => validate function when you press intro to modify a field
@@ -236,7 +237,7 @@ export default function TableEditable<T extends { id: number }>({
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body>
+                <Table.Body height={height || "full"} minHeight={minHeight}>
                     {loading && (
                         <Table.Row>
                             <Table.Cell
@@ -278,7 +279,15 @@ export default function TableEditable<T extends { id: number }>({
                     {!loading && finalData.length === 0 && (
                         <Table.Row>
                             <Table.Cell colSpan={labels.length} border="hidden">
-                                {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No hay datos para mostrar" message="Intenta con otros criterios de búsqueda o agregando un dato nuevo" />}
+                                <Flex justify="center" align="center" w="100%" >
+                                    {noItemsComponent ? noItemsComponent : (
+                                        <EmptyDataScreen
+                                            title="No hay datos para mostrar"
+                                            message="Intenta con otros criterios de búsqueda o agregando un dato nuevo"
+                                            icon={<BeanOff />}
+                                        />
+                                    )}
+                                </Flex>
                             </Table.Cell>
                         </Table.Row>
                     )}
