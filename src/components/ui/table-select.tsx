@@ -5,6 +5,7 @@ import { LoadingScreen } from "./screens/loading-screen";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Text } from "@chakra-ui/react";
 import EmptyDataScreen from "./screens/empty-data-screen";
+import { ErrorScreen } from "./screens/error-screen";
 export interface label<T extends { id: number }> {
     labelName: string,
     propName?: keyof T
@@ -45,15 +46,21 @@ export interface tableSelectProps<T extends { id: number }> {
  * Pagination must be managed outside of this component
  *
  */
+export const sortIcon = {
+    "Asc": ArrowUp,
+    "Desc": ArrowDown
+}
+export const getSorticon = (sortDirection: "Asc" | "Desc") => {
+    const Icon = sortIcon[sortDirection]
+    return <Icon size="16px" />
+}
+
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
         height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false
     }: tableSelectProps<T>) {
 
-    const sortIcon = {
-        "Asc": ArrowUp,
-        "Desc": ArrowDown
-    }
+
 
     const [selected, setSelected] = React.useState<T | null>(null);
     const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
@@ -131,10 +138,7 @@ export default function TableSelect<T extends { id: number }>(
         setFinalData(data);
     }, [data]);
 
-    function getSorticon() {
-        const Icon = sortIcon[sortDirection]
-        return <Icon size="16px" />
-    }
+
     function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
         setFinalData(finalData.sort(sortFunction))
         if (sortDirection === "Desc") {
@@ -175,7 +179,7 @@ export default function TableSelect<T extends { id: number }>(
                                         }
                                         }
                                         _hover={{
-                                            bg: "gray.100"
+                                            bg: label.isSortable ? "gray.100" : "transparent",
                                         }}
                                     >
                                         <Box
@@ -187,7 +191,7 @@ export default function TableSelect<T extends { id: number }>(
 
                                             <Text>{label.labelName}</Text>
                                             <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
-                                                {label.isSortable && sortHeader === index && getSorticon()}
+                                                {label.isSortable && sortHeader === index && getSorticon(sortDirection)}
                                             </Box>
                                         </Box>
                                     </Table.ColumnHeader>)}
@@ -204,7 +208,7 @@ export default function TableSelect<T extends { id: number }>(
                                     textAlign="center"
 
                                 >
-                                    <LoadingScreen message={loadingMessage} />
+                                    <ErrorScreen errorMessage={error.message || "Error desconocido"} title={"Error al traer datos"}  />
                                 </Table.Cell>
                             </Table.Row>}
                             {loading &&
@@ -251,7 +255,7 @@ export default function TableSelect<T extends { id: number }>(
 
                                 >
                                     {labels && labels.map((label: label<T>, index: number) =>
-                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item) } pl={5}>
+                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item)} pl={5}>
                                             {label.isComponent && label.render ?
                                                 label.render(item) :
                                                 String(label.propName && (item[label.propName] || label.textIfNull || "-"))
@@ -261,7 +265,7 @@ export default function TableSelect<T extends { id: number }>(
                             {!loading && finalData && finalData.length === 0 &&
                                 <Table.Row>
                                     <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
-                                        {noItemsComponent? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
+                                        {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
                                     </Table.Cell>
                                 </Table.Row>}
                         </Table.Body>

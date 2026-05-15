@@ -20,7 +20,8 @@ import BankAccountsPage from "@/pages/Treasury/BankAccountsPage";
 import MovementsPage from "@/pages/Treasury/MovementsPage";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
-import PurchaseQuotesList from "@/pages/Purchases/SupplierQuotes/PurchaseQuotesList";
+import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
+import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +52,8 @@ export const router = createBrowserRouter([
             element: <BudgetSheetPage mode="create" />,
           },
           /* ===== COMPRAS ===== */
-          { path: "/compras/cotizaciones-proveedores", element: <PurchaseQuotesList /> },
+          { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
+          { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
