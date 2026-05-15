@@ -277,7 +277,7 @@ export default function TableEditable<T extends { id: number }>({
                     ))}
 
                     {!loading && finalData.length === 0 && (
-                        <Table.Row>
+                        <Table.Row border="hidden">
                             <Table.Cell colSpan={labels.length} border="hidden">
                                 <Flex justify="center" align="center" w="100%" >
                                     {noItemsComponent ? noItemsComponent : (
