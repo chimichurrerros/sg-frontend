@@ -15,6 +15,8 @@ import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
+import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
+import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +43,9 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
+          { path: "/dash/proveedores", element: <SupplierListPage /> },
+          { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
+          { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
