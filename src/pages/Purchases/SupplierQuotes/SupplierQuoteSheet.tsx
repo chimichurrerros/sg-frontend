@@ -61,7 +61,7 @@ export default function SupplierQuoteSheet({ mode, quoteId }: SupplierQuoteSheet
                                     <Table.Row bg="bg.subtle">
                                         <Table.ColumnHeader>Proveedor</Table.ColumnHeader>
                                         <Table.ColumnHeader>Nombre</Table.ColumnHeader>
-                                        <Table.ColumnHeader textAlign="end">Cantidad</Table.ColumnHeader>
+                                        <Table.ColumnHeader >Cantidad</Table.ColumnHeader>
                                     </Table.Row>
                                 </Table.Header>
 
@@ -75,7 +75,7 @@ export default function SupplierQuoteSheet({ mode, quoteId }: SupplierQuoteSheet
                                                     </Table.Cell>
                                                 )}
                                                 <Table.Cell>{product.name}</Table.Cell>
-                                                <Table.Cell textAlign="end">{product.quantity}</Table.Cell>
+                                                <Table.Cell textAlign="center">{product.quantity}</Table.Cell>
                                             </Table.Row>
                                         ))
                                     )}

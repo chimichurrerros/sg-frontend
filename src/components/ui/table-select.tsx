@@ -225,7 +225,7 @@ export default function TableSelect<T extends { id: number }>(
                                     </Table.Cell>
                                 </Table.Row>
                             }
-                            {finalData && !loading && finalData.length > 0 && finalData.sort().map((item: T) =>
+                            {finalData && !loading && !isError && finalData.length > 0 && finalData.sort().map((item: T) =>
                                 <Table.Row
                                     key={item.id}
                                     onClick={() => {
@@ -262,7 +262,7 @@ export default function TableSelect<T extends { id: number }>(
                                             }</Table.Cell>)}
                                 </Table.Row>
                             )}
-                            {!loading && finalData && finalData.length === 0 &&
+                            {!loading && !isError && finalData && finalData.length === 0 &&
                                 <Table.Row>
                                     <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
                                         {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}

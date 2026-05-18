@@ -26,7 +26,6 @@ export const ErrorScreen: React.FC<errorProps> = ({
       h="100%"
       alignItems="center"
       justifyContent="center"
-      bgColor="gray.50"
       rounded="lg"
     >
       <Box
