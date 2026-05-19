@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const catalogKeys = {
   products: ["products"] as const,
+  services: ["services"] as const,
   categories: ["categories"] as const,
   brands: ["brands"] as const,
 };
@@ -29,6 +30,20 @@ export const useCreateProduct = () => {
 export const useDeleteProduct = () => {
   return useMutation({
     mutationFn: (id: number) => catalogApi.deleteProduct(id), // TODO: delete endpoint should return deleted element
+  });
+};
+
+/* ===== Services ===== */
+export const useAllServices = () => {
+  return useQuery({
+    queryKey: catalogKeys.services,
+    queryFn: catalogApi.getAllProducts,
+  });
+};
+
+export const useCreateService = () => {
+  return useMutation({
+    mutationFn: (data: ProductRequestDTO) => catalogApi.createProduct(data),
   });
 };
 
