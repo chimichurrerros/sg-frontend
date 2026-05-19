@@ -18,6 +18,7 @@ export interface SupplierQuote {
     date:              Date;
     total:             number;
     state:           number;
+    associatedPurchaseOrderId? :number;
     details:           SupplierQuoteProduct[];
 }
 //GET 

@@ -25,11 +25,14 @@ export const useGetAllSupplierQuotes = () => {
         queryFn: () => supplierQuoteApi.getAll(),
     });
 };
+
 export const useGetSupplierQuoteById = (id: number | undefined) => {
     return useQuery({
         queryKey: supplierQuoteKeys.detail(id ?? -1),
         queryFn: () => supplierQuoteApi.getById(id!),
         enabled: id !== undefined && id !== -1,
+        staleTime: 0,
+        refetchOnMount: true,
     });
 };
 

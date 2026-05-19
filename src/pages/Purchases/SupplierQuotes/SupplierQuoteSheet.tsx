@@ -70,6 +70,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
         if (quoteData) {
             setSelectedPurchaseRequestId(quoteData.purchaseRequestId)
             setSelectedSupplierId(quoteData.supplierId)
+            setSaleOrderId(quoteData?.associatedPurchaseOrderId || null)
             setSelectedPurchaseRequest(purchaseRequests?.purchaseRequests.find(pr => pr.id === quoteData.purchaseRequestId) || null)
             setProducts(quoteData.details.map(d => ({
                 id: d.id,
@@ -81,9 +82,9 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
             })));
         }
     }, [quoteData])
-    
-    useEffect(()=>{
-        if(selectedPurchaseRequestId && purchaseRequests){
+
+    useEffect(() => {
+        if (selectedPurchaseRequestId && purchaseRequests) {
 
             const prods = quoteData && selectedPurchaseRequestId === quoteData.purchaseRequestId ? quoteData.details.map(d => ({
                 id: d.id,
@@ -92,11 +93,16 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                 quantityRequested: d.quantityAvailable,
                 price: d.price,
                 taxRate: d.taxRate,
-            })):
-             purchaseRequests?.purchaseRequests.find((pr)=>pr.id===selectedPurchaseRequestId)?.details  || []
+            })) :
+                purchaseRequests?.purchaseRequests.find((pr) => pr.id === selectedPurchaseRequestId)?.details || []
+
+            setSelectedPurchaseRequest(purchaseRequests.purchaseRequests.find(pr => pr.id === selectedPurchaseRequestId) || null)
+            
             setProducts(prods)
         }
-    },[selectedPurchaseRequestId])
+    }, [selectedPurchaseRequestId])
+
+    
     // useEffect(() => {
     //     if (!purchaseRequests || !quoteData || initialLoadDone) return;
 
@@ -160,10 +166,37 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
         editSupplierQuote.mutate({ id: quoteData.id, data: data })
     }
 
+    // export interface SupplierQuoteCreateRequest {
+    //     supplierId:        number;
+    //     purchaseRequestId: number;
+    //     details:           CreateSupplierQuoteProduct[];
+    // }
+
+    //     export interface CreateSupplierQuoteProduct {
+    //     productId:         number;
+    //     quantityAvailable: number;
+    //     price:             number;
+    //     taxRate:           number;
+    // }
+    // export interface PurchaseRequestDetails {
+    //     id:                number;
+    //     productId:         number;
+    //     productName:       string;
+    //     price?:            number;
+    //     taxRate? :         number;
+    //     quantityRequested: number;
+    // }
 
     function createQuote() {
-
+        if (!selectedSupplierId || !selectedPurchaseRequestId) return;
+        createSupplierQuote.mutate({
+            supplierId: selectedSupplierId, purchaseRequestId: selectedPurchaseRequestId,
+            details: products.map(({ quantityRequested, ...p }) => {
+                return { quantityAvailable: quantityRequested, ...p } as CreateSupplierQuoteProduct
+            })
+        })
     }
+
     if (loadingQuoteData && mode !== "create") { return <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center"><LoadingScreen message="Cargando cotización..." /> </Box> }
 
     if (isQuoteDataError) {
@@ -174,7 +207,10 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
     return (
         <Box display="flex" flexDirection="column" gap={4} height="full" minHeight="0">
             <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box display={"flex"} flexDirection={"column" } gap={1}>
                 <Text fontSize="2xl" fontWeight="bold">{mode === "create" ? "Nueva Cotización de Proveedor" : `Editar Cotización #${id}`}</Text>
+                {mode === "edit" && saleOrderId && <Text fontSize="sm" color="gray" fontStyle="italic"> Esta cotización no es editable puesto que ya tiene una orden de compra asociada.</Text>}
+                </Box>
                 <Box display="flex" gap={4}>
                     <IconButton p={2} variant="outline" size="lg" onClick={() => navigate("/compras/cotizaciones-proveedores")}>
                         <ArrowLeft />
@@ -189,7 +225,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         description={"Esta acción generará la orden de compra a " + suppliers?.suppliers.find(s => s.id === selectedSupplierId)?.businessName.toUpperCase()}
                         onAccept={() => createQuote()}
                     />}
-                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg">
+                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg" onClick={()=>quoteData?.associatedPurchaseOrderId && navigate("/compras/orden-compra/"+quoteData?.associatedPurchaseOrderId)}>
                         <ExternalLink />
                         Ver Orden de Compra asociada
                     </IconButton>}
@@ -218,7 +254,6 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                             }}
                         />
                     </Box>
-
                     <Box minWidth="250px" flex="1">
                         <Box display="flex" flexDirection="row" gap={3}>
                             <Text fontSize="sm" fontWeight="medium" mb={1}>Proveedores *</Text>
@@ -251,6 +286,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         key={JSON.stringify(products)}
                         labels={labels} data={products}
                         height="100%"
+                        readOnly={saleOrderId !== null || (mode === "edit" && quoteData?quoteData.state ===2 : false)}
                         noItemsComponent={<EmptyDataScreen title="No se encontraron productos" message=
                             {selectedPurchaseRequest ? "Al parecer este pedido de compra no tiene ningun producto registrado." : "No hay productos para mostrar en este momento. Puedes seleccionar un pedido de compra para cargar sus productos."}
                             icon={selectedPurchaseRequest ? <FileQuestion size={48} color="gray" /> : <FileInput size={48} color="gray" />} />}
@@ -266,7 +302,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                     </Button>
                     <ConfirmActionDialog trigger={<IconButton p={2}
                         bgColor="brand.primary" size="lg"
-                        disabled={products.some(p => !p.price || !p.taxRate || !p.quantityRequested) || !selectedPurchaseRequestId || !selectedSupplierId || editSupplierQuote.isPending || products.length===0}>
+                        disabled={products.some(p => !p.price || !p.taxRate || !p.quantityRequested) || !selectedPurchaseRequestId || !selectedSupplierId || editSupplierQuote.isPending || products.length === 0}>
                         {editSupplierQuote.isPending ? <Spinner /> : <Save />}
                         Guardar
                     </IconButton>}
