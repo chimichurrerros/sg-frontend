@@ -17,6 +17,7 @@ import {
   ScrollText,
   TableProperties,
   NotebookPen,
+  ClipboardCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -72,6 +73,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Cotizaciones",
         icon:   TableProperties,
         path: "/compras/cotizaciones-proveedores"
+      },
+      {
+        id: "ordenes-de-compra",
+        label: "Órdenes de Compra",
+        icon: ClipboardCheck,
+        path: "/compras/ordenes-de-compra"
       },
     ]
 

@@ -28,6 +28,8 @@ import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesL
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
+import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
+import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +63,9 @@ export const router = createBrowserRouter([
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
           { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
+          { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
+          { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
+          { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
