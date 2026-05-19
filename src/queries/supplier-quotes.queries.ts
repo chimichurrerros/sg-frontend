@@ -26,13 +26,11 @@ export const useGetAllSupplierQuotes = () => {
     });
 };
 
-export const useGetSupplierQuoteById = (id: number | undefined) => {
+export const useGetSupplierQuoteById = (id: number) => {    
     return useQuery({
-        queryKey: supplierQuoteKeys.detail(id ?? -1),
+        queryKey: supplierQuoteKeys.detail(id),
         queryFn: () => supplierQuoteApi.getById(id!),
         enabled: id !== undefined && id !== -1,
-        staleTime: 0,
-        refetchOnMount: true,
     });
 };
 
