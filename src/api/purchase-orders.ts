@@ -72,4 +72,8 @@ export const purchaseOrdersApi = {
         apiClient
             .put<PurchaseOrderResponseDTO>(`/api/purchaseorders/${id}`, body)
             .then((r) => r.data),
+    getDraft: (purchaseRequestId: number) =>
+        apiClient
+            .get<PurchaseOrderResponseDTO>(`/api/purchaseorders/draft/${purchaseRequestId}`)
+            .then((r) => r.data),
 };

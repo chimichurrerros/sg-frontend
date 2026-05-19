@@ -3,7 +3,7 @@ import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { ButtonGroup, IconButton, Pagination, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { LuChevronLeft, LuChevronRight} from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries.ts";
 import type { PurchaseOrderDTO } from "@/api/purchase-orders.ts";
@@ -20,7 +20,7 @@ export default function PurchaseOrderListPage() {
 
     const labels: label<PurchaseOrderDTO>[] = [
         {
-            labelName: "Número",
+            labelName: "Código",
             propName: "number",
             isSortable: true,
             sortFunction: (a, b) => a.number.localeCompare(b.number),
@@ -40,12 +40,27 @@ export default function PurchaseOrderListPage() {
         {
             labelName: "Fecha",
             propName: "date",
+            isComponent: true,
+            render: (item) => new Date(item.date).toLocaleDateString("es-PY", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            }),
             isSortable: true,
             sortFunction: (a, b) => a.date.localeCompare(b.date),
         },
         {
             labelName: "Estado",
             propName: "state",
+            isComponent: true,
+            render: (item) => {
+                const states: Record<number, string> = {
+                    0: "BORRADOR",
+                    1: "ACTIVO",
+                    2: "CANCELADO",
+            };
+            return states[item.state] ?? item.state;
+            },
             isSortable: true,
             sortFunction: (a, b) => a.state - b.state,
         },
@@ -76,6 +91,7 @@ export default function PurchaseOrderListPage() {
                 onEdit={selectedOrder ? handleEdit : undefined}
                 onDelete={handleDelete}
             />
+                
 
             <TableSelect
                 data={currentOrders}

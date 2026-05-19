@@ -45,3 +45,11 @@ export const useEditPurchaseOrder = () => {
         },
     });
 };
+
+export const useGetPurchaseOrderDraft = (purchaseRequestId?: number) => {
+    return useQuery({
+        queryKey: purchaseRequestId ? ["purchaseOrderDraft", purchaseRequestId] : ["purchaseOrderDraft", "none"] as const,
+        queryFn: () => purchaseOrdersApi.getDraft(purchaseRequestId ?? 0),
+        enabled: Boolean(purchaseRequestId),
+    });
+};
