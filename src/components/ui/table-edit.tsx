@@ -37,6 +37,7 @@ export interface TableEditableProps<T extends { id: number }> {
     minHeight?: string;
     loadingMessage?: string;
     loading?: boolean;
+    readOnly?: boolean
 }
 
 export default function TableEditable<T extends { id: number }>({
@@ -48,6 +49,7 @@ export default function TableEditable<T extends { id: number }>({
     minHeight = "auto",
     loadingMessage = "Cargando datos...",
     loading = false,
+    readOnly = false
 }: TableEditableProps<T>) {
     const [editingCell, setEditingCell] = useState<{ rowId: number; propName: string } | null>(null);
     const [editValue, setEditValue] = useState<any>("");
@@ -172,6 +174,7 @@ export default function TableEditable<T extends { id: number }>({
                         width={`${(String(item[label.propName]).length + 1) * 3}px`}
                         border="1px"
                         color={!isValid ? "red" : ""}
+                        disabled={readOnly}
                     />
                 </Box>
             );
@@ -227,8 +230,8 @@ export default function TableEditable<T extends { id: number }>({
                                     alignContent="center"
                                 >
                                     <Text fontWeight="semibold">{label.labelName}</Text>
-
-                                    <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
+                                    {label.isEditable && <Text fontSize="sm" color="brand.secondary">*</Text>}
+                                    <Box width="16px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
                                         {label.isSortable && sortHeader === index && getSorticon(sortDirection)}
                                     </Box>
                                 </Box>
@@ -237,7 +240,7 @@ export default function TableEditable<T extends { id: number }>({
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body height={height || "full"} minHeight={minHeight}>
+                <Table.Body height={height || "full"} minHeight={minHeight} >
                     {loading && (
                         <Table.Row>
                             <Table.Cell
@@ -267,9 +270,12 @@ export default function TableEditable<T extends { id: number }>({
                                     // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
                                     height="40px"
                                     verticalAlign="middle"
+
                                 >
                                     <Tooltip showArrow={true} content={label.propName && label.labelName + ":" + String(item[label.propName])} disabled={!label.propName || !item[label.propName]}>
-                                        <Text>{renderCellContent(item, label)}</Text>
+                                        <Box w="full" h="full">
+                                            {renderCellContent(item, label)}
+                                        </Box>
                                     </Tooltip>
                                 </Table.Cell>
                             ))}
