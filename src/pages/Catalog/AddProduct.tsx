@@ -13,7 +13,9 @@ import {
   ButtonGroup,
   createListCollection,
   Field,
+  Flex,
   Grid,
+  GridItem,
   Heading,
   Input,
   Portal,
@@ -88,8 +90,9 @@ export const AddProducts = () => {
   };
 
   return (
-    <Stack gap={4} maxW="600px">
-      <Stack gap={1}>
+    <Stack gap={4} paddingInline="15%">
+      <Flex alignItems="center" justifyContent="space-between">
+        <Heading size="xl">Nuevo producto</Heading>
         <Button
           variant="ghost"
           size="sm"
@@ -98,121 +101,131 @@ export const AddProducts = () => {
         >
           <LuArrowLeft /> Volver al catálogo
         </Button>
-        <Heading size="md">Nuevo producto</Heading>
-      </Stack>
+      </Flex>
 
       <Stack as="form" onSubmit={handleSubmit(handleCreate)} gap={4}>
-        <Grid templateColumns="1fr 1fr" gap={4}>
-          <Field.Root invalid={!!errors.name} required gridColumn="1 / -1">
-            <Field.Label>Nombre</Field.Label>
-            <Input
-              {...register("name")}
-              placeholder="Nombre del producto"
-              disabled={isPending}
-            />
-            <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
-          </Field.Root>
-          <Field.Root invalid={!!errors.description} gridColumn="1 / -1">
-            <Field.Label>Descripción</Field.Label>
-            <Textarea
-              {...register("description")}
-              placeholder="Descripción del producto"
-              disabled={isPending}
-            />
-            <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
-          </Field.Root>
+        <Grid templateColumns="2fr 2fr" gap={4} alignItems="center">
+          <GridItem colSpan={4}>
+            <Field.Root invalid={!!errors.name} required>
+              <Input
+                {...register("name")}
+                placeholder="Nombre del producto"
+                disabled={isPending}
+                variant="flushed"
+                size="lg"
+              />
+              <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
+            </Field.Root>
+          </GridItem>
 
-          <Field.Root invalid={!!errors.barcode} required gridColumn="1 / -1">
+          <GridItem colSpan={3}>
+            <Field.Root invalid={!!errors.description}>
+              <Textarea
+                {...register("description")}
+                placeholder="Descripción"
+                disabled={isPending}
+              />
+              <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
+            </Field.Root>
+          </GridItem>
+
+          <Field.Root invalid={!!errors.barcode} required>
             <Field.Label>Código de barras</Field.Label>
             <Input
               {...register("barcode")}
-              placeholder="Código de barras"
+              placeholder="5449000009067"
               disabled={isPending}
             />
             <Field.ErrorText>{errors.barcode?.message}</Field.ErrorText>
           </Field.Root>
 
-          <Field.Root invalid={!!errors.productCategoryId} required>
-            <Field.Label>Categoría</Field.Label>
-            <Controller
-              name="productCategoryId"
-              control={control}
-              render={({ field }) => (
-                <Select.Root
-                  collection={categoryCollection}
-                  value={field.value ? [String(field.value)] : []}
-                  onValueChange={(e) => field.onChange(Number(e.value[0]))}
-                  disabled={isPending}
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder="Seleccionar categoría" />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.ClearTrigger />
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {categoryCollection.items.map((item) => (
-                          <Select.Item item={item} key={item.value}>
-                            {item.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              )}
-            />
-            <Field.ErrorText>
-              {errors.productCategoryId?.message}
-            </Field.ErrorText>
-          </Field.Root>
+          <GridItem colSpan={2}>
+            <Field.Root invalid={!!errors.productCategoryId} required>
+              <Field.Label>Categoría</Field.Label>
+              <Controller
+                name="productCategoryId"
+                control={control}
+                render={({ field }) => (
+                  <Select.Root
+                    collection={categoryCollection}
+                    value={field.value ? [String(field.value)] : []}
+                    onValueChange={(e) => field.onChange(Number(e.value[0]))}
+                    disabled={isPending}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder="Seleccionar categoría" />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.ClearTrigger />
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {categoryCollection.items.map((item) => (
+                            <Select.Item item={item} key={item.value}>
+                              {item.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                )}
+              />
+              <Field.ErrorText>
+                {errors.productCategoryId?.message}
+              </Field.ErrorText>
+            </Field.Root>
+          </GridItem>
 
-          <Field.Root invalid={!!errors.productBrandId} required>
-            <Field.Label>Marca</Field.Label>
-            <Controller
-              name="productBrandId"
-              control={control}
-              render={({ field }) => (
-                <Select.Root
-                  collection={brandCollection}
-                  value={field.value ? [String(field.value)] : []}
-                  onValueChange={(e) => field.onChange(Number(e.value[0]))}
-                  disabled={isPending}
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder="Seleccionar marca" />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.ClearTrigger />
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {brandCollection.items.map((item) => (
-                          <Select.Item item={item} key={item.value}>
-                            {item.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              )}
-            />
-            <Field.ErrorText>{errors.productBrandId?.message}</Field.ErrorText>
-          </Field.Root>
+          <GridItem colSpan={2}>
+            <Field.Root invalid={!!errors.productBrandId} required>
+              <Field.Label>Marca</Field.Label>
+              <Controller
+                name="productBrandId"
+                control={control}
+                render={({ field }) => (
+                  <Select.Root
+                    collection={brandCollection}
+                    value={field.value ? [String(field.value)] : []}
+                    onValueChange={(e) => field.onChange(Number(e.value[0]))}
+                    disabled={isPending}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder="Seleccionar marca" />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.ClearTrigger />
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {brandCollection.items.map((item) => (
+                            <Select.Item item={item} key={item.value}>
+                              {item.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                )}
+              />
+              <Field.ErrorText>
+                {errors.productBrandId?.message}
+              </Field.ErrorText>
+            </Field.Root>
+          </GridItem>
 
           <Field.Root invalid={!!errors.price} required>
             <Field.Label>Precio</Field.Label>

@@ -16,8 +16,12 @@ import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BanksPage from "@/pages/Treasury/BanksPage";
-import BankAccountsPage from "@/pages/Treasury/BankAccountsPage";
-import MovementsPage from "@/pages/Treasury/MovementsPage";
+import BankAccountsPage from "@/pages/Treasury/Accounts/BankAccountsPage";
+import BankAccountView from "@/pages/Treasury/Accounts/BankAccountView";
+import BankAccountCreate from "@/pages/Treasury/Accounts/BankAccountCreate";
+import MovementsPage from "@/pages/Treasury/Movements/MovementsPage";
+import MovementView from "@/pages/Treasury/Movements/MovementView";
+import MovementCreate from "@/pages/Treasury/Movements/MovementCreate";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
@@ -61,7 +65,11 @@ export const router = createBrowserRouter([
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
           { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
+          { path: "/tesoreria/cuentas-bancarias/nueva", element: <BankAccountCreate /> },
+          { path: "/tesoreria/cuentas-bancarias/:id", element: <BankAccountView /> },
           { path: "/tesoreria/movimientos", element: <MovementsPage /> },
+          { path: "/tesoreria/movimientos/nueva", element: <MovementCreate /> },
+          { path: "/tesoreria/movimientos/:id", element: <MovementView /> },
           { path: "/tesoreria/cheques", element: <ChecksList /> },
           { path: "/tesoreria/cheques/:id", element: <CheckView /> },
 
