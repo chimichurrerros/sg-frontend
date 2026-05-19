@@ -1,7 +1,6 @@
 import { Box, Collapsible, Spinner } from "@chakra-ui/react";
-import { IconButton, Input, InputGroup, Text, Button, VStack, HStack } from "@chakra-ui/react";
-import { LuSearch } from "react-icons/lu";
-import { HousePlusIcon, Pencil, Trash2Icon, XIcon, CheckIcon, Save, Plus } from "lucide-react";
+import { IconButton, Input,Text, Button, VStack, HStack } from "@chakra-ui/react";
+import { HousePlusIcon, Pencil, Trash2Icon,  Save, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Branch } from "@/types/branches";
 import TableSelect, { type label } from "@/components/ui/table-select";

@@ -1,15 +1,16 @@
 import type { SupplierQuote } from "@/api/supplierQuote.api";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import type { label } from "@/components/ui/table-select";
 import TableSelect from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useGetSupplierQuotes } from "@/queries/supplier-quotes.queries";
+import { useEditSupplierQuote, useGetSupplierQuotes } from "@/queries/supplier-quotes.queries";
 import { supplierQuoteStatusMap } from "@/types/purchases";
 import type { PaginationParams } from "@/types/types";
-import { Box, IconButton, Input, InputGroup, NumberInput } from "@chakra-ui/react";
+import { Box, IconButton, Input, InputGroup, NumberInput, Spinner } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ export default function SupplierQuotesList() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
     const [selected, setSelected] = useState<SupplierQuote | null>(null);
     const { data: supplierQuotes, isPending: loadingSupplierQuotes, error: supplierQuotesError, isError } = useGetSupplierQuotes(params);
+    const editSupplierQuote = useEditSupplierQuote();
     const navigate = useNavigate();
 
     const labels: label<SupplierQuote>[] = [
@@ -26,7 +28,7 @@ export default function SupplierQuotesList() {
         { labelName: "Proveedor", propName: "supplierName", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.supplierName.localeCompare(b.supplierName) },
         { labelName: "Fecha", propName: "date", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
         { labelName: "Monto Total", propName: "total", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
-        { labelName: "Estado", propName: "supplierQuoteState", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
+        { labelName: "Estado", propName: "state", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
     ]
     useEffect(() => {
         if (isError) {
@@ -52,10 +54,16 @@ export default function SupplierQuotesList() {
                         <NumberInput.Input />
                     </NumberInput.Root>
                 </Box>
-                <IconButton padding={2} variant="outline" disabled={!selected}>
-                    <Trash2 />
-                    Eliminar
-                </IconButton>
+                <DestructiveActionDialog trigger={
+                    <IconButton padding={2} variant="outline" disabled={!selected || editSupplierQuote.isPending}>
+                        {editSupplierQuote.isPending ? <Spinner/>:<X />}
+                        Rechazar
+                    </IconButton>
+                }
+                    title={"Rechazar Cotización"}
+                    description="Una vez rechazada, podrá ser visualizada pero ya no editable ni se podrá generar una compra a partir de ella"
+                    onAccept={() => {selected && editSupplierQuote.mutate({id: selected?.id,data:{state:2}}) }}
+                />
                 <IconButton padding={2} bgColor="brand.secondary" disabled={!selected} onClick={() => selected && navigate(`/compras/cotizaciones-proveedores/${selected.id}`)}>
                     <Pencil />
                     Editar

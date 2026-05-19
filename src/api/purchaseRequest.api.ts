@@ -29,6 +29,8 @@ export interface PurchaseRequestDetails {
     id:                number;
     productId:         number;
     productName:       string;
+    price?:            number;
+    taxRate? :         number;
     quantityRequested: number;
 }
 
