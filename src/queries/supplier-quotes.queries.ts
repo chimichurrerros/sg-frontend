@@ -25,13 +25,13 @@ export const useGetAllSupplierQuotes = () => {
         queryFn: () => supplierQuoteApi.getAll(),
     });
 };
-export const useGetSupplierQuoteById = (id: number) => {
+export const useGetSupplierQuoteById = (id: number | undefined) => {
     return useQuery({
-        queryKey: supplierQuoteKeys.detail(id),
-        queryFn: () => supplierQuoteApi.getById(id),
-        enabled: !!id,
+        queryKey: supplierQuoteKeys.detail(id ?? -1),
+        queryFn: () => supplierQuoteApi.getById(id!),
+        enabled: id !== undefined && id !== -1,
     });
-}
+};
 
 export const useCreateSupplierQuote = () => {
     const queryClient = useQueryClient();

@@ -8,6 +8,7 @@ export interface SupplierQuoteProduct {
     quantityAvailable: number;
     price:             number;
     taxRate:           number;
+    total?:             number;
 }
 
 export interface SupplierQuote {
@@ -17,7 +18,7 @@ export interface SupplierQuote {
     purchaseRequestId: number;
     date:              Date;
     total:             number;
-    stateId:           number;
+    supplierQuoteState:           number;
     details:           SupplierQuoteProduct[];
 }
 //GET 

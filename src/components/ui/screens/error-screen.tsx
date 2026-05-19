@@ -21,9 +21,9 @@ export const ErrorScreen: React.FC<errorProps> = ({
   retryText = "Reintentar",
 }) => {
   return (
-    <Flex
-      w="100%"
-      h="100%"
+    <Box
+      w="full"
+      h="full"
       alignItems="center"
       justifyContent="center"
       rounded="lg"
@@ -97,6 +97,6 @@ export const ErrorScreen: React.FC<errorProps> = ({
           )}
         </Box>
       </Box>
-    </Flex>
+    </Box>
   );
 };

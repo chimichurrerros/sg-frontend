@@ -4,7 +4,7 @@ import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import type { label } from "@/components/ui/table-select";
 import TableSelect from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useGetSupplierQuotes } from "@/queries/supplierQuotes.queries";
+import { useGetSupplierQuotes } from "@/queries/supplier-quotes.queries";
 import { supplierQuoteStatusMap } from "@/types/purchases";
 import type { PaginationParams } from "@/types/types";
 import { Box, IconButton, Input, InputGroup, NumberInput } from "@chakra-ui/react";
@@ -20,20 +20,13 @@ export default function SupplierQuotesList() {
     const [selected, setSelected] = useState<SupplierQuote | null>(null);
     const { data: supplierQuotes, isPending: loadingSupplierQuotes, error: supplierQuotesError, isError } = useGetSupplierQuotes(params);
     const navigate = useNavigate();
-    //     export interface SupplierQuoteProduct {
-    //     id:                number;
-    //     productId:         number;
-    //     productName:       string;
-    //     quantityAvailable: number;
-    //     price:             number;
-    //     taxRate:           number;
-    // }
+
     const labels: label<SupplierQuote>[] = [
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.id - b.id },
         { labelName: "Proveedor", propName: "supplierName", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.supplierName.localeCompare(b.supplierName) },
         { labelName: "Fecha", propName: "date", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
         { labelName: "Monto Total", propName: "total", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
-        { labelName: "Estado", propName: "stateId", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
+        { labelName: "Estado", propName: "supplierQuoteState", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
     ]
     useEffect(() => {
         if (isError) {
@@ -46,6 +39,7 @@ export default function SupplierQuotesList() {
             <Text fontSize="2xl" fontWeight="bold">
                 Lista de Cotizaciones de Proveedores
             </Text>
+            {/* <p>{JSON.stringify(supplierQuotes?.supplierQuotes || [])}</p> */}
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
@@ -62,7 +56,7 @@ export default function SupplierQuotesList() {
                     <Trash2 />
                     Eliminar
                 </IconButton>
-                <IconButton padding={2} bgColor="brand.secondary" disabled={!selected}>
+                <IconButton padding={2} bgColor="brand.secondary" disabled={!selected} onClick={() => selected && navigate(`/compras/cotizaciones-proveedores/${selected.id}`)}>
                     <Pencil />
                     Editar
                 </IconButton>
@@ -76,6 +70,7 @@ export default function SupplierQuotesList() {
                 data={supplierQuotes?.supplierQuotes || []}
                 labels={labels}
                 onSelect={(item) => setSelected(item)}
+                onDoubleClick={(item) => navigate(`/compras/cotizaciones-proveedores/${item.id}`)}
                 loading={loadingSupplierQuotes}
                 noItemsComponent={
                     <EmptyDataScreen

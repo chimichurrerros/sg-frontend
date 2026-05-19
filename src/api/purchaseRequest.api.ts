@@ -1,0 +1,46 @@
+import type { PaginationType } from "@/types/types";
+import { apiClient } from "./client";
+
+export interface PurchaseRequestCreateRequest {
+    observation: string;
+    details:     PurchaseRequestCreateDetails[];
+}
+
+export interface PurchaseRequestCreateDetails {
+    productId:         number;
+    quantityRequested: number;
+}
+
+export interface PurchaseRequestWrapper {
+    purchaseRequest: PurchaseRequest;
+}
+
+export interface PurchaseRequest {
+    id:                   number;
+    userId:               number;
+    userName:             string;
+    date:                 Date;
+    purchaseRequestState: number;
+    observation:          string;
+    details:              PurchaseRequestDetails[];
+}
+
+export interface PurchaseRequestDetails {
+    id:                number;
+    productId:         number;
+    productName:       string;
+    quantityRequested: number;
+}
+
+//GETS
+export interface PurchaseRequestGetResponse {
+    purchaseRequests: PurchaseRequest[];
+    pagination: PaginationType;
+}
+
+export const purchaseRequestApi = {
+    get: (params: PaginationType) => apiClient.get<PurchaseRequestGetResponse>(`/api/purchase-requests`, { params }).then((r) => r.data),
+    getAll: () => apiClient.get<{purchaseRequests: PurchaseRequest[]}>(`/api/purchase-requests/all`).then((r) => r.data),
+    getById: (id: number) => apiClient.get<PurchaseRequest>(`/api/purchase-requests/${id}`).then((r) => r.data),
+    create: (data: PurchaseRequestCreateRequest) => apiClient.post<PurchaseRequest>("/api/purchase-requests", data).then((r) => r.data),
+}
