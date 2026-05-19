@@ -22,6 +22,7 @@ import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
+import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
           /* ===== COMPRAS ===== */
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
+          { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
