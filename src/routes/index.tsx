@@ -22,6 +22,8 @@ import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
+import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
+import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +56,7 @@ export const router = createBrowserRouter([
           /* ===== COMPRAS ===== */
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
+          { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
@@ -66,6 +69,10 @@ export const router = createBrowserRouter([
           { path: "/register", element: <RegisterPage /> },
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
+          { path: "/dash/proveedores", element: <SupplierListPage /> },
+          { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
+          { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },
+          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
         ],

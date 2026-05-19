@@ -1,13 +1,16 @@
+import type { SupplierQuote } from "@/api/supplierQuote.api";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import type { label } from "@/components/ui/table-select";
 import TableSelect from "@/components/ui/table-select";
-import { supplierQuoteStatusMap, type SupplierQuote } from "@/types/purchases";
+import { toaster } from "@/components/ui/toaster";
+import { useGetSupplierQuotes } from "@/queries/supplier-quotes.queries";
+import { supplierQuoteStatusMap } from "@/types/purchases";
 import type { PaginationParams } from "@/types/types";
 import { Box, IconButton, Input, InputGroup, NumberInput } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
@@ -15,21 +18,28 @@ import { useNavigate } from "react-router-dom";
 export default function SupplierQuotesList() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
     const [selected, setSelected] = useState<SupplierQuote | null>(null);
+    const { data: supplierQuotes, isPending: loadingSupplierQuotes, error: supplierQuotesError, isError } = useGetSupplierQuotes(params);
     const navigate = useNavigate();
+
     const labels: label<SupplierQuote>[] = [
-        { labelName: "Código", propName: "code", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.code - b.code },
+        { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.id - b.id },
         { labelName: "Proveedor", propName: "supplierName", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.supplierName.localeCompare(b.supplierName) },
-        { labelName: "Establecimiento", propName: "stablishment", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.stablishment.localeCompare(b.stablishment) },
-        { labelName: "Monto Total", propName: "totalAmount", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.totalAmount - b.totalAmount },
-        { labelName: "Fecha de Cotización", propName: "quoteDate", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => new Date(a.quoteDate).getTime() - new Date(b.quoteDate).getTime() },
-        { labelName: "Estado", propName: "status", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
+        { labelName: "Fecha", propName: "date", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
+        { labelName: "Monto Total", propName: "total", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
+        { labelName: "Estado", propName: "supplierQuoteState", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
     ]
+    useEffect(() => {
+        if (isError) {
+            toaster.create({ title: "Error al cargar las cotizaciones: " + (supplierQuotesError?.message || "Error desconocido"), type: "error" });
+        }
+    }, [isError, supplierQuotesError])
 
     return (
         <Box display="flex" flexDirection="column" gap={5}>
             <Text fontSize="2xl" fontWeight="bold">
                 Lista de Cotizaciones de Proveedores
             </Text>
+            {/* <p>{JSON.stringify(supplierQuotes?.supplierQuotes || [])}</p> */}
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
@@ -46,7 +56,7 @@ export default function SupplierQuotesList() {
                     <Trash2 />
                     Eliminar
                 </IconButton>
-                <IconButton padding={2} bgColor="brand.secondary" disabled={!selected}>
+                <IconButton padding={2} bgColor="brand.secondary" disabled={!selected} onClick={() => selected && navigate(`/compras/cotizaciones-proveedores/${selected.id}`)}>
                     <Pencil />
                     Editar
                 </IconButton>
@@ -56,21 +66,22 @@ export default function SupplierQuotesList() {
                 </IconButton>
             </Box>
             <TableSelect<SupplierQuote>
-                key={"purchase-quotes-table"}
-                data={[]}
+                key={JSON.stringify(supplierQuotes)}
+                data={supplierQuotes?.supplierQuotes || []}
                 labels={labels}
                 onSelect={(item) => setSelected(item)}
-                loading={false}
+                onDoubleClick={(item) => navigate(`/compras/cotizaciones-proveedores/${item.id}`)}
+                loading={loadingSupplierQuotes}
                 noItemsComponent={
                     <EmptyDataScreen
-                    title="No se encontraron cotizaciones"
-                    message="No hay cotizaciones de proveedores para mostrar en este momento. Puedes crear una nueva cotización haciendo clic en el botón 'Nuevo'."
-                    icon={<LuSearch size={48} color="gray" />}
-                />
+                        title="No se encontraron cotizaciones"
+                        message="No hay cotizaciones de proveedores para mostrar en este momento. Puedes crear una nueva cotización haciendo clic en el botón 'Nuevo'."
+                        icon={<LuSearch size={48} color="gray" />}
+                    />
                 }
             />
             <PaginationControl
-                pagination={null}
+                pagination={supplierQuotes?.pagination || null}
                 onPageChange={(page: number) => { setParams({ ...params, page }) }}
             />
         </Box>
