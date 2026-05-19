@@ -23,8 +23,8 @@ interface productsTableProps {
 export default function ProductsTable({ products, onDataChange, labels, readOnly }: productsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("")
-  const {data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts} = useAllProducts()
-  
+  const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useAllProducts()
+
   useHotkeys("ctrl+i", () => {
     if (readOnly) return
     addProdRef.current?.click();
@@ -35,12 +35,12 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
   }
 
   useEffect(() => {
-    if(!aviableProducts?.products) return;
+    if (!aviableProducts?.products) return;
     const prod = aviableProducts?.products.find(p => p.barcode == productCode)
     if (prod) {
       const exist = products.some(p => p.id === prod.id)
       if (exist) {
-        onDataChange(products.map(p => p.id === prod.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity+1)*p.price} : p))
+        onDataChange(products.map(p => p.id === prod.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity + 1) * p.price } : p))
       } else {
         onDataChange([...products, { ...prod, quantity: 1, total: prod.price } as ProductSaleDTO])
       }
@@ -51,7 +51,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
   return (<Box flex={1}>
     {!readOnly && <Box display="flex" flexDirection="row" gap={3}>
       <Input placeholder="Insertar código de producto" mb={3} size="sm" value={productCode} onChange={(e) => setProductCode(e.target.value)} />
-      { <SearchProductsDialog
+      {<SearchProductsDialog
         products={aviableProducts?.products || []}
         onSelect={(product: ProductSelect, quantity: number) => { onDataChange([...products, generateProductSaleDTO(product, quantity)]) }}
         selectedProductsIds={products.map((p: ProductSaleDTO) => p.id)}
@@ -60,13 +60,13 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
         isError={isErrorProducts}
         trigger={<IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts}
           ref={addProdRef}
-        >  {aviableProducts ? <Plus />: <Spinner/>} Item </IconButton>} />}
+        >  {aviableProducts ? <Plus /> : <Spinner />} Item </IconButton>} />}
     </Box>}
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden">
+    <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden" height="46vh">
       <TableEditable
         labels={labels}
         data={products}
-        height="47vh"
+        height="100%"
         onDataChange={onDataChange}
         noItemsComponent=
         {<EmptyDataScreen title={"Sin productos"} icon={<PackageOpenIcon />}
