@@ -21,3 +21,9 @@ export interface CustomerForSales{
     name:string
     ruc:string
 }
+
+export interface BackendError{
+    title:string
+    status:number
+    details?:string
+}
