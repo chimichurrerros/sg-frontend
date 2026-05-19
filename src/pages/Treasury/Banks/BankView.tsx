@@ -1,13 +1,18 @@
-import { accountTypeMap } from "@/api/bankAccounts.api";
-import { useGetAccountById, useUpdateAccount, useDeleteAccount } from "@/queries/bankAccounts.queries";
-import { createAccountSchema, type CreateAccountFormData } from "@/schemas/bankAccounts.schema";
+import { bankMovementTypeMap, type BankResponseDto } from "@/api/banks.api";
+import { useGetBankById, useUpdateBank, useDeleteBank } from "@/queries/banks.queries";
+import { createBankSchema, type CreateBankFormData } from "@/schemas/banks.schema";
 import { toaster } from "@/components/ui/toaster";
+import { accountTypeMap } from "@/api/bankAccounts.api";
+import TableSelect, { type label } from "@/components/ui/table-select";
+import type { BankAccountResponseDto } from "@/api/banks.api";
+import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import {
     Box,
     Button,
     createListCollection,
     Field,
     Grid,
+    GridItem,
     IconButton,
     Input,
     Portal,
@@ -24,7 +29,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 const accountTypeCollection = createListCollection({
-    items: Object.entries(accountTypeMap).map(([value, label]) => ({
+    items: Object.entries(bankMovementTypeMap).map(([value, label]) => ({
         label,
         value,
     })),
@@ -46,16 +51,35 @@ function LabelValue({ label, value }: { label: string; value: string }) {
 const formatBalance = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", minimumFractionDigits: 0 }).format(value);
 
-export default function BankAccountView() {
+const bankAccountLabels: label<BankAccountResponseDto>[] = [
+    { labelName: "Nombre", propName: "name", textIfNull: "-" },
+    {
+        labelName: "Tipo",
+        propName: "accountType",
+        transformFunction: (value: number) => accountTypeMap[value] || "Desconocido",
+    },
+    {
+        labelName: "Saldo Actual",
+        propName: "currentBalance",
+        transformFunction: (value: number) => formatBalance(value),
+    },
+    {
+        labelName: "Saldo Disponible",
+        propName: "availableBalance",
+        transformFunction: (value: number) => formatBalance(value),
+    },
+];
+
+export default function BankView() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const accountId = Number(id);
+    const bankId = Number(id);
     const [isEditing, setIsEditing] = useState(false);
 
-    const { data: account, isPending, isError, error } = useGetAccountById(accountId);
-    const { mutate: updateAccount, isPending: isUpdating } = useUpdateAccount(accountId);
-    const { mutate: deleteAccount } = useDeleteAccount();
+    const { data: bank, isPending, isError, error } = useGetBankById(bankId);
+    const { mutate: updateBank, isPending: isUpdating } = useUpdateBank(bankId);
+    const { mutate: deleteBank } = useDeleteBank();
 
     const {
         register,
@@ -63,41 +87,41 @@ export default function BankAccountView() {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<CreateAccountFormData>({
-        resolver: zodResolver(createAccountSchema),
+    } = useForm<CreateBankFormData>({
+        resolver: zodResolver(createBankSchema),
     });
 
     useEffect(() => {
-        if (account) {
+        if (bank) {
             reset({
-                name: account.name ?? "",
-                accountType: account.accountType,
-                currentBalance: account.currentBalance,
-                availableBalance: account.availableBalance,
+                name: bank.name ?? "",
+                accountNumber: bank.accountNumber ?? "",
+                accountType: bank.accountType,
+                ruc: bank.ruc ?? "",
             });
         }
-    }, [account, reset]);
+    }, [bank, reset]);
 
     useEffect(() => {
         if (isError) {
             toaster.create({
-                title: "Error al cargar la cuenta bancaria",
+                title: "Error al cargar el banco",
                 description: error?.message || "Error desconocido",
                 type: "error",
             });
         }
     }, [isError, error]);
 
-    const handleSave = (formData: CreateAccountFormData) => {
-        updateAccount(formData, {
+    const handleSave = (formData: CreateBankFormData) => {
+        updateBank(formData, {
             onSuccess: () => {
-                toaster.create({ title: "Cuenta bancaria actualizada con éxito" });
-                queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
+                toaster.create({ title: "Banco actualizado con éxito" });
+                queryClient.invalidateQueries({ queryKey: ["banks"] });
                 setIsEditing(false);
             },
             onError: (err) => {
                 toaster.create({
-                    title: "Error al actualizar la cuenta bancaria",
+                    title: "Error al actualizar el banco",
                     description: err.message,
                     type: "error",
                 });
@@ -106,16 +130,16 @@ export default function BankAccountView() {
     };
 
     const handleDelete = () => {
-        if (!account) return;
-        deleteAccount(account.id, {
+        if (!bank) return;
+        deleteBank(bank.id, {
             onSuccess: () => {
-                toaster.create({ title: "Cuenta bancaria eliminada con éxito" });
-                queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
-                navigate("/tesoreria/cuentas-bancarias");
+                toaster.create({ title: "Banco eliminado con éxito" });
+                queryClient.invalidateQueries({ queryKey: ["banks"] });
+                navigate("/tesoreria/bancos");
             },
             onError: (err) => {
                 toaster.create({
-                    title: "Error al eliminar la cuenta bancaria",
+                    title: "Error al eliminar el banco",
                     description: err.message,
                     type: "error",
                 });
@@ -126,16 +150,16 @@ export default function BankAccountView() {
     if (isPending) {
         return (
             <Box p={4}>
-                <Text>Cargando cuenta bancaria...</Text>
+                <Text>Cargando banco...</Text>
             </Box>
         );
     }
 
-    if (isError || !account) {
+    if (isError || !bank) {
         return (
             <Box p={4}>
-                <Text color="red.500">Error al cargar la cuenta bancaria.</Text>
-                <Button mt={4} variant="ghost" onClick={() => navigate("/tesoreria/cuentas-bancarias")}>
+                <Text color="red.500">Error al cargar el banco.</Text>
+                <Button mt={4} variant="ghost" onClick={() => navigate("/tesoreria/bancos")}>
                     <ArrowLeft /> Volver al listado
                 </Button>
             </Box>
@@ -146,11 +170,11 @@ export default function BankAccountView() {
         <Box display="flex" flexDirection="column" minHeight="0" p={4}>
             <Box display="flex" flexDirection="row" gap={4} py={2} justifyContent="space-between">
                 <Text fontSize="2xl" fontWeight="bold">
-                    {isEditing ? "Editando: " : ""}{account.name ?? "Cuenta Bancaria"}
+                    {isEditing ? "Editando: " : ""}{bank.name ?? "Banco"}
                 </Text>
 
                 <Box display="flex" gap={4}>
-                    <IconButton padding={2} variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/cuentas-bancarias")}>
+                    <IconButton padding={2} variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/bancos")}>
                         <ArrowLeft />
                         Volver al listado
                     </IconButton>
@@ -188,13 +212,31 @@ export default function BankAccountView() {
             {!isEditing ? (
                 <Box bg="white" h="full" w="100%">
                     <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                        <LabelValue label="ID" value={String(account.id)} />
-                        <LabelValue label="Nombre" value={account.name ?? "-"} />
-                        <LabelValue label="Tipo de Cuenta" value={accountTypeMap[account.accountType] || "Desconocido"} />
-                        <LabelValue label="Saldo Actual" value={formatBalance(account.currentBalance)} />
-                        <LabelValue label="Saldo Disponible" value={formatBalance(account.availableBalance)} />
-                        <LabelValue label="ID del Banco" value={account.bankId != null ? String(account.bankId) : "-"} />
+                        <LabelValue label="ID" value={String(bank.id)} />
+                        <LabelValue label="Nombre" value={bank.name ?? "-"} />
+                        <LabelValue label="Nro. Cuenta" value={bank.accountNumber ?? "-"} />
+                        <LabelValue label="Tipo" value={bankMovementTypeMap[bank.accountType] || "Desconocido"} />
+                        <LabelValue label="RUC" value={bank.ruc ?? "-"} />
+                        <LabelValue label="Activo" value={bank.isActive ? "Sí" : "No"} />
                     </Grid>
+
+                    <Text fontSize="lg" fontWeight="semibold" mt={6} mb={3}>
+                        Cuentas Bancarias Asociadas
+                    </Text>
+                    <TableSelect
+                        data={bank.accounts ?? []}
+                        loading={false}
+                        labels={bankAccountLabels}
+                        onSelect={() => {}}
+                        minheight="200px"
+                        noItemsComponent={
+                            <EmptyDataScreen
+                                title="Sin cuentas bancarias"
+                                message="Este banco no tiene cuentas bancarias asociadas."
+                                icon={<></>}
+                            />
+                        }
+                    />
                 </Box>
             ) : (
                 <Box bg="white" h="full" w="100%">
@@ -203,14 +245,24 @@ export default function BankAccountView() {
                             <Field.Label>Nombre</Field.Label>
                             <Input
                                 {...register("name")}
-                                placeholder="Nombre de la cuenta"
+                                placeholder="Nombre del banco"
                                 disabled={isUpdating}
                             />
                             <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
                         </Field.Root>
 
+                        <Field.Root invalid={!!errors.accountNumber} required>
+                            <Field.Label>Número de Cuenta</Field.Label>
+                            <Input
+                                {...register("accountNumber")}
+                                placeholder="000-000000-0"
+                                disabled={isUpdating}
+                            />
+                            <Field.ErrorText>{errors.accountNumber?.message}</Field.ErrorText>
+                        </Field.Root>
+
                         <Field.Root invalid={!!errors.accountType} required>
-                            <Field.Label>Tipo de Cuenta</Field.Label>
+                            <Field.Label>Tipo de Cuenta Bancaria</Field.Label>
                             <Controller
                                 name="accountType"
                                 control={control}
@@ -224,7 +276,7 @@ export default function BankAccountView() {
                                         <Select.HiddenSelect />
                                         <Select.Control>
                                             <Select.Trigger>
-                                                <Select.ValueText placeholder="Seleccionar tipo de cuenta" />
+                                                <Select.ValueText placeholder="Seleccionar tipo" />
                                             </Select.Trigger>
                                             <Select.IndicatorGroup>
                                                 <Select.ClearTrigger />
@@ -249,28 +301,14 @@ export default function BankAccountView() {
                             <Field.ErrorText>{errors.accountType?.message}</Field.ErrorText>
                         </Field.Root>
 
-                        <Field.Root invalid={!!errors.currentBalance} required>
-                            <Field.Label>Saldo Actual</Field.Label>
+                        <Field.Root invalid={!!errors.ruc} required>
+                            <Field.Label>RUC</Field.Label>
                             <Input
-                                {...register("currentBalance", { valueAsNumber: true })}
-                                type="number"
-                                step="0.01"
-                                min={0}
+                                {...register("ruc")}
+                                placeholder="0000000-0"
                                 disabled={isUpdating}
                             />
-                            <Field.ErrorText>{errors.currentBalance?.message}</Field.ErrorText>
-                        </Field.Root>
-
-                        <Field.Root invalid={!!errors.availableBalance} required>
-                            <Field.Label>Saldo Disponible</Field.Label>
-                            <Input
-                                {...register("availableBalance", { valueAsNumber: true })}
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                disabled={isUpdating}
-                            />
-                            <Field.ErrorText>{errors.availableBalance?.message}</Field.ErrorText>
+                            <Field.ErrorText>{errors.ruc?.message}</Field.ErrorText>
                         </Field.Root>
                     </Stack>
                 </Box>

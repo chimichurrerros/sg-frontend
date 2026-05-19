@@ -31,17 +31,17 @@ export const accountTypeMap: Record<number, string> = {
 
 export const bankAccountsApi = {
     getAccounts: (params?: PaginationParams) =>
-        apiClient.get<ListAccountsWrapperDto>("/api/Accounts", { params }).then((r) => r.data),
+        apiClient.get<ListAccountsWrapperDto>("/api/accounts", { params }).then((r) => r.data),
 
     createAccount: (body: CreateAccountRequestDto) =>
-        apiClient.post<AccountResponseDto>("/api/Accounts", body).then((r) => r.data),
+        apiClient.post<AccountResponseDto>("/api/accounts", body).then((r) => r.data),
 
     getAccountById: (id: number) =>
-        apiClient.get<{ account: AccountResponseDto }>(`/api/Accounts/${id}`).then((r) => r.data.account),
+        apiClient.get<{ account: AccountResponseDto }>(`/api/accounts/${id}`).then((r) => r.data.account),
 
     updateAccount: (id: number, body: CreateAccountRequestDto) =>
-        apiClient.put<AccountResponseDto>(`/api/Accounts/${id}`, body).then((r) => r.data),
+        apiClient.put<AccountResponseDto>(`/api/accounts/${id}`, body).then((r) => r.data),
 
     deleteAccount: (id: number) =>
-        apiClient.delete(`/api/Accounts/${id}`).then((r) => r.data),
+        apiClient.delete(`/api/accounts/${id}`).then((r) => r.data),
 };

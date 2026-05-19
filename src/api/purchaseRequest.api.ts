@@ -38,9 +38,17 @@ export interface PurchaseRequestGetResponse {
     pagination: PaginationType;
 }
 
+export const purchaseRequestStateMap: Record<number, string> = {
+    0: "Pendiente",
+    1: "Aprobado",
+    2: "Rechazado",
+    3: "Completado",
+};
+
 export const purchaseRequestApi = {
     get: (params: PaginationType) => apiClient.get<PurchaseRequestGetResponse>(`/api/purchase-requests`, { params }).then((r) => r.data),
     getAll: () => apiClient.get<{purchaseRequests: PurchaseRequest[]}>(`/api/purchase-requests/all`).then((r) => r.data),
-    getById: (id: number) => apiClient.get<PurchaseRequest>(`/api/purchase-requests/${id}`).then((r) => r.data),
+    getById: (id: number) => apiClient.get<PurchaseRequestWrapper>(`/api/purchase-requests/${id}`).then((r) => r.data.purchaseRequest),
     create: (data: PurchaseRequestCreateRequest) => apiClient.post<PurchaseRequest>("/api/purchase-requests", data).then((r) => r.data),
+
 }
