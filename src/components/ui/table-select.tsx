@@ -139,12 +139,14 @@ export default function TableSelect<T extends { id: number }>(
     }, [data]);
 
 
-    function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
-        setFinalData(finalData.sort(sortFunction))
-        if (sortDirection === "Desc") {
-            setFinalData(finalData.reverse())
-        }
+function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
+    const sortedData = [...finalData].sort(sortFunction); 
+    if (sortDirection === "Desc") {
+        setFinalData(sortedData.reverse());
+    } else {
+        setFinalData(sortedData);
     }
+}
     return (
         <Box flex="1" minHeight="0" my={3}>
             {loading ? (
@@ -225,7 +227,7 @@ export default function TableSelect<T extends { id: number }>(
                                     </Table.Cell>
                                 </Table.Row>
                             }
-                            {finalData && !loading && !isError && finalData.length > 0 && finalData.sort().map((item: T) =>
+                            {finalData && !loading && !isError && finalData.length > 0 && [...finalData].map((item: T) =>
                                 <Table.Row
                                     key={item.id}
                                     onClick={() => {

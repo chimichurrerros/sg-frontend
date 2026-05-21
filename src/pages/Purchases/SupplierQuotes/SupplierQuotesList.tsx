@@ -26,7 +26,7 @@ export default function SupplierQuotesList() {
     const labels: label<SupplierQuote>[] = [
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.id - b.id },
         { labelName: "Proveedor", propName: "supplierName", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.supplierName.localeCompare(b.supplierName) },
-        { labelName: "Fecha", propName: "date", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
+        { labelName: "Fecha", propName: "date",transformFunction:(value:Date)=>new Date(value).toLocaleDateString(), isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
         { labelName: "Monto Total", propName: "total", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
         { labelName: "Estado", propName: "state", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
     ]
@@ -55,7 +55,7 @@ export default function SupplierQuotesList() {
                     </NumberInput.Root>
                 </Box>
                 <DestructiveActionDialog trigger={
-                    <IconButton padding={2} variant="outline" disabled={!selected || editSupplierQuote.isPending}>
+                    <IconButton padding={2} variant="outline" disabled={!selected || editSupplierQuote.isPending || selected.state === 2 || selected.associatedPurchaseOrderId !== null}>
                         {editSupplierQuote.isPending ? <Spinner/>:<X />}
                         Rechazar
                     </IconButton>
