@@ -1,7 +1,7 @@
 import { purchaseRequestApi, type PurchaseRequestCreateRequest } from "@/api/purchaseRequest.api";
 import { toaster } from "@/components/ui/toaster";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { PaginationType } from "@/types/types";
+import type { PaginationParams } from "@/types/types";
 import { RETRIES } from "@/constants/queryConstants";
 
 
@@ -10,7 +10,7 @@ export const purchaseRequestKeys = {
     detail: (id: number) => ["purchaseRequests", id] as const,
 };
 
-export const useGetPurchaseRequests = (params: PaginationType) => {
+export const useGetPurchaseRequests = (params: PaginationParams) => {
     return useQuery({
         queryKey: [...purchaseRequestKeys.all, params],
         queryFn: () => purchaseRequestApi.get(params),

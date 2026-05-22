@@ -12,7 +12,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LuArrowLeft } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import PurchaseProductsTable, {
@@ -22,8 +22,6 @@ import PurchaseProductsTable, {
 export default function PurchaseRequestView() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [observation, setObservation] = useState("");
-  const [products, setProducts] = useState<PurchaseProductRow[]>([]);
   const purchaseRequestId = Number(id);
 
   const {
@@ -32,20 +30,6 @@ export default function PurchaseRequestView() {
     isError,
     error,
   } = useGetPurchaseRequestById(purchaseRequestId);
-
-  useEffect(() => {
-    if (purchaseRequest) {
-      setObservation(purchaseRequest.observation ?? "");
-      setProducts(
-        (purchaseRequest.details ?? []).map((d) => ({
-          id: d.id,
-          productId: d.productId,
-          productName: d.productName,
-          quantityRequested: d.quantityRequested,
-        }))
-      );
-    }
-  }, [purchaseRequest]);
 
   useEffect(() => {
     if (isError) {
@@ -72,6 +56,14 @@ export default function PurchaseRequestView() {
       </Flex>
     );
   }
+
+  const observation = purchaseRequest.observation ?? "";
+  const products: PurchaseProductRow[] = (purchaseRequest.details ?? []).map((d) => ({
+    id: d.id,
+    productId: d.productId,
+    productName: d.productName,
+    quantityRequested: d.quantityRequested,
+  }));
 
   const formatDate = (value: Date) => {
     const d = new Date(value);
@@ -152,7 +144,7 @@ export default function PurchaseRequestView() {
         <Box flex="1" minHeight="0">
           <PurchaseProductsTable
             products={products}
-            onDataChange={setProducts}
+            onDataChange={() => {}}
             readOnly
           />
         </Box>
