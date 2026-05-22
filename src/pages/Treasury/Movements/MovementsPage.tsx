@@ -9,15 +9,13 @@ import { Box, IconButton, Input, InputGroup, NumberInput, Text } from "@chakra-u
 import { ArrowUpDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
+import { parseDate } from "@/constants/date";
 import { useNavigate } from "react-router-dom";
 
 const formatBalance = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", minimumFractionDigits: 0 }).format(value);
 
-const formatDate = (value: string) => {
-    const d = new Date(value);
-    return d.toLocaleDateString("es-PY", { year: "numeric", month: "2-digit", day: "2-digit" });
-};
+const formatDate = (value: string) => parseDate(value);
 
 const movementLabels: label<BankMovementResponseDto>[] = [
     {

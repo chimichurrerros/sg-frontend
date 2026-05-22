@@ -1,4 +1,5 @@
 import { checkStatusEnum, checkTypeEnum, type Check } from "@/api/checks.api";
+import { parseDate } from "@/constants/date";
 import { useUpdateCheck } from "@/queries/checks.queries";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
@@ -17,8 +18,8 @@ const checkLabels: label<Check>[] = [
     { labelName: "Banco Emisor", propName: "issuingBank", isSortable: true, sortFunction: (a, b) => a.issuingBank.localeCompare(b.issuingBank) },
     { labelName: "Beneficiario", propName: "receiver", isSortable: true, sortFunction: (a, b) => a.receiver.localeCompare(b.receiver) },
     { labelName: "Monto", propName: "amount", isSortable: true, sortFunction: (a, b) => a.amount - b.amount },
-    { labelName: "Fecha de Emision", propName: "emisionDate", transformFunction: (date: string) => new Date(date).toLocaleDateString(), isSortable: true, sortFunction: (a, b) => new Date(a.emisionDate).getTime() - new Date(b.emisionDate).getTime() },
-    { labelName: "Fecha de Vencimiento", propName: "maturityDate", transformFunction: (date: string) => new Date(date).toLocaleDateString(), isSortable: true, sortFunction: (a, b) => new Date(a.maturityDate).getTime() - new Date(b.maturityDate).getTime() },
+    { labelName: "Fecha de Emision", propName: "emisionDate", transformFunction: (date: string) => parseDate(date), isSortable: true, sortFunction: (a, b) => new Date(a.emisionDate).getTime() - new Date(b.emisionDate).getTime() },
+    { labelName: "Fecha de Vencimiento", propName: "maturityDate", transformFunction: (date: string) => parseDate(date), isSortable: true, sortFunction: (a, b) => new Date(a.maturityDate).getTime() - new Date(b.maturityDate).getTime() },
     { labelName: "Tipo", propName: "type", transformFunction: (value: number) => checkTypeEnum[value] || "Desconocido", isSortable: true, sortFunction: (a, b) => a.type - b.type },
     { labelName: "Estado", propName: "status", transformFunction: (value: number) => checkStatusEnum[value] || "Desconocido" },
 ];
