@@ -4,29 +4,36 @@ import type { Supplier } from "@/types/suppliers";
 import {
     suppliersKeys,
     useAllSuppliers,
-    useDeleteSupplier,
     useEditSupplier,
 } from "@/queries/suppliers.queries";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { ButtonGroup, IconButton, Pagination, Stack, Text } from "@chakra-ui/react";
+import { Box, ButtonGroup, IconButton, Input, InputGroup, Pagination, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { LuChevronLeft, LuChevronRight, LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 
 export default function SupplierListPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { data, isLoading } = useAllSuppliers();
-    const deleteSupplier = useDeleteSupplier();
     const editSupplier = useEditSupplier();
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
     const [page, setPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const suppliers = (data?.suppliers ?? []).filter(s => s.isActive);
+    const filteredSuppliers = suppliers.filter((supplier) => {
+        const term = searchTerm.trim().toLowerCase();
+        if (!term) return true;
+        return (
+            supplier.businessName.toLowerCase().includes(term) ||
+            (supplier.phone ?? "").toLowerCase().includes(term)
+        );
+    });
     const pageSize = 10;
-    const currentSuppliers = suppliers.slice((page - 1) * pageSize, page * pageSize);
+    const currentSuppliers = filteredSuppliers.slice((page - 1) * pageSize, page * pageSize);
 
     const labels: label<Supplier>[] = [
         {
@@ -65,10 +72,16 @@ export default function SupplierListPage() {
                     queryClient.invalidateQueries({ queryKey: suppliersKeys.suppliers });
                     setSelectedSupplier(null);
                 },
-                onError: (error: any) => {
+                onError: (error: unknown) => {
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                            : typeof error === "string"
+                            ? error
+                            : "Error desconocido";
                     toaster.create({
                         title: "Error al eliminar proveedor",
-                        description: error?.message,
+                        description: errorMessage,
                         type: "error",
                     });
                 },
@@ -82,12 +95,26 @@ export default function SupplierListPage() {
                 Proveedores
             </Text>
 
-            <TableBar
-                selected={selectedSupplier}
-                onCreate={handleCreate}
-                onEdit={selectedSupplier ? handleEdit : undefined}
-                onDelete={handleDelete}
-            />
+            <Box display="flex" flexDirection="row" gap={3} alignItems="center" justifyContent="space-between">
+                <InputGroup flex="1" maxW="400px" startElement={<LuSearch />}>
+                    <Input
+                        placeholder="Buscar por nombre"
+                        value={searchTerm}
+                        variant="subtle"
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setPage(1);
+                        }}
+                    />
+                </InputGroup>
+
+                <TableBar
+                    selected={selectedSupplier}
+                    onCreate={handleCreate}
+                    onEdit={selectedSupplier ? handleEdit : undefined}
+                    onDelete={handleDelete}
+                />
+            </Box>
 
             <TableSelect
                 data={currentSuppliers}
@@ -104,7 +131,7 @@ export default function SupplierListPage() {
             />
 
             <Pagination.Root
-                count={suppliers.length ?? 0}
+                count={filteredSuppliers.length ?? 0}
                 pageSize={pageSize}
                 page={page}
                 onPageChange={(e) => setPage(e.page)}
