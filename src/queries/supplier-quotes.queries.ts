@@ -13,9 +13,9 @@ export const supplierQuoteKeys = {
 
 export const useGetSupplierQuotes = (params: PaginationParams) => {
     return useQuery({
-        queryKey: supplierQuoteKeys.detail(params.page || 1),
+        queryKey: ["supplierQuotes", params.page, params.pageSize],
         queryFn: () => supplierQuoteApi.get(params),
-        enabled: !!params.page,
+        staleTime: 1000 * 60 * 2,
     });
 };
 

@@ -13,6 +13,8 @@ export const createAccountSchema = z.object({
     availableBalance: z
         .number({ message: "El saldo disponible es requerido" })
         .min(0, "El saldo no puede ser negativo"),
+    accountNumber: z.string().optional(),
+    bankId: z.number().optional(),
 });
 
 export type CreateAccountFormData = z.infer<typeof createAccountSchema>;

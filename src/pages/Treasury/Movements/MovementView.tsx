@@ -77,6 +77,7 @@ export default function MovementView() {
     useEffect(() => {
         if (movement) {
             reset({
+                accountId: movement.bankAccountId,
                 bankAccountId: movement.bankAccountId,
                 amount: movement.amount,
                 description: movement.description ?? "",
@@ -96,7 +97,7 @@ export default function MovementView() {
     }, [isError, error]);
 
     const handleSave = (formData: CreateMovementFormData) => {
-        updateMovement({ ...formData, date: new Date(formData.date).toISOString() }, {
+        updateMovement({ ...formData, accountId: formData.bankAccountId, date: new Date(formData.date).toISOString() }, {
             onSuccess: () => {
                 toaster.create({ title: "Movimiento bancario actualizado con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["bankMovements"] });

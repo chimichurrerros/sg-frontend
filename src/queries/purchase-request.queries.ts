@@ -28,7 +28,7 @@ export const useGetPurchaseRequestById = (id: number) => {
     return useQuery({
         queryKey: purchaseRequestKeys.detail(id),
         queryFn: () => purchaseRequestApi.getById(id),
-        enabled: !!id,
+        enabled: id >= 0,
     });
 };
 
@@ -47,3 +47,5 @@ export const useCreatePurchaseRequest = () => {
         retry: RETRIES,
     });
 };
+
+

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createMovementSchema = z.object({
+    accountId: z.number(),
     bankAccountId: z
         .number({ message: "La cuenta bancaria es requerida" })
         .min(1, "La cuenta bancaria es requerida"),

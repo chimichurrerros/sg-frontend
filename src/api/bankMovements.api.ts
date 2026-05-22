@@ -15,6 +15,7 @@ export interface ListBankMovementsWrapperDto {
 }
 
 export interface CreateBankMovementRequestDto {
+    accountId: number;
     bankAccountId: number;
     amount: number;
     description?: string | null;

@@ -47,6 +47,7 @@ export default function MovementCreate() {
     } = useForm<CreateMovementFormData>({
         resolver: zodResolver(createMovementSchema),
         defaultValues: {
+            accountId: 0,
             bankAccountId: 0,
             amount: 0,
             description: "",
@@ -55,7 +56,7 @@ export default function MovementCreate() {
     });
 
     const handleCreate = (formData: CreateMovementFormData) => {
-        createMovement({ ...formData, date: new Date(formData.date).toISOString() }, {
+        createMovement({ ...formData, accountId: formData.bankAccountId, date: new Date(formData.date).toISOString() }, {
             onSuccess: () => {
                 toaster.create({ title: "Movimiento bancario creado con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["bankMovements"] });

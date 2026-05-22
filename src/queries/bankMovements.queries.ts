@@ -27,7 +27,7 @@ export const useGetMovementById = (id: number) => {
         queryKey: bankMovementsKeys.detail(id),
         queryFn: () => bankMovementsApi.getMovementById(id),
         retry: RETRIES,
-        enabled: !!id,
+        enabled: id >= 0,
     });
 };
 

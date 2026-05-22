@@ -27,7 +27,7 @@ export const useGetAccountById = (id: number) => {
         queryKey: bankAccountsKeys.detail(id),
         queryFn: () => bankAccountsApi.getAccountById(id),
         retry: RETRIES,
-        enabled: !!id,
+        enabled: id >= 0,
     });
 };
 
