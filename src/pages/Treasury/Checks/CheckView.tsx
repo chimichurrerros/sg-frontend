@@ -9,6 +9,7 @@ import { checkStatusEnum, checkTypeEnum } from "@/api/checks.api";
 import { parseDate } from "@/constants/date";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -69,15 +70,19 @@ export default function CheckView() {
                         <ArrowLeft />
                         Volver al listado
                     </IconButton>
-                    <IconButton
-                        padding={2}
-                        variant="outline"
-                        disabled={isAlreadySettled || isRejecting || isReconciling}
-                        onClick={() => rejectMutation.mutate()}
-                    >
-                        {isRejecting ? <Spinner size="sm" /> : <BanknoteX />}
-                        Rechazar Cheque
-                    </IconButton>
+                    <DestructiveActionDialog
+                        trigger={<IconButton
+                            padding={2}
+                            variant="outline"
+                            disabled={isAlreadySettled || isRejecting || isReconciling}
+                            onClick={() => rejectMutation.mutate()}
+                        >
+                            {isRejecting ? <Spinner size="sm" /> : <BanknoteX />}
+                            Anular Cheque
+                        </IconButton>} 
+                        title={"Anular cheque"}
+                        description="Esta acción es irreversible" 
+                                           />
                     <IconButton
                         padding={2}
                         bgColor="brand.primary"
