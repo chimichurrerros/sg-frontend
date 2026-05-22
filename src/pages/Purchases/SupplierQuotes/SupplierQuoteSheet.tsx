@@ -67,13 +67,16 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
     // const [initialLoadDone, setInitialLoadDone] = useState(false);
 
     //Load products and set ids
+    // useEffect 1
     useEffect(() => {
         if (quoteData) {
             setSelectedPurchaseRequestId(quoteData.purchaseRequestId)
             setSelectedSupplierId(quoteData.supplierId)
             setSaleOrderId(quoteData?.associatedPurchaseOrderId || null)
-            setSelectedPurchaseRequest(purchaseRequests?.purchaseRequests.find(pr => pr.id === quoteData.purchaseRequestId) || null)
-            setProducts(quoteData.details.map(d => ({
+            setSelectedPurchaseRequest(
+                purchaseRequests?.purchaseRequests.find(pr => pr.id === quoteData.purchaseRequestId) || null
+            )
+            setProducts((quoteData.details ?? []).map(d => ({  // ← ?? []
                 id: d.id,
                 productId: d.productId,
                 productName: d.productName,
@@ -84,26 +87,30 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
         }
     }, [quoteData])
 
+    // useEffect 2
     useEffect(() => {
         if (selectedPurchaseRequestId && purchaseRequests) {
+            const prods = quoteData && selectedPurchaseRequestId === quoteData.purchaseRequestId
+                ? (quoteData.details ?? []).map(d => ({   // ← ?? []
+                    id: d.id,
+                    productId: d.productId,
+                    productName: d.productName,
+                    quantityRequested: d.quantityAvailable,
+                    price: d.price,
+                    taxRate: d.taxRate,
+                }))
+                : purchaseRequests?.purchaseRequests.find(
+                    (pr) => pr.id === selectedPurchaseRequestId
+                )?.details || []
 
-            const prods = quoteData && selectedPurchaseRequestId === quoteData.purchaseRequestId ? quoteData.details.map(d => ({
-                id: d.id,
-                productId: d.productId,
-                productName: d.productName,
-                quantityRequested: d.quantityAvailable,
-                price: d.price,
-                taxRate: d.taxRate,
-            })) :
-                purchaseRequests?.purchaseRequests.find((pr) => pr.id === selectedPurchaseRequestId)?.details || []
-
-            setSelectedPurchaseRequest(purchaseRequests.purchaseRequests.find(pr => pr.id === selectedPurchaseRequestId) || null)
-            
+            setSelectedPurchaseRequest(
+                purchaseRequests.purchaseRequests.find(pr => pr.id === selectedPurchaseRequestId) || null
+            )
             setProducts(prods)
         }
     }, [selectedPurchaseRequestId])
 
-    
+
     // useEffect(() => {
     //     if (!purchaseRequests || !quoteData || initialLoadDone) return;
 
@@ -208,9 +215,9 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
     return (
         <Box display="flex" flexDirection="column" gap={4} height="full" minHeight="0">
             <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Box display={"flex"} flexDirection={"column" } gap={1}>
-                <Text fontSize="2xl" fontWeight="bold">{mode === "create" ? "Nueva Cotización de Proveedor" : `Editar Cotización #${id}`}</Text>
-                {mode === "edit" && saleOrderId && <Text fontSize="sm" color="gray" fontStyle="italic"> Esta cotización no es editable puesto que ya tiene una orden de compra asociada.</Text>}
+                <Box display={"flex"} flexDirection={"column"} gap={1}>
+                    <Text fontSize="2xl" fontWeight="bold">{mode === "create" ? "Nueva Cotización de Proveedor" : `Editar Cotización #${id}`}</Text>
+                    {mode === "edit" && saleOrderId && <Text fontSize="sm" color="gray" fontStyle="italic"> Esta cotización no es editable puesto que ya tiene una orden de compra asociada.</Text>}
                 </Box>
                 <Box display="flex" gap={4}>
                     <IconButton p={2} variant="outline" size="lg" onClick={() => navigate("/compras/cotizaciones-proveedores")}>
@@ -226,7 +233,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         description={"Esta acción generará la orden de compra a " + suppliers?.suppliers.find(s => s.id === selectedSupplierId)?.businessName.toUpperCase()}
                         onAccept={() => createQuote()}
                     />}
-                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg" onClick={()=>quoteData?.associatedPurchaseOrderId && navigate("/compras/ordenes-de-compra/"+quoteData?.associatedPurchaseOrderId)}>
+                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg" onClick={() => quoteData?.associatedPurchaseOrderId && navigate("/compras/ordenes-de-compra/" + quoteData?.associatedPurchaseOrderId)}>
                         <ExternalLink />
                         Ver Orden de Compra asociada
                     </IconButton>}
@@ -287,7 +294,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         key={JSON.stringify(products)}
                         labels={labels} data={products}
                         height="100%"
-                        readOnly={saleOrderId !== null || (mode === "edit" && quoteData?quoteData.state ===2 : false)}
+                        readOnly={saleOrderId !== null || (mode === "edit" && quoteData ? quoteData.state === 2 : false)}
                         noItemsComponent={<EmptyDataScreen title="No se encontraron productos" message=
                             {selectedPurchaseRequest ? "Al parecer este pedido de compra no tiene ningun producto registrado." : "No hay productos para mostrar en este momento. Puedes seleccionar un pedido de compra para cargar sus productos."}
                             icon={selectedPurchaseRequest ? <FileQuestion size={48} color="gray" /> : <FileInput size={48} color="gray" />} />}
