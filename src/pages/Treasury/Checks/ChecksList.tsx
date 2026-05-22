@@ -121,6 +121,7 @@ export default function ChecksList() {
                     labels={checkLabels}
                     onSelect={(check) => setSelected(check)}
                     minheight="0"
+                    height="60vh"
                     noItemsComponent={
                         <EmptyDataScreen
                             title="No se encontraron cheques"
