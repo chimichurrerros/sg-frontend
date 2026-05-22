@@ -73,6 +73,12 @@ export const NAV_CONFIG: NavItem[] = [
         icon:   TableProperties,
         path: "/compras/cotizaciones-proveedores"
       },
+      {
+        id: "recepcion-ordenes-compra",
+        label: "Recepción de OC",
+        icon:   Package,
+        path: "/compras/recepcion-ordenes-compra"
+      },
     ]
 
   },
