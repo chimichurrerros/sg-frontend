@@ -15,7 +15,9 @@ import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
-import BanksPage from "@/pages/Treasury/BanksPage";
+import BanksPage from "@/pages/Treasury/Banks/BanksPage";
+import BankCreate from "@/pages/Treasury/Banks/BankCreate";
+import BankView from "@/pages/Treasury/Banks/BankView";
 import BankAccountsPage from "@/pages/Treasury/Accounts/BankAccountsPage";
 import BankAccountView from "@/pages/Treasury/Accounts/BankAccountView";
 import BankAccountCreate from "@/pages/Treasury/Accounts/BankAccountCreate";
@@ -27,6 +29,9 @@ import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
 import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
+import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
+import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
+import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
@@ -61,6 +66,9 @@ export const router = createBrowserRouter([
             element: <BudgetSheetPage mode="create" />,
           },
           /* ===== COMPRAS ===== */
+          { path: "/compras/pedidos", element: <PurchaseRequestList /> },
+          { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },
+          { path: "/compras/pedidos/:id", element: <PurchaseRequestView /> },
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
           { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
@@ -71,6 +79,8 @@ export const router = createBrowserRouter([
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
+          { path: "/tesoreria/bancos/nuevo", element: <BankCreate /> },
+          { path: "/tesoreria/bancos/:id", element: <BankView /> },
           { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
           { path: "/tesoreria/cuentas-bancarias/nueva", element: <BankAccountCreate /> },
           { path: "/tesoreria/cuentas-bancarias/:id", element: <BankAccountView /> },

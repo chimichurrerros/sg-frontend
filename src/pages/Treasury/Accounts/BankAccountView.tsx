@@ -1,5 +1,6 @@
-import { type AccountResponseDto, accountTypeMap } from "@/api/bankAccounts.api";
+import { accountTypeMap, type CreateAccountRequestDto } from "@/api/bankAccounts.api";
 import { useGetAccountById, useUpdateAccount, useDeleteAccount } from "@/queries/bankAccounts.queries";
+import { useGetBanks } from "@/queries/banks.queries";
 import { createAccountSchema, type CreateAccountFormData } from "@/schemas/bankAccounts.schema";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -8,7 +9,6 @@ import {
     createListCollection,
     Field,
     Grid,
-    GridItem,
     IconButton,
     Input,
     Portal,
@@ -57,6 +57,18 @@ export default function BankAccountView() {
     const { data: account, isPending, isError, error } = useGetAccountById(accountId);
     const { mutate: updateAccount, isPending: isUpdating } = useUpdateAccount(accountId);
     const { mutate: deleteAccount } = useDeleteAccount();
+    const { data: banks } = useGetBanks();
+
+    const bankCollection = createListCollection({
+        items: (banks?.banks ?? []).map((bank) => ({
+            label: bank.name ?? `Banco #${bank.id}`,
+            value: String(bank.id),
+        })),
+    });
+
+    const bankName = account?.bankId != null
+        ? banks?.banks?.find((b) => b.id === account.bankId)?.name ?? `Banco #${account.bankId}`
+        : null;
 
     const {
         register,
@@ -75,6 +87,8 @@ export default function BankAccountView() {
                 accountType: account.accountType,
                 currentBalance: account.currentBalance,
                 availableBalance: account.availableBalance,
+                accountNumber: account.accountNumber ?? "",
+                bankId: account.bankId ?? undefined,
             });
         }
     }, [account, reset]);
@@ -90,7 +104,15 @@ export default function BankAccountView() {
     }, [isError, error]);
 
     const handleSave = (formData: CreateAccountFormData) => {
-        updateAccount(formData, {
+        const apiData: CreateAccountRequestDto = {
+            name: formData.name || null,
+            accountType: formData.accountType,
+            currentBalance: formData.currentBalance,
+            availableBalance: formData.availableBalance,
+            accountNumber: formData.accountNumber || null,
+            bankId: formData.bankId ?? null,
+        };
+        updateAccount(apiData, {
             onSuccess: () => {
                 toaster.create({ title: "Cuenta bancaria actualizada con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
@@ -192,9 +214,10 @@ export default function BankAccountView() {
                         <LabelValue label="ID" value={String(account.id)} />
                         <LabelValue label="Nombre" value={account.name ?? "-"} />
                         <LabelValue label="Tipo de Cuenta" value={accountTypeMap[account.accountType] || "Desconocido"} />
+                        <LabelValue label="Nro. Cuenta" value={account.accountNumber ?? "-"} />
                         <LabelValue label="Saldo Actual" value={formatBalance(account.currentBalance)} />
                         <LabelValue label="Saldo Disponible" value={formatBalance(account.availableBalance)} />
-                        <LabelValue label="ID del Banco" value={account.bankId != null ? String(account.bankId) : "-"} />
+                        <LabelValue label="Banco" value={bankName ?? "-"} />
                     </Grid>
                 </Box>
             ) : (
@@ -248,6 +271,56 @@ export default function BankAccountView() {
                                 )}
                             />
                             <Field.ErrorText>{errors.accountType?.message}</Field.ErrorText>
+                        </Field.Root>
+
+                        <Field.Root invalid={!!errors.bankId}>
+                            <Field.Label>Banco</Field.Label>
+                            <Controller
+                                name="bankId"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select.Root
+                                        collection={bankCollection}
+                                        value={field.value != null ? [String(field.value)] : []}
+                                        onValueChange={(e) => field.onChange(Number(e.value[0]))}
+                                        disabled={isUpdating}
+                                    >
+                                        <Select.HiddenSelect />
+                                        <Select.Control>
+                                            <Select.Trigger>
+                                                <Select.ValueText placeholder="Seleccionar banco" />
+                                            </Select.Trigger>
+                                            <Select.IndicatorGroup>
+                                                <Select.ClearTrigger />
+                                                <Select.Indicator />
+                                            </Select.IndicatorGroup>
+                                        </Select.Control>
+                                        <Portal>
+                                            <Select.Positioner>
+                                                <Select.Content>
+                                                    {bankCollection.items.map((item) => (
+                                                        <Select.Item item={item} key={item.value}>
+                                                            {item.label}
+                                                            <Select.ItemIndicator />
+                                                        </Select.Item>
+                                                    ))}
+                                                </Select.Content>
+                                            </Select.Positioner>
+                                        </Portal>
+                                    </Select.Root>
+                                )}
+                            />
+                            <Field.ErrorText>{errors.bankId?.message}</Field.ErrorText>
+                        </Field.Root>
+
+                        <Field.Root invalid={!!errors.accountNumber}>
+                            <Field.Label>Número de Cuenta</Field.Label>
+                            <Input
+                                {...register("accountNumber")}
+                                placeholder="000-000000-0"
+                                disabled={isUpdating}
+                            />
+                            <Field.ErrorText>{errors.accountNumber?.message}</Field.ErrorText>
                         </Field.Root>
 
                         <Field.Root invalid={!!errors.currentBalance} required>

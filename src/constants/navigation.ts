@@ -69,6 +69,12 @@ export const NAV_CONFIG: NavItem[] = [
     id: "compras", label: "Compras", icon: NotebookPen, path: "/compras",
     children: [
       {
+        id: "pedidos-compra",
+        label: "Pedidos de Compra",
+        icon: ScrollText,
+        path: "/compras/pedidos"
+      },
+      {
         id: "cotizaciones-proveedores",
         label: "Cotizaciones",
         icon:   TableProperties,
