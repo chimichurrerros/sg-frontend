@@ -45,7 +45,7 @@ export default function PurchaseReceiptWizard() {
     const [observation, setObservation] = useState("");
     const [details, setDetails] = useState<DetailItem[]>([]);
 
-    const purchaseOrdersList = useMemo(() => purchaseOrders || [], [purchaseOrders]);
+    const purchaseOrdersList = useMemo(() => purchaseOrders?.purchaseOrders || [], [purchaseOrders]);
     const suppliers = useMemo(() => suppliersData?.suppliers || [], [suppliersData]);
     const branches = useMemo(() => branchesData?.branches || [], [branchesData]);
 
