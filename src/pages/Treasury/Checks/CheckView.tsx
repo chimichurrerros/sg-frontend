@@ -9,6 +9,7 @@ import { checkStatusEnum, checkTypeEnum } from "@/api/checks.api";
 import { parseDate } from "@/constants/date";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -69,15 +70,19 @@ export default function CheckView() {
                         <ArrowLeft />
                         Volver al listado
                     </IconButton>
-                    <IconButton
-                        padding={2}
-                        variant="outline"
-                        disabled={isAlreadySettled || isRejecting || isReconciling}
-                        onClick={() => rejectMutation.mutate()}
-                    >
-                        {isRejecting ? <Spinner size="sm" /> : <BanknoteX />}
-                        Rechazar Cheque
-                    </IconButton>
+                    <DestructiveActionDialog
+                        trigger={<IconButton
+                            padding={2}
+                            variant="outline"
+                            disabled={isAlreadySettled || isRejecting || isReconciling}
+                            onClick={() => rejectMutation.mutate()}
+                        >
+                            {isRejecting ? <Spinner size="sm" /> : <BanknoteX />}
+                            Anular Cheque
+                        </IconButton>} 
+                        title={"Anular cheque"}
+                        description="Esta acción es irreversible" 
+                                           />
                     <IconButton
                         padding={2}
                         bgColor="brand.primary"
@@ -95,7 +100,7 @@ export default function CheckView() {
             <Box bg="white" h="full" w="100%">
                 <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                     <LabelValue label="Número de Cheque" value={check.number} />
-                    <LabelValue label="Fecha de Emisión" value={parseDate(check.emisionDate)} />
+                    <LabelValue label="Fecha de Emisión" value={check.emisionDate || "-"} />
                     <LabelValue label="Situación" value={checkStatusEnum[check.status] ?? "-"} />
 
                     <LabelValue label="Tipo" value={checkTypeEnum[check.type] ?? "-"} />
@@ -103,8 +108,8 @@ export default function CheckView() {
                     <LabelValue label="Receptor" value={check.receiver} />
 
                     <LabelValue label="Monto" value={`${check.amount?.toLocaleString("es-PY") || "-"} ₲`} />
-                    <LabelValue label="Fecha de Disponibilidad" value={parseDate(check.availabilityDate)} />
-                    <LabelValue label="Fecha de Vencimiento" value={parseDate(check.maturityDate)} />
+                    <LabelValue label="Fecha de Disponibilidad" value={check.availabilityDate || "-"} />
+                    <LabelValue label="Fecha de Vencimiento" value={check.maturityDate || "-"} />
 
                     {check.paymentDate && (
                         <GridItem colSpan={3}>
