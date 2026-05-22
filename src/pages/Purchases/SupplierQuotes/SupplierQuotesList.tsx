@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import PageSizeControl from "@/components/ui/page-size-control";
+import { parsePrice } from "@/constants/price";
 
 
 export default function SupplierQuotesList() {
@@ -29,7 +30,7 @@ export default function SupplierQuotesList() {
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.id - b.id },
         { labelName: "Proveedor", propName: "supplierName", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.supplierName.localeCompare(b.supplierName) },
         { labelName: "Fecha", propName: "date", transformFunction:(value: Date) => parseDate(value), isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.date.getTime() - b.date.getTime() },
-        { labelName: "Monto Total", propName: "total", isSortable: true, sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
+        { labelName: "Monto Total", propName: "total", isSortable: true, transformFunction: (value)=>parsePrice(value), sortFunction: (a: SupplierQuote, b: SupplierQuote) => a.total - b.total },
         { labelName: "Estado", propName: "state", transformFunction: (value: number) => supplierQuoteStatusMap[value] || "Desconocido" },
     ]
     useEffect(() => {
@@ -43,7 +44,6 @@ export default function SupplierQuotesList() {
             <Text fontSize="2xl" fontWeight="bold">
                 Lista de Cotizaciones de Proveedores
             </Text>
-            <p>{JSON.stringify(params)}</p>
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
                     <Input placeholder="Buscar Cotizaciones..." />

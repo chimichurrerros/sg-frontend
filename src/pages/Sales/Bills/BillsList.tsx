@@ -1,26 +1,30 @@
 import { Box } from "@chakra-ui/react";
 import { IconButton, Text } from "@chakra-ui/react";
-import { Eye, Plus } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Bill } from "@/types/bills";
+import { billStatusEnumParse, billTypeEnumParse, type Bill } from "@/types/bills";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { useAllBills } from "@/queries/bills.queries";
 import { parseDate } from "@/constants/date";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
+import PaginationControl from "@/components/ui/pagination-control";
+import type { PaginationParams } from "@/types/types";
+import PageSizeControl from "@/components/ui/page-size-control";
 
 export default function BillsListPage() {
   const navigate = useNavigate();
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [bills, setBills] = useState<Bill[]>([]);
-
+  const [params, setParams] = useState<PaginationParams>({ pageSize: 10, page: 1 });
   const {
     data: allBills,
     isPending: loadingAllBills,
     isError: isErrorAllBills,
     error: errorAllBills,
-  } = useAllBills();
+  } = useAllBills(params || undefined);
 
   useEffect(() => {
     if (allBills?.bills) {
@@ -65,15 +69,15 @@ export default function BillsListPage() {
       isSortable: true,
       sortFunction: (a: Bill, b: Bill) => new Date(a.dueDate ?? "").getTime() - new Date(b.dueDate ?? "").getTime(),
     },
-    { labelName: "Total", propName: "total" },
-    { labelName: "IVA", propName: "taxTotal" },
-    { labelName: "Tipo", propName: "billType" },
-    { labelName: "Estado", propName: "billState" },
+    { labelName: "Total", propName: "total", transformFunction: (value) => parsePrice(value) },
+    { labelName: "IVA", propName: "taxTotal", transformFunction: (value) => parsePrice(value) },
+    { labelName: "Tipo", propName: "billType", transformFunction: (value) => billTypeEnumParse[Number(value)] },
+    { labelName: "Estado", propName: "billState", transformFunction: (value) => billStatusEnumParse[Number(value)] },
   ];
 
-  const handleNewBill = () => {
-    navigate("/ventas/facturas/nueva");
-  };
+  // const handleNewBill = () => {
+  //   navigate("/ventas/facturas/nueva");
+  // };
 
   const handleViewBill = () => {
     if (!selectedBill) return;
@@ -85,14 +89,20 @@ export default function BillsListPage() {
       <Box
         display="flex"
         flexDirection="row"
-        gap={5}
-        alignContent="center"
+        alignItems="center"
         justifyContent="space-between"
+        gap={4}
       >
         <Text fontWeight="bold" fontSize="3xl">
           Listado de Facturas
         </Text>
-        <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+
+        <Box display="flex" flexDirection="row" alignItems="center" gap={3}>
+          <Text fontSize="sm" color="gray.500" whiteSpace="nowrap">
+            Registros por pág.
+          </Text>
+          <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
+
           <IconButton
             paddingX={5}
             bgColor="brand.secondary"
@@ -102,17 +112,8 @@ export default function BillsListPage() {
             <Eye size={20} />
             Ver
           </IconButton>
-          {/* <IconButton
-            paddingX={5}
-            bgColor="brand.primary"
-            onClick={handleNewBill}
-          >
-            <Plus size={20} />
-            Nueva
-          </IconButton> */}
         </Box>
       </Box>
-
       <TableSelect
         key={JSON.stringify(bills)}
         data={bills}
@@ -131,6 +132,7 @@ export default function BillsListPage() {
         }}
         onDoubleClick={(item: Bill) => navigate(`/ventas/facturas/${item.id}`)}
       />
+      <PaginationControl pagination={allBills?.pagination || null} onPageChange={(page) => setParams({ ...params, page })} />
     </Box>
   );
 }

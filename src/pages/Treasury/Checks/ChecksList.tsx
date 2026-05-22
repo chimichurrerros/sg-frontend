@@ -7,18 +7,20 @@ import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetChecksKeys } from "@/queries/checks.queries";
 import type { PaginationParams } from "@/types/types";
-import { Box, IconButton, Input, InputGroup, NumberInput, Spinner, Text } from "@chakra-ui/react";
+import { Box, IconButton, Input, InputGroup, Spinner, Text } from "@chakra-ui/react";
 import { ArrowDownUp, Banknote, BanknoteX, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
+import { parsePrice } from "@/constants/price";
+import PageSizeControl from "@/components/ui/page-size-control";
 
 const checkLabels: label<Check>[] = [
     { labelName: "Nro.", propName: "number", isSortable: true, sortFunction: (a, b) => a.number.localeCompare(b.number) },
     { labelName: "Banco Emisor", propName: "issuingBank", isSortable: true, sortFunction: (a, b) => a.issuingBank.localeCompare(b.issuingBank) },
     { labelName: "Beneficiario", propName: "receiver", isSortable: true, sortFunction: (a, b) => a.receiver.localeCompare(b.receiver) },
-    { labelName: "Monto", propName: "amount", isSortable: true, sortFunction: (a, b) => a.amount - b.amount },
+    { labelName: "Monto", propName: "amount",transformFunction: (value)=>parsePrice(value) ,isSortable: true, sortFunction: (a, b) => a.amount - b.amount },
     { labelName: "Fecha de Emision", propName: "emisionDate", transformFunction: (date: string) => parseDate(date), isSortable: true, sortFunction: (a, b) => new Date(a.emisionDate).getTime() - new Date(b.emisionDate).getTime() },
     { labelName: "Fecha de Vencimiento", propName: "maturityDate", transformFunction: (date: string) => parseDate(date), isSortable: true, sortFunction: (a, b) => new Date(a.maturityDate).getTime() - new Date(b.maturityDate).getTime() },
     { labelName: "Tipo", propName: "type", transformFunction: (value: number) => checkTypeEnum[value] || "Desconocido", isSortable: true, sortFunction: (a, b) => a.type - b.type },
@@ -68,7 +70,7 @@ export default function ChecksList() {
                 </InputGroup>
                 <Box display="flex" flexDirection="row" gap={2}>
                     <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág.</Text>
-                    <NumberInput.Root
+                    {/* <NumberInput.Root
                         defaultValue="10"
                         width="70px"
                         max={30}
@@ -77,7 +79,8 @@ export default function ChecksList() {
                     >
                         <NumberInput.Control />
                         <NumberInput.Input />
-                    </NumberInput.Root>
+                    </NumberInput.Root> */}
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5}/>
                 </Box>
 
                 <DestructiveActionDialog

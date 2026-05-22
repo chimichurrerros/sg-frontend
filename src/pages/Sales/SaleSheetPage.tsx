@@ -7,7 +7,6 @@ import {
   Input,
   Button,
   IconButton,
-  NumberInput,
   Spinner,
 } from "@chakra-ui/react";
 import { CircleDollarSign, Printer, X } from "lucide-react";
@@ -23,6 +22,7 @@ import { useMask } from "@react-input/mask";
 import { parseDate } from "@/constants/date";
 import { useCreateSale } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -30,7 +30,7 @@ const getSaleTemplate = (): Sale => ({
     ruc: ""
   },
   sale: {
-    date: new Date().toISOString().split('.')[0], 
+    date: new Date().toISOString().split('.')[0],
     cashierNumber: 3,
     saleNumber: 0
   },
@@ -64,7 +64,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     showMask: true,
   });
   const [dialogAmount, setDialogAmount] = useState(0);
-
+  const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
   useEffect(() => {
     const subtotal = saleForm.products.reduce((sum, p) => sum + (p.total || 0), 0);
     const total = subtotal;
@@ -83,21 +83,23 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }, [saleForm.products, dialogAmount]);
 
   const productsLabel: EditableLabel<ProductSaleDTO>[] = [
-    { labelName: "Código", propName: "barcode", textIfNull:"-" },
-    { labelName: "Nombre", propName: "name", textIfNull:"Producto sin nombre", isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.name || "").localeCompare(b.name || "") },
-    { labelName: "Descripción", propName: "description",
-      textIfNull:"Sin Descripción", 
-      transform: (d:string) =>d && d.length >35  ?  d.slice(0,25)+"..." : d},
+    { labelName: "Código", propName: "barcode", textIfNull: "-" },
+    { labelName: "Nombre", propName: "name", textIfNull: "Producto sin nombre", isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.name || "").localeCompare(b.name || "") },
+    {
+      labelName: "Descripción", propName: "description",
+      textIfNull: "Sin Descripción",
+      transform: (d: string) => d && d.length > 35 ? d.slice(0, 25) + "..." : d
+    },
 
     {
       labelName: "Cantidad", propName: "quantity",
       isEditable: true, inputType: "number",
       validate: (value: number | string) => Number(value) > 0,
       transform: (value: string) => Number(value),
-      onEdit: (item: ProductSaleDTO, newValue: string | number | null| undefined) => { if(!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
+      onEdit: (item: ProductSaleDTO, newValue: string | number | null | undefined) => { if (!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
     },
-    { labelName: "Precio Unitario", propName: "price",isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price,},
-    { labelName: "Total", propName: "total",isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull:"0" },
+    { labelName: "Precio Unitario", propName: "price", isSortable: true, transform: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price, },
+    { labelName: "Total", propName: "total", isSortable: true, transform: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull: "0" },
     {
       labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
         <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setSaleForm({ ...saleForm, products: saleForm.products.filter((p: ProductSaleDTO) => p.id !== item.id) })}>
@@ -180,10 +182,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         ruc: formattedRuc
       }
     });
-  };
-
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString() + " GS.";
   };
 
   const isAmountValid = dialogAmount >= saleForm.totals.total;
@@ -298,24 +296,24 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             <Box borderTop="1px solid" borderColor="gray.100" my={1} />
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Subtotal</Text>
-              <Text>{formatCurrency(saleForm.totals.subtotal)}</Text>
+              <Text>{parsePrice(saleForm.totals.subtotal)}</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">IVA</Text>
-              <Text>{formatCurrency(saleForm.totals.iva)}</Text>
+              <Text>{parsePrice(saleForm.totals.iva)}</Text>
             </Flex>
             <Box borderTop="1px solid" borderColor="gray.200" my={1} />
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Total</Text>
-              <Text color="green.600">{formatCurrency(saleForm.totals.total)}</Text>
+              <Text color="green.600">{parsePrice(saleForm.totals.total)}</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Importe</Text>
-              <Text color="green.600">{formatCurrency(saleForm.totals.amount)}</Text>
+              <Text color="green.600">{parsePrice(saleForm.totals.amount)}</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Vuelto</Text>
-              <Text color="green.600">{formatCurrency(saleForm.totals.change)}</Text>
+              <Text color="green.600">{parsePrice(saleForm.totals.change)}</Text>
             </Flex>
           </Box>
         </Box>
@@ -324,7 +322,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       <Flex mt={4} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">
         <Flex gap={4} align="center">
           <Text fontSize="3xl" fontWeight="bold">
-            Total a pagar: <Text as="span" color="green.600">{formatCurrency(saleForm.totals.total)}</Text>
+            Total a pagar: <Text as="span" color="green.600">{parsePrice(saleForm.totals.total)}</Text>
           </Text>
         </Flex>
 
@@ -348,22 +346,22 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             title="Confirmar Venta"
             description="¿Estás seguro de que deseas generar esta venta?"
             onAccept={() => {
-              if(!isAmountValid){
-                toaster.create({title:"Monto del importe es menor que el precio a pagar",type: "error"})
+              if (!isAmountValid) {
+                toaster.create({ title: "Monto del importe es menor que el precio a pagar", type: "error" })
                 return;
               }
               createSale.mutate(saleForm)
             }}
             trigger={
-              <IconButton 
-                bg="brand.primary" 
-                padding={4} 
-                size="lg" 
-                color="white" 
-                ref={triggerRef} 
-                disabled={saleForm.products.length === 0 || createSale.isPending }
+              <IconButton
+                bg="brand.primary"
+                padding={4}
+                size="lg"
+                color="white"
+                ref={triggerRef}
+                disabled={saleForm.products.length === 0 || createSale.isPending}
               >
-                {createSale.isPending ? <Spinner/> : <CircleDollarSign />} Generar Venta
+                {createSale.isPending ? <Spinner /> : <CircleDollarSign />} Generar Venta
               </IconButton>
             }
           >
@@ -371,20 +369,23 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text fontSize="sm" color="gray.600" mb={2}>
                 Ingresar el importe del cliente.
               </Text>
-              <NumberInput.Root
-                value={dialogAmount.toString()}
-                onValueChange={(e) => {
-                  const val = Number(e.value);
-                  setDialogAmount(isNaN(val) ? 0 : val);
+              <Input
+                value={displayValue}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^\d]/g, "");
+                  const val = raw === "" ? 0 : Number(raw);
+                  setDialogAmount(val);
+                  setDisplayValue(raw);
                 }}
-              >
-                <NumberInput.Input onKeyDown={(e) => {
+                onBlur={() => setDisplayValue(parsePrice(dialogAmount))}
+                onFocus={() => setDisplayValue(dialogAmount === 0 ? "" : dialogAmount.toString())}
+                onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
                     e.stopPropagation();
                   }
-                }} />
-              </NumberInput.Root>
+                }}
+              />
               <Text
                 fontSize="lg"
                 fontStyle="bold"
@@ -393,9 +394,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 mt={3}
               >
                 {isAmountValid ? (
-                  `Vuelto: ${formatCurrency(dialogAmount - saleForm.totals.total)}`
+                  `Vuelto: ${parsePrice(dialogAmount - saleForm.totals.total)}`
                 ) : (
-                  `Faltan: ${formatCurrency(saleForm.totals.total - dialogAmount)}`
+                  `Faltan: ${parsePrice(saleForm.totals.total - dialogAmount)}`
                 )}
               </Text>
             </Box>

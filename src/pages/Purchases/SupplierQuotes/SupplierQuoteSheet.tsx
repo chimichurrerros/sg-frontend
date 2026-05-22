@@ -19,6 +19,7 @@ import { parseDate } from "@/constants/date";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import type { Supplier } from "@/types/suppliers";
 import type { CreateSupplierQuoteProduct, EditSupplierQuoteRequest } from "@/api/supplierQuote.api";
+import { parsePrice } from "@/constants/price";
 interface SupplierQuoteSheetProps {
     mode: "create" | "edit";
 }
@@ -51,6 +52,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
         {
             labelName: "Precio Unitario",
             propName: "price", isEditable: true,
+            transform:(value)=>parsePrice(value),
             isSortable: true,
             textIfNull: "Definir",
             inputType: "number",

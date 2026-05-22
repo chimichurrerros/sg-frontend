@@ -3,6 +3,7 @@ import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
 import {
   catalogKeys,
   useAllProducts,
@@ -28,7 +29,7 @@ export const Products = () => {
     { labelName: "Nombre", propName: "name" },
     { labelName: "Categoría", propName: "productCategoryName" },
     { labelName: "Marca", propName: "productBrandName" },
-    { labelName: "Precio", propName: "price" },
+    { labelName: "Precio", propName: "price",transformFunction:(value)=>parsePrice(value) },
     { labelName: "Stock mínimo", propName: "minimumStock" },
   ];
   const [page, setPage] = useState(1);

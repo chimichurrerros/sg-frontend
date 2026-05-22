@@ -20,6 +20,11 @@ export const BillTypeEnum = {
   CREDITO: 2,
 } as const;
 
+export const billTypeEnumParse: Record<number,string>={
+  1 : "CONTADO",
+  2 : "CREDITO"
+}
+
 export type BillTypeEnum = (typeof BillTypeEnum)[keyof typeof BillTypeEnum];
 
 export const BillStateEnum = {
@@ -27,5 +32,9 @@ export const BillStateEnum = {
   Paid: 1,
   Voided: 2,
 } as const;
-
+export const billStatusEnumParse: Record<number,string>={
+  0 : "PENDIENTE",
+  1 : "PAGADO",
+  2 : "ANULADO"
+}
 export type BillStateEnum = (typeof BillStateEnum)[keyof typeof BillStateEnum];
