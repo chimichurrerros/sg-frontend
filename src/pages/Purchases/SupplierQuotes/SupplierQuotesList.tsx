@@ -9,12 +9,13 @@ import { useEditSupplierQuote, useGetSupplierQuotes } from "@/queries/supplier-q
 import { supplierQuoteStatusMap } from "@/types/purchases";
 import { parseDate } from "@/constants/date";
 import type { PaginationParams } from "@/types/types";
-import { Box, IconButton, Input, InputGroup, NumberInput, Spinner } from "@chakra-ui/react";
+import { Box, IconButton, Input, InputGroup, Spinner } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
 import { Pencil, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import PageSizeControl from "@/components/ui/page-size-control";
 
 
 export default function SupplierQuotesList() {
@@ -42,7 +43,7 @@ export default function SupplierQuotesList() {
             <Text fontSize="2xl" fontWeight="bold">
                 Lista de Cotizaciones de Proveedores
             </Text>
-            {/* <p>{JSON.stringify(supplierQuotes?.supplierQuotes || [])}</p> */}
+            <p>{JSON.stringify(params)}</p>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
@@ -50,10 +51,7 @@ export default function SupplierQuotesList() {
                 </InputGroup>
                 <Box display="flex" flexDirection="row" gap={2}>
                     <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
-                    <NumberInput.Root defaultValue="10" width="70px" max={30} min={5} onValueChange={(value) => setParams({ ...params, pageSize: value.valueAsNumber })}>
-                        <NumberInput.Control />
-                        <NumberInput.Input />
-                    </NumberInput.Root>
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5}  />
                 </Box>
                 <DestructiveActionDialog trigger={
                     <IconButton padding={2} variant="outline" disabled={!selected || editSupplierQuote.isPending || selected.state === 2 || selected.associatedPurchaseOrderId !== null}>
