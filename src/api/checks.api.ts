@@ -42,8 +42,8 @@ export interface UpdateCheckBodyRequest {
     paymentDate?: string;
 }
 export const checksApi = {
-    getChecks:  (params?:PaginationParams) => apiClient.get<GetCheckResponse>("/api/Checks/", { params }).then((r) => r.data),
-    createCheck: (body: CreateCheckBodyRequest) => apiClient.post<Check>("/api/Checks/",body).then((r) => r.data),
-    getCheckById: (id: number) => apiClient.get<{check: Check}>(`/api/Checks/${id}`).then((r) => r.data.check),
-    updateCheck: (id: number, body: UpdateCheckBodyRequest) => apiClient.patch<Check>(`/api/Checks/${id}/status`, body).then((r) => r.data)
+    getChecks:  (params?:PaginationParams) => apiClient.get<GetCheckResponse>("/api/checks/", { params }).then((r) => r.data),
+    createCheck: (body: CreateCheckBodyRequest) => apiClient.post<Check>("/api/checks/",body).then((r) => r.data),
+    getCheckById: (id: number) => apiClient.get<{check: Check}>(`/api/checks/${id}`).then((r) => r.data.check),
+    updateCheck: (id: number, body: UpdateCheckBodyRequest) => apiClient.patch<Check>(`/api/checks/${id}/status`, body).then((r) => r.data)
 }

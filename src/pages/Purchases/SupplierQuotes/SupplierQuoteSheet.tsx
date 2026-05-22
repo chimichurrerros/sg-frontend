@@ -76,7 +76,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
             setSelectedPurchaseRequest(
                 purchaseRequests?.purchaseRequests.find(pr => pr.id === quoteData.purchaseRequestId) || null
             )
-            setProducts((quoteData.details ?? []).map(d => ({  // ← ?? []
+            setProducts((quoteData.details ?? []).map(d => ({  
                 id: d.id,
                 productId: d.productId,
                 productName: d.productName,
@@ -91,7 +91,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
     useEffect(() => {
         if (selectedPurchaseRequestId && purchaseRequests) {
             const prods = quoteData && selectedPurchaseRequestId === quoteData.purchaseRequestId
-                ? (quoteData.details ?? []).map(d => ({   // ← ?? []
+                ? (quoteData.details ?? []).map(d => ({  
                     id: d.id,
                     productId: d.productId,
                     productName: d.productName,

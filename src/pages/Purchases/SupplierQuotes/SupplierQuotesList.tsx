@@ -11,7 +11,7 @@ import { parseDate } from "@/constants/date";
 import type { PaginationParams } from "@/types/types";
 import { Box, IconButton, Input, InputGroup, Spinner } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
-import { Pencil, Plus, X } from "lucide-react";
+import { ExternalLink, Pencil, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +44,6 @@ export default function SupplierQuotesList() {
                 Lista de Cotizaciones de Proveedores
             </Text>
             <p>{JSON.stringify(params)}</p>
-
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
                     <Input placeholder="Buscar Cotizaciones..." />
@@ -53,6 +52,7 @@ export default function SupplierQuotesList() {
                     <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
                     <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5}  />
                 </Box>
+                <IconButton variant="ghost" size="sm" disabled={!selected || selected?.associatedPurchaseOrderId ===null} onClick={()=>{selected && navigate("/compras/ordenes-de-compra/"+ selected.associatedPurchaseOrderId)}}><ExternalLink/></IconButton>
                 <DestructiveActionDialog trigger={
                     <IconButton padding={2} variant="outline" disabled={!selected || editSupplierQuote.isPending || selected.state === 2 || selected.associatedPurchaseOrderId !== null}>
                         {editSupplierQuote.isPending ? <Spinner/>:<X />}
@@ -79,6 +79,7 @@ export default function SupplierQuotesList() {
                 onSelect={(item) => setSelected(item)}
                 onDoubleClick={(item) => navigate(`/compras/cotizaciones-proveedores/${item.id}`)}
                 loading={loadingSupplierQuotes}
+                height="50vh"
                 noItemsComponent={
                     <EmptyDataScreen
                         title="No se encontraron cotizaciones"

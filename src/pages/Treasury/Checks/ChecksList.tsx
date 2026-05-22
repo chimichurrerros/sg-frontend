@@ -85,13 +85,13 @@ export default function ChecksList() {
                         padding={2}
                         variant="outline"
                         disabled={!selected || !isSelectedPending || isActioning}
-                        onClick={() => selected && rejectMutation.mutate()}
                     >
                         {rejectMutation.isPending ? <Spinner size="sm" /> : <BanknoteX />}
                         Anular Cheque
                     </IconButton>}
                     title="Anular cheque"
                     description="Esta acción es irreversible"
+                    onAccept={() => selected && rejectMutation.mutate()}
                 />
                 <IconButton
                     padding={2}
@@ -121,6 +121,7 @@ export default function ChecksList() {
                     labels={checkLabels}
                     onSelect={(check) => setSelected(check)}
                     minheight="0"
+                    height="60vh"
                     noItemsComponent={
                         <EmptyDataScreen
                             title="No se encontraron cheques"
