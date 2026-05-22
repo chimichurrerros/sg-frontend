@@ -8,7 +8,7 @@ import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { Package, CheckCircle2 } from "lucide-react";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { useAllBranches } from "@/queries/branches.queries";
-import { useGetAllPurchaseOrders } from "@/queries/purchase-orders.queries";
+import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
 import type { PurchaseOrder } from "@/api/purchaseOrders.api";
 
@@ -30,7 +30,7 @@ interface DetailItem {
 export default function PurchaseReceiptWizard() {
     const navigate = useNavigate();
 
-    const { data: purchaseOrders, isPending: loadingPOs } = useGetAllPurchaseOrders();
+    const { data: purchaseOrders, isPending: loadingPOs } = useAllPurchaseOrders();
     const { data: suppliersData, isPending: loadingSuppliers } = useAllSuppliers();
     const { data: branchesData, isPending: loadingBranches } = useAllBranches();
     const { mutate: createReceipt, isPending: isSubmitting } = useCreatePurchaseReceipt();
