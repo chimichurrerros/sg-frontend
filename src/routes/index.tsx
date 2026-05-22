@@ -28,11 +28,14 @@ import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
+import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
+import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
+import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +72,10 @@ export const router = createBrowserRouter([
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
           { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
+          { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
+          { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
+          { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
+          { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },

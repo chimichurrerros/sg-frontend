@@ -25,9 +25,10 @@ export const useGetAllSupplierQuotes = () => {
         queryFn: () => supplierQuoteApi.getAll(),
     });
 };
-export const useGetSupplierQuoteById = (id: number | undefined) => {
+
+export const useGetSupplierQuoteById = (id: number) => {    
     return useQuery({
-        queryKey: supplierQuoteKeys.detail(id ?? -1),
+        queryKey: supplierQuoteKeys.detail(id),
         queryFn: () => supplierQuoteApi.getById(id!),
         enabled: id !== undefined && id !== -1,
     });
@@ -49,14 +50,13 @@ export const useCreateSupplierQuote = () => {
     });
 };
 
-export const useEditSupplierQuote = (id: number) => {
+export const useEditSupplierQuote = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: EditSupplierQuoteRequest) => supplierQuoteApi.edit(id, data),
+        mutationFn: (body: {id: number,data: EditSupplierQuoteRequest}) => supplierQuoteApi.edit(body.id, body.data),
         onSuccess: () => {
             toaster.create({ title: "Cotización actualizada exitosamente", type: "success" });
             queryClient.invalidateQueries({ queryKey: supplierQuoteKeys.all });
-            queryClient.invalidateQueries({ queryKey: supplierQuoteKeys.detail(id) });
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.title || error.message;

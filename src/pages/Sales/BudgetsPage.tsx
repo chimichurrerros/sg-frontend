@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react/box";
 import { IconButton, Input, InputGroup, Text } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import { CalendarOff, CalendarPlus, DollarSign } from "lucide-react";
+import { parseDate } from "@/constants/date";
 import React from "react";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import type { PaginationType } from "@/types/types";
@@ -27,8 +28,8 @@ export default function BudgetsPage() {
         { labelName: "Cliente", propName: "client", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return a.client.localeCompare(b.client)}},
         { labelName: "Concepto", propName: "concept", textIfNull: "Sin Concepto" },
         { labelName: "Monto", propName: "amount", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return Number(a.amount)-Number(b.amount)}},
-        { labelName: "Fecha de Creación", propName: "creationDate" , isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()}},
-        { labelName: "Fecha de Expiración", propName: "expirationDate", isSortable:true,sortFunction: (a:Budget,b:Budget)=>{return new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime()}},
+        { labelName: "Fecha de Creación", propName: "creationDate", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()}, transformFunction: (date: string) => parseDate(date) },
+        { labelName: "Fecha de Expiración", propName: "expirationDate", isSortable:true, sortFunction: (a:Budget,b:Budget)=>{return new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime()}, transformFunction: (date: string) => parseDate(date) },
         { labelName: "Estado", propName: "state" }
     ];
     const mock_data: Budget[] = [
