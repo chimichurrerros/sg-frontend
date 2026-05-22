@@ -11,6 +11,7 @@ import { ArrowDownUp, Banknote, BanknoteX, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 
 const checkLabels: label<Check>[] = [
     { labelName: "Nro.", propName: "number", isSortable: true, sortFunction: (a, b) => a.number.localeCompare(b.number) },
@@ -78,16 +79,19 @@ export default function ChecksList() {
                     </NumberInput.Root>
                 </Box>
 
-                <IconButton
-                    padding={2}
-                    variant="outline"
-                    disabled={!selected || !isSelectedPending || isActioning}
-                    onClick={() => selected && rejectMutation.mutate()}
-                >
-                    {rejectMutation.isPending ? <Spinner size="sm" /> : <BanknoteX />}
-                    Anular Cheque
-                </IconButton>
-
+                <DestructiveActionDialog
+                    trigger={<IconButton
+                        padding={2}
+                        variant="outline"
+                        disabled={!selected || !isSelectedPending || isActioning}
+                        onClick={() => selected && rejectMutation.mutate()}
+                    >
+                        {rejectMutation.isPending ? <Spinner size="sm" /> : <BanknoteX />}
+                        Anular Cheque
+                    </IconButton>}
+                    title="Anular cheque"
+                    description="Esta acción es irreversible"
+                />
                 <IconButton
                     padding={2}
                     bgColor="brand.secondary"
