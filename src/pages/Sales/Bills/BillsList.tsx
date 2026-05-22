@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import type { Bill } from "@/types/bills";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { useAllBills } from "@/queries/bills.queries";
+import { parseDate } from "@/constants/date";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 
@@ -50,8 +51,20 @@ export default function BillsListPage() {
       isSortable: true,
       sortFunction: (a: Bill, b: Bill) => a.number.localeCompare(b.number),
     },
-    { labelName: "Fecha", propName: "date" },
-    { labelName: "Vencimiento", propName: "dueDate" },
+    {
+      labelName: "Fecha",
+      propName: "date",
+      transformFunction: (value: string) => parseDate(value),
+      isSortable: true,
+      sortFunction: (a: Bill, b: Bill) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    },
+    {
+      labelName: "Vencimiento",
+      propName: "dueDate",
+      transformFunction: (value: string) => parseDate(value),
+      isSortable: true,
+      sortFunction: (a: Bill, b: Bill) => new Date(a.dueDate ?? "").getTime() - new Date(b.dueDate ?? "").getTime(),
+    },
     { labelName: "Total", propName: "total" },
     { labelName: "IVA", propName: "taxTotal" },
     { labelName: "Tipo", propName: "billType" },

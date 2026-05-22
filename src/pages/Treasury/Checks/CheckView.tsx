@@ -6,6 +6,7 @@ import { Text } from "@chakra-ui/react/text";
 import { ArrowDownUp, ArrowLeft, BanknoteX } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { checkStatusEnum, checkTypeEnum } from "@/api/checks.api";
+import { parseDate } from "@/constants/date";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
 
@@ -107,7 +108,7 @@ export default function CheckView() {
 
                     {check.paymentDate && (
                         <GridItem colSpan={3}>
-                            <LabelValue label="Fecha de Pago" value={check.paymentDate} />
+                            <LabelValue label="Fecha de Pago" value={parseDate(check.paymentDate)} />
                         </GridItem>
                     )}
                 </Grid>

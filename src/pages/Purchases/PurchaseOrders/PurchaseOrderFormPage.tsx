@@ -18,6 +18,7 @@ import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useGetAllPurchaseRequests } from "@/queries/purchase-request.queries.ts";
 import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder } from "@/queries/purchase-orders.queries.ts";
 import { useMe } from "@/queries/auth.queries";
+import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 
 export default function PurchaseOrderFormPage() {
@@ -36,15 +37,11 @@ export default function PurchaseOrderFormPage() {
     const createOrder = useCreatePurchaseOrder();
 
     const draft = draftData?.purchaseOrder;
-    const today = new Date().toLocaleDateString("es-PY", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+    const today = parseDate(new Date());
 
     const requestCollection = createListCollection({
         items: (requestsData?.purchaseRequests ?? []).map((r) => ({
-            label: `${r.id} - ${new Date(r.date).toLocaleDateString("es-PY")}`,
+            label: `${r.id} - ${parseDate(r.date)}`,
             value: String(r.id),
         })),
     });
@@ -87,7 +84,7 @@ export default function PurchaseOrderFormPage() {
         <Grid templateColumns="1fr 1fr 1fr" gap={4}>
             {!isViewMode && (
                 <Field.Root required>
-                    <Field.Label>Cotización de Pedido</Field.Label>
+                    <Field.Label>Pedido de Productos</Field.Label>
                     <Select.Root
                         collection={requestCollection}
                         value={selectedRequestId ? [String(selectedRequestId)] : []}
@@ -96,7 +93,7 @@ export default function PurchaseOrderFormPage() {
                         <Select.HiddenSelect />
                         <Select.Control>
                             <Select.Trigger>
-                                <Select.ValueText placeholder="Seleccionar cotización" />
+                                <Select.ValueText placeholder="Seleccionar pedido" />
                             </Select.Trigger>
                             <Select.IndicatorGroup>
                                 <Select.ClearTrigger />
@@ -123,7 +120,7 @@ export default function PurchaseOrderFormPage() {
                 <Field.Label>Fecha</Field.Label>
                 <Input
                     value={isViewMode
-                        ? new Date(orderData?.purchaseOrder.date ?? "").toLocaleDateString("es-PY", { day: "2-digit", month: "2-digit", year: "numeric" })
+                        ? parseDate(orderData?.purchaseOrder.date)
                         : today}
                     disabled
                 />
@@ -137,17 +134,25 @@ export default function PurchaseOrderFormPage() {
                 />
             </Field.Root>
 
-            <Field.Root>
-                <Field.Label>Proveedor</Field.Label>
-                <Input
-                    value={isViewMode ? orderData?.purchaseOrder.supplierName ?? "" : draft?.supplierName ?? ""}
-                    disabled
-                />
-            </Field.Root>
+            {/* Campo 'Proveedor' eliminado según solicitud */}
 
             <Field.Root>
                 <Field.Label>Estado</Field.Label>
-                <Input value="ACTIVO" disabled />
+                <Input
+                    value={(() => {
+                        const purchaseOrderStates: Record<number, string> = {
+                            0: "Pendiente",
+                            1: "Aprobado",
+                            2: "Rechazado",
+                            3: "Completado",
+                        };
+                        const state = isViewMode
+                            ? orderData?.purchaseOrder.state
+                            : draft?.state;
+                        return purchaseOrderStates[state ?? 0] ?? "Desconocido";
+                    })()}
+                    disabled
+                />
             </Field.Root>
         </Grid>
 
@@ -186,15 +191,15 @@ export default function PurchaseOrderFormPage() {
             </Text>
         )}
 
-        <ButtonGroup alignSelf="end">
-            <Button
-                variant="outline"
-                onClick={() => navigate("/compras/ordenes-de-compra")}
-                disabled={createOrder.isPending}
-            >
-                {isViewMode ? "Volver" : "Cancelar"}
-            </Button>
-            {!isViewMode && (
+        {!isViewMode && (
+            <ButtonGroup alignSelf="end">
+                <Button
+                    variant="outline"
+                    onClick={() => navigate("/compras/ordenes-de-compra")}
+                    disabled={createOrder.isPending}
+                >
+                    Cancelar
+                </Button>
                 <Button
                     bgColor="brand.primary"
                     onClick={handleSubmit}
@@ -203,8 +208,8 @@ export default function PurchaseOrderFormPage() {
                 >
                     <LuSave /> Guardar
                 </Button>
-            )}
-        </ButtonGroup>
+            </ButtonGroup>
+        )}
     </Stack>
     );
 }

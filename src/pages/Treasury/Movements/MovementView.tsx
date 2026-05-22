@@ -1,4 +1,5 @@
 import { type AccountResponseDto } from "@/api/bankAccounts.api";
+import { parseDate } from "@/constants/date";
 import { useGetMovementById, useUpdateMovement, useDeleteMovement } from "@/queries/bankMovements.queries";
 import { useGetAccounts } from "@/queries/bankAccounts.queries";
 import { createMovementSchema, type CreateMovementFormData } from "@/schemas/bankMovements.schema";
@@ -40,10 +41,7 @@ function LabelValue({ label, value }: { label: string; value: string }) {
 const formatBalance = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", minimumFractionDigits: 0 }).format(value);
 
-const formatDate = (value: string) => {
-    const d = new Date(value);
-    return d.toLocaleDateString("es-PY", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-};
+const formatDate = (value: string) => parseDate(value);
 
 export default function MovementView() {
     const { id } = useParams<{ id: string }>();

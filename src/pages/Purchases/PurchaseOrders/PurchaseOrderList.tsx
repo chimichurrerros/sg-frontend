@@ -1,22 +1,41 @@
 import { useNavigate } from "react-router-dom";
-import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
-import { ButtonGroup, IconButton, Pagination, Stack, Text } from "@chakra-ui/react";
+import { ButtonGroup, IconButton, Pagination, Stack, Text, Flex, InputGroup, Input, Spacer, Button } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuChevronLeft, LuChevronRight} from "react-icons/lu";
+import { LuChevronLeft, LuChevronRight, LuPlus, LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries.ts";
+import { parseDate } from "@/constants/date";
 import type { PurchaseOrderDTO } from "@/api/purchase-orders.ts";
 
 export default function PurchaseOrderListPage() {
     const navigate = useNavigate();
     const { data, isLoading } = useAllPurchaseOrders();
-    const [selectedOrder, setSelectedOrder] = useState<PurchaseOrderDTO | null>(null);
     const [page, setPage] = useState(1);
+    const [search, setSearch] = useState("");
 
     const orders = data?.purchaseOrders ?? [];
+    const stateLabels: Record<number, string> = {
+        0: "Pendiente",
+        1: "Aprobado",
+        2: "Rechazado",
+        3: "Completado",
+    };
+    const filteredOrders = orders.filter((order) => {
+        if (!search.trim()) return true;
+        const term = search.toLowerCase();
+        const date = parseDate(order.date);
+        const values = [
+            order.number,
+            order.supplierName,
+            String(order.total),
+            date,
+            stateLabels[order.state] ?? String(order.state),
+        ];
+        return values.some((value) => value.toLowerCase().includes(term));
+    });
     const pageSize = 10;
-    const currentOrders = orders.slice((page - 1) * pageSize, page * pageSize);
+    const currentOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
 
     const labels: label<PurchaseOrderDTO>[] = [
         {
@@ -24,12 +43,6 @@ export default function PurchaseOrderListPage() {
             propName: "number",
             isSortable: true,
             sortFunction: (a, b) => a.number.localeCompare(b.number),
-        },
-        {
-            labelName: "Proveedor",
-            propName: "supplierName",
-            isSortable: true,
-            sortFunction: (a, b) => a.supplierName.localeCompare(b.supplierName),
         },
         {
             labelName: "Total",
@@ -41,11 +54,7 @@ export default function PurchaseOrderListPage() {
             labelName: "Fecha",
             propName: "date",
             isComponent: true,
-            render: (item) => new Date(item.date).toLocaleDateString("es-PY", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-            }),
+            render: (item) => parseDate(item.date),
             isSortable: true,
             sortFunction: (a, b) => a.date.localeCompare(b.date),
         },
@@ -55,11 +64,12 @@ export default function PurchaseOrderListPage() {
             isComponent: true,
             render: (item) => {
                 const states: Record<number, string> = {
-                    0: "BORRADOR",
-                    1: "ACTIVO",
-                    2: "CANCELADO",
-            };
-            return states[item.state] ?? item.state;
+                    0: "Pendiente",
+                    1: "Aprobado",
+                    2: "Rechazado",
+                    3: "Completado",
+                };
+                return states[item.state] ?? item.state;
             },
             isSortable: true,
             sortFunction: (a, b) => a.state - b.state,
@@ -70,14 +80,6 @@ export default function PurchaseOrderListPage() {
         navigate("/compras/ordenes-de-compra/nuevo");
     };
 
-    const handleEdit = () => {
-        if (!selectedOrder) return;
-        navigate(`/compras/ordenes-de-compra/${selectedOrder.id}`);
-    };
-
-    const handleDelete = () => {
-        if (!selectedOrder) return;
-    };
 
     return (
         <Stack gap={4} p={4}>
@@ -85,12 +87,23 @@ export default function PurchaseOrderListPage() {
                 Lista de Órdenes de Compra
             </Text>
 
-            <TableBar
-                selected={selectedOrder}
-                onCreate={handleCreate}
-                onEdit={selectedOrder ? handleEdit : undefined}
-                onDelete={handleDelete}
-            />
+            <Flex gap="0.8rem">
+                <InputGroup startElement={<LuSearch />} maxW="32rem">
+                    <Input
+                        placeholder="Buscar"
+                        variant="subtle"
+                        value={search}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setPage(1);
+                        }}
+                    />
+                </InputGroup>
+                <Spacer />
+                <Button size="sm" colorPalette="brand" onClick={handleCreate}>
+                    <LuPlus /> Nuevo
+                </Button>
+            </Flex>
                 
 
             <TableSelect
@@ -103,12 +116,12 @@ export default function PurchaseOrderListPage() {
                         message="Crea una orden de compra para verla en la lista."
                     />
                 }
-                onSelect={(item) => setSelectedOrder(item)}
+                onSelect={() => undefined}
                 onDoubleClick={(item) => navigate(`/compras/ordenes-de-compra/${item.id}`)}
             />
 
             <Pagination.Root
-                count={orders.length}
+                count={filteredOrders.length}
                 pageSize={pageSize}
                 page={page}
                 onPageChange={(e) => setPage(e.page)}

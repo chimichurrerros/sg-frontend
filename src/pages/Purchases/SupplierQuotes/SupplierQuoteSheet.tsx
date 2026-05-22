@@ -15,6 +15,7 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import type { BackendError } from "@/types/types";
 import { toaster } from "@/components/ui/toaster";
 import { supplierQuoteStatusMap } from "@/types/purchases";
+import { parseDate } from "@/constants/date";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import type { Supplier } from "@/types/suppliers";
 import type { CreateSupplierQuoteProduct, EditSupplierQuoteRequest } from "@/api/supplierQuote.api";
@@ -27,7 +28,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
     const { data: suppliers, isPending: loadingSuppliers, isError: isErrorSuppliers, error: errorSuppliers } = useAllSuppliers()
     const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null)
     const { id } = useParams(); //If quoteId is present, we're in edit mode, otherwise create mode
-    const { data: quoteData, isPending: loadingQuoteData, error: quoteDataError, isError: isQuoteDataError } = useGetSupplierQuoteById(mode === "edit" ? parseInt(id!) : undefined);
+    const { data: quoteData, isPending: loadingQuoteData, error: quoteDataError, isError: isQuoteDataError } = useGetSupplierQuoteById(mode === "edit" ? parseInt(id!) : -1);
     const [selectedPurchaseRequestId, setSelectedPurchaseRequestId] = useState<number | null>(null);
     const [selectedPurchaseRequest, setSelectedPurchaseRequest] = useState<PurchaseRequest | null>(null);
     const [errorBody, setErrorBody] = useState<BackendError | null>(null);
@@ -225,7 +226,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         description={"Esta acción generará la orden de compra a " + suppliers?.suppliers.find(s => s.id === selectedSupplierId)?.businessName.toUpperCase()}
                         onAccept={() => createQuote()}
                     />}
-                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg" onClick={()=>quoteData?.associatedPurchaseOrderId && navigate("/compras/orden-compra/"+quoteData?.associatedPurchaseOrderId)}>
+                    {mode === "edit" && <IconButton p={2} bgColor="brand.primary" disabled={!saleOrderId} size="lg" onClick={()=>quoteData?.associatedPurchaseOrderId && navigate("/compras/ordenes-de-compra/"+quoteData?.associatedPurchaseOrderId)}>
                         <ExternalLink />
                         Ver Orden de Compra asociada
                     </IconButton>}
@@ -241,7 +242,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         </Box>
                         <SelectWrapper
                             disabled={loadingPurchaseRequests || isPurchaseRequestsError || saleOrderId !== null}
-                            options={purchaseRequests?.purchaseRequests.map((pr) => ({ value: pr.id.toString(), label: `${pr.id} - ${pr.userName} - ${pr.date}` })) || []}
+                            options={purchaseRequests?.purchaseRequests.map((pr) => ({ value: pr.id.toString(), label: `${pr.id} - ${pr.userName} - ${parseDate(pr.date)}` })) || []}
                             placeholder="Selecciona un pedido de compra"
                             width="full"
                             value={selectedPurchaseRequestId?.toString() || ""}
@@ -270,7 +271,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                     </Box>
                     <Box minWidth="250px" flex="1">
                         <Text fontSize="sm" fontWeight="medium" mb={1}>Fecha de Cotización</Text>
-                        <Input value={quoteData?.date.toString() || "Hoy"} readOnly />
+                        <Input value={quoteData ? parseDate(quoteData.date) : parseDate(new Date())} readOnly />
                     </Box>
 
                     {mode === "edit" && (
