@@ -82,7 +82,8 @@ export default function CheckView() {
                         </IconButton>} 
                         title={"Anular cheque"}
                         description="Esta acción es irreversible" 
-                                           />
+                        onAccept={() => rejectMutation.mutate()}
+                        />
                     <IconButton
                         padding={2}
                         bgColor="brand.primary"

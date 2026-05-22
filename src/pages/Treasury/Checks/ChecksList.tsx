@@ -85,13 +85,13 @@ export default function ChecksList() {
                         padding={2}
                         variant="outline"
                         disabled={!selected || !isSelectedPending || isActioning}
-                        onClick={() => selected && rejectMutation.mutate()}
                     >
                         {rejectMutation.isPending ? <Spinner size="sm" /> : <BanknoteX />}
                         Anular Cheque
                     </IconButton>}
                     title="Anular cheque"
                     description="Esta acción es irreversible"
+                    onAccept={() => selected && rejectMutation.mutate()}
                 />
                 <IconButton
                     padding={2}
