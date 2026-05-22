@@ -26,5 +26,3 @@ export const branchesApi = {
     edit: (id: number, body: EditBranchRequest) => apiClient.put<BranchResponse>("/api/branches/" + id, body).then((r) => r.data),
     delete: (id: number) => apiClient.delete("/api/branches/" + id).then((r) => r.data)
 }
-
-

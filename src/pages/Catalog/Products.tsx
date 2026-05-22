@@ -1,4 +1,5 @@
 import type { ProductDTO } from "@/api/catalog.api";
+import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
@@ -9,14 +10,15 @@ import {
 } from "@/queries/catalog.queries";
 import { ButtonGroup, IconButton, Pagination, Stack } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { BeanOffIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
 export const Products = () => {
   const navigation = useNavigate();
 
-  const { data, isLoading, error } = useAllProducts();
+  const { data, isLoading, error,isError } = useAllProducts();
   const { mutate: deleteProduct } = useDeleteProduct();
   const queryClient = useQueryClient();
 
@@ -51,10 +53,9 @@ export const Products = () => {
     });
   };
 
-  if (error) {
-    console.log("Error: " + error);
-    return null;
-  }
+  useEffect(()=> {
+    if(isError){toaster.create({title:"Error al cargar los productos",description: error?.message || "Error desconocido", type:"error"})}
+  },[error,isError])
 
   return (
     <Stack>
@@ -71,6 +72,7 @@ export const Products = () => {
           setSelecteed(item);
         }}
         loading={isLoading}
+        noItemsComponent={<EmptyDataScreen title="No se cargaron productos" message="Verificar errores de conexión o crear un producto nuevo" icon={<BeanOffIcon/>}/>}
       />
 
       <Pagination.Root

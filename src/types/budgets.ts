@@ -1,4 +1,4 @@
-import type { PaymentMethod, } from "./sales";
+import type { PaymentMethod, ProductSaleDTO, SaleCondition, } from "./sales";
 import type { CustomerForSales, Bill } from "./types";
 
 export interface BudgetForm{
@@ -12,4 +12,6 @@ export interface BudgetForm{
     resolutionDate?:string
     status?: "Pendiente" | "Aprobado" | "Rechazado" | "Expirado"
     payMethod?: PaymentMethod
+    condition?: SaleCondition
+    products: ProductSaleDTO[]
 }

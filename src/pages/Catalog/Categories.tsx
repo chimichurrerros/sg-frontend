@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { LuChevronLeft, LuChevronRight, LuSave, LuX } from "react-icons/lu";
 
@@ -53,7 +53,7 @@ export const Categories = () => {
   });
 
   // Categories table
-  const { data, isLoading, error } = useAllCategories();
+  const { data, isLoading, error,isError } = useAllCategories();
   const categoriesLabels: label<ProductCategoryDTO>[] = [
     { labelName: "ID", propName: "id" },
     { labelName: "Nombre", propName: "name" },
@@ -100,10 +100,9 @@ export const Categories = () => {
     });
   };
 
-  if (error) {
-    console.log("Error: " + error);
-    return;
-  }
+  useEffect(()=> {
+    if(isError){toaster.create({title:"Error al cargar los productos",description: error?.message || "Error desconocido", type:"error"})}
+  },[error,isError])
 
   return (
     <Stack>

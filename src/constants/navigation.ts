@@ -8,9 +8,16 @@ import {
   Building2,
   Truck,
   CalendarRange,
-  ClipboardList,
   Package,
   Receipt,
+  Landmark,
+  Building,
+  CreditCard,
+  BanknoteArrowUp,
+  ScrollText,
+  TableProperties,
+  NotebookPen,
+  ClipboardCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -58,13 +65,51 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // { id: "compras", label: "Compras", icon: Package, path: "/dash/compras" },
-  // {
-  //   id: "tesoreria",4
-  //   label: "Tesorería y Bancos",
-  //   icon: Landmark,
-  //   path: "/dash/tesoreria",
-  // },
+  {
+    id: "compras", label: "Compras", icon: NotebookPen, path: "/compras",
+    children: [
+      {
+        id: "cotizaciones-proveedores",
+        label: "Cotizaciones",
+        icon:   TableProperties,
+        path: "/compras/cotizaciones-proveedores"
+      },
+      {
+        id: "ordenes-de-compra",
+        label: "Órdenes de Compra",
+        icon: ClipboardCheck,
+        path: "/compras/ordenes-de-compra"
+      },
+    ]
+
+  },
+  {
+    id: "tesoreria",
+    label: "Tesorería y Bancos",
+    icon: Landmark,
+    path: "/tesoreria",
+    children: [
+      { id: "bancos", label: "Bancos", icon: Building, path: "/tesoreria/bancos" },
+      {
+        id: "cuentas-bancarias",
+        label: "Cuentas bancarias",
+        icon: CreditCard,
+        path: "/tesoreria/cuentas-bancarias",
+      },
+      {
+        id: "movimientos",
+        label: "Movimientos",
+        icon: BanknoteArrowUp,
+        path: "/tesoreria/movimientos",
+      },
+      {
+        id: "cheques",
+        label: "Cheques",
+        icon: ScrollText,
+        path: "/tesoreria/cheques"
+      },
+    ],
+  },
   // { id: "rrhh", label: "RR.HH.", icon: Users, path: "/dash/rrhh" },
   {
     id: "gestiones",
