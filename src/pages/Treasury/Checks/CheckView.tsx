@@ -6,6 +6,7 @@ import { Text } from "@chakra-ui/react/text";
 import { ArrowDownUp, ArrowLeft, BanknoteX } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { checkStatusEnum, checkTypeEnum } from "@/api/checks.api";
+import { parseDate } from "@/constants/date";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
 
@@ -94,7 +95,7 @@ export default function CheckView() {
             <Box bg="white" h="full" w="100%">
                 <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                     <LabelValue label="Número de Cheque" value={check.number} />
-                    <LabelValue label="Fecha de Emisión" value={check.emisionDate} />
+                    <LabelValue label="Fecha de Emisión" value={check.emisionDate || "-"} />
                     <LabelValue label="Situación" value={checkStatusEnum[check.status] ?? "-"} />
 
                     <LabelValue label="Tipo" value={checkTypeEnum[check.type] ?? "-"} />
@@ -102,12 +103,12 @@ export default function CheckView() {
                     <LabelValue label="Receptor" value={check.receiver} />
 
                     <LabelValue label="Monto" value={`${check.amount?.toLocaleString("es-PY") || "-"} ₲`} />
-                    <LabelValue label="Fecha de Disponibilidad" value={check.availabilityDate} />
-                    <LabelValue label="Fecha de Vencimiento" value={check.maturityDate} />
+                    <LabelValue label="Fecha de Disponibilidad" value={check.availabilityDate || "-"} />
+                    <LabelValue label="Fecha de Vencimiento" value={check.maturityDate || "-"} />
 
                     {check.paymentDate && (
                         <GridItem colSpan={3}>
-                            <LabelValue label="Fecha de Pago" value={check.paymentDate} />
+                            <LabelValue label="Fecha de Pago" value={parseDate(check.paymentDate)} />
                         </GridItem>
                     )}
                 </Grid>

@@ -20,6 +20,7 @@ import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
 import { useMask } from "@react-input/mask";
+import { parseDate } from "@/constants/date";
 import { useCreateSale } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
 
@@ -288,7 +289,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             </Flex>}
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Fecha</Text>
-              <Text fontWeight="medium">{new Date(saleForm.sale.date).toLocaleDateString()}</Text>
+              <Text fontWeight="medium">{parseDate(saleForm.sale.date)}</Text>
             </Flex>
             <Flex justify="space-between" fontSize="sm">
               <Text color="gray.500">Caja N°</Text>

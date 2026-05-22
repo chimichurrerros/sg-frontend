@@ -15,6 +15,7 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import type { BackendError } from "@/types/types";
 import { toaster } from "@/components/ui/toaster";
 import { supplierQuoteStatusMap } from "@/types/purchases";
+import { parseDate } from "@/constants/date";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import type { Supplier } from "@/types/suppliers";
 import type { CreateSupplierQuoteProduct, EditSupplierQuoteRequest } from "@/api/supplierQuote.api";
@@ -241,7 +242,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                         </Box>
                         <SelectWrapper
                             disabled={loadingPurchaseRequests || isPurchaseRequestsError || saleOrderId !== null}
-                            options={purchaseRequests?.purchaseRequests.map((pr) => ({ value: pr.id.toString(), label: `${pr.id} - ${pr.userName} - ${pr.date}` })) || []}
+                            options={purchaseRequests?.purchaseRequests.map((pr) => ({ value: pr.id.toString(), label: `${pr.id} - ${pr.userName} - ${parseDate(pr.date)}` })) || []}
                             placeholder="Selecciona un pedido de compra"
                             width="full"
                             value={selectedPurchaseRequestId?.toString() || ""}
@@ -270,7 +271,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                     </Box>
                     <Box minWidth="250px" flex="1">
                         <Text fontSize="sm" fontWeight="medium" mb={1}>Fecha de Cotización</Text>
-                        <Input value={quoteData?.date.toString() || "Hoy"} readOnly />
+                        <Input value={quoteData ? parseDate(quoteData.date) : parseDate(new Date())} readOnly />
                     </Box>
 
                     {mode === "edit" && (

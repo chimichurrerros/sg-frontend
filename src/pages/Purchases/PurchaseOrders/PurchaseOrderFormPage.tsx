@@ -18,6 +18,7 @@ import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useGetAllPurchaseRequests } from "@/queries/purchase-request.queries.ts";
 import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder } from "@/queries/purchase-orders.queries.ts";
 import { useMe } from "@/queries/auth.queries";
+import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 
 export default function PurchaseOrderFormPage() {
@@ -36,15 +37,11 @@ export default function PurchaseOrderFormPage() {
     const createOrder = useCreatePurchaseOrder();
 
     const draft = draftData?.purchaseOrder;
-    const today = new Date().toLocaleDateString("es-PY", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+    const today = parseDate(new Date());
 
     const requestCollection = createListCollection({
         items: (requestsData?.purchaseRequests ?? []).map((r) => ({
-            label: `${r.id} - ${new Date(r.date).toLocaleDateString("es-PY")}`,
+            label: `${r.id} - ${parseDate(r.date)}`,
             value: String(r.id),
         })),
     });
@@ -123,7 +120,7 @@ export default function PurchaseOrderFormPage() {
                 <Field.Label>Fecha</Field.Label>
                 <Input
                     value={isViewMode
-                        ? new Date(orderData?.purchaseOrder.date ?? "").toLocaleDateString("es-PY", { day: "2-digit", month: "2-digit", year: "numeric" })
+                        ? parseDate(orderData?.purchaseOrder.date)
                         : today}
                     disabled
                 />
