@@ -8,6 +8,7 @@ export interface AccountResponseDto {
     name: string | null;
     currentBalance: number;
     availableBalance: number;
+    accountNumber: string | null;
 }
 
 export interface ListAccountsWrapperDto {
@@ -21,6 +22,7 @@ export interface CreateAccountRequestDto {
     name?: string | null;
     currentBalance: number;
     availableBalance: number;
+    accountNumber?: string | null;
 }
 
 export const accountTypeMap: Record<number, string> = {

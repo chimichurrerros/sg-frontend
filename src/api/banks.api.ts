@@ -4,7 +4,6 @@ import { apiClient } from "./client";
 export interface BankAccountResponseDto {
     id: number;
     name: string | null;
-    accountType: number;
     currentBalance: number;
     availableBalance: number;
 }
@@ -12,8 +11,6 @@ export interface BankAccountResponseDto {
 export interface BankResponseDto {
     id: number;
     name: string | null;
-    accountNumber: string | null;
-    accountType: number;
     ruc: string | null;
     isActive: boolean;
     accounts: BankAccountResponseDto[] | null;
@@ -26,15 +23,8 @@ export interface ListBanksWrapperDto {
 
 export interface CreateBankRequestDto {
     name: string | null;
-    accountNumber: string | null;
-    accountType: number;
     ruc: string | null;
 }
-
-export const bankMovementTypeMap: Record<number, string> = {
-    1: "Débito",
-    2: "Crédito",
-};
 
 export const banksApi = {
     getBanks: (params?: PaginationParams) =>

@@ -1,22 +1,17 @@
-import { bankMovementTypeMap, type BankResponseDto } from "@/api/banks.api";
+import { type CreateBankRequestDto } from "@/api/banks.api";
 import { useGetBankById, useUpdateBank, useDeleteBank } from "@/queries/banks.queries";
 import { createBankSchema, type CreateBankFormData } from "@/schemas/banks.schema";
 import { toaster } from "@/components/ui/toaster";
-import { accountTypeMap } from "@/api/bankAccounts.api";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import type { BankAccountResponseDto } from "@/api/banks.api";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import {
     Box,
     Button,
-    createListCollection,
     Field,
     Grid,
-    GridItem,
     IconButton,
     Input,
-    Portal,
-    Select,
     Separator,
     Stack,
     Text,
@@ -25,15 +20,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-
-const accountTypeCollection = createListCollection({
-    items: Object.entries(bankMovementTypeMap).map(([value, label]) => ({
-        label,
-        value,
-    })),
-});
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -53,11 +41,6 @@ const formatBalance = (value: number) =>
 
 const bankAccountLabels: label<BankAccountResponseDto>[] = [
     { labelName: "Nombre", propName: "name", textIfNull: "-" },
-    {
-        labelName: "Tipo",
-        propName: "accountType",
-        transformFunction: (value: number) => accountTypeMap[value] || "Desconocido",
-    },
     {
         labelName: "Saldo Actual",
         propName: "currentBalance",
@@ -83,7 +66,6 @@ export default function BankView() {
 
     const {
         register,
-        control,
         handleSubmit,
         reset,
         formState: { errors },
@@ -95,8 +77,6 @@ export default function BankView() {
         if (bank) {
             reset({
                 name: bank.name ?? "",
-                accountNumber: bank.accountNumber ?? "",
-                accountType: bank.accountType,
                 ruc: bank.ruc ?? "",
             });
         }
@@ -113,7 +93,11 @@ export default function BankView() {
     }, [isError, error]);
 
     const handleSave = (formData: CreateBankFormData) => {
-        updateBank(formData, {
+        const apiData: CreateBankRequestDto = {
+            name: formData.name || null,
+            ruc: formData.ruc || null,
+        };
+        updateBank(apiData, {
             onSuccess: () => {
                 toaster.create({ title: "Banco actualizado con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["banks"] });
@@ -214,8 +198,6 @@ export default function BankView() {
                     <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                         <LabelValue label="ID" value={String(bank.id)} />
                         <LabelValue label="Nombre" value={bank.name ?? "-"} />
-                        <LabelValue label="Nro. Cuenta" value={bank.accountNumber ?? "-"} />
-                        <LabelValue label="Tipo" value={bankMovementTypeMap[bank.accountType] || "Desconocido"} />
                         <LabelValue label="RUC" value={bank.ruc ?? "-"} />
                         <LabelValue label="Activo" value={bank.isActive ? "Sí" : "No"} />
                     </Grid>
@@ -241,7 +223,7 @@ export default function BankView() {
             ) : (
                 <Box bg="white" h="full" w="100%">
                     <Stack as="form" onSubmit={handleSubmit(handleSave)} gap={4} maxW="600px">
-                        <Field.Root invalid={!!errors.name} required>
+                        <Field.Root invalid={!!errors.name}>
                             <Field.Label>Nombre</Field.Label>
                             <Input
                                 {...register("name")}
@@ -251,57 +233,7 @@ export default function BankView() {
                             <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
                         </Field.Root>
 
-                        <Field.Root invalid={!!errors.accountNumber} required>
-                            <Field.Label>Número de Cuenta</Field.Label>
-                            <Input
-                                {...register("accountNumber")}
-                                placeholder="000-000000-0"
-                                disabled={isUpdating}
-                            />
-                            <Field.ErrorText>{errors.accountNumber?.message}</Field.ErrorText>
-                        </Field.Root>
-
-                        <Field.Root invalid={!!errors.accountType} required>
-                            <Field.Label>Tipo de Cuenta Bancaria</Field.Label>
-                            <Controller
-                                name="accountType"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select.Root
-                                        collection={accountTypeCollection}
-                                        value={[String(field.value)]}
-                                        onValueChange={(e) => field.onChange(Number(e.value[0]))}
-                                        disabled={isUpdating}
-                                    >
-                                        <Select.HiddenSelect />
-                                        <Select.Control>
-                                            <Select.Trigger>
-                                                <Select.ValueText placeholder="Seleccionar tipo" />
-                                            </Select.Trigger>
-                                            <Select.IndicatorGroup>
-                                                <Select.ClearTrigger />
-                                                <Select.Indicator />
-                                            </Select.IndicatorGroup>
-                                        </Select.Control>
-                                        <Portal>
-                                            <Select.Positioner>
-                                                <Select.Content>
-                                                    {accountTypeCollection.items.map((item) => (
-                                                        <Select.Item item={item} key={item.value}>
-                                                            {item.label}
-                                                            <Select.ItemIndicator />
-                                                        </Select.Item>
-                                                    ))}
-                                                </Select.Content>
-                                            </Select.Positioner>
-                                        </Portal>
-                                    </Select.Root>
-                                )}
-                            />
-                            <Field.ErrorText>{errors.accountType?.message}</Field.ErrorText>
-                        </Field.Root>
-
-                        <Field.Root invalid={!!errors.ruc} required>
+                        <Field.Root invalid={!!errors.ruc}>
                             <Field.Label>RUC</Field.Label>
                             <Input
                                 {...register("ruc")}

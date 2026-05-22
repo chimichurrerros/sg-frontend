@@ -1,5 +1,4 @@
 import type { BankResponseDto } from "@/api/banks.api";
-import { bankMovementTypeMap } from "@/api/banks.api";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -29,22 +28,6 @@ const bankLabels: label<BankResponseDto>[] = [
     isSortable: true,
     sortFunction: (a: BankResponseDto, b: BankResponseDto) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
-  },
-  {
-    labelName: "Nro. Cuenta",
-    propName: "accountNumber",
-    isSortable: true,
-    sortFunction: (a: BankResponseDto, b: BankResponseDto) =>
-      (a.accountNumber ?? "").localeCompare(b.accountNumber ?? ""),
-  },
-  {
-    labelName: "Tipo",
-    propName: "accountType",
-    isSortable: true,
-    sortFunction: (a: BankResponseDto, b: BankResponseDto) =>
-      a.accountType - b.accountType,
-    transformFunction: (value: number) =>
-      bankMovementTypeMap[value] || "Desconocido",
   },
   {
     labelName: "RUC",

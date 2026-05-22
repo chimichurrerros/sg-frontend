@@ -1,5 +1,6 @@
 import type { AccountResponseDto } from "@/api/bankAccounts.api";
 import { accountTypeMap } from "@/api/bankAccounts.api";
+import { useGetBanks } from "@/queries/banks.queries";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -18,7 +19,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Landmark, Pencil, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
@@ -28,41 +29,6 @@ const formatBalance = (value: number) =>
     currency: "PYG",
     minimumFractionDigits: 0,
   }).format(value);
-
-const accountLabels: label<AccountResponseDto>[] = [
-  {
-    labelName: "Nombre",
-    propName: "name",
-    isSortable: true,
-    sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
-      (a.name ?? "").localeCompare(b.name ?? ""),
-  },
-  {
-    labelName: "Tipo de Cuenta",
-    propName: "accountType",
-    isSortable: true,
-    sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
-      a.accountType - b.accountType,
-    transformFunction: (value: number) =>
-      accountTypeMap[value] || "Desconocido",
-  },
-  {
-    labelName: "Saldo Actual",
-    propName: "currentBalance",
-    isSortable: true,
-    sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
-      a.currentBalance - b.currentBalance,
-    transformFunction: (value: number) => formatBalance(value),
-  },
-  {
-    labelName: "Saldo Disponible",
-    propName: "availableBalance",
-    isSortable: true,
-    sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
-      a.availableBalance - b.availableBalance,
-    transformFunction: (value: number) => formatBalance(value),
-  },
-];
 
 export default function BankAccountsPage() {
   const [params, setParams] = useState<PaginationParams>({
@@ -84,9 +50,63 @@ export default function BankAccountsPage() {
         ? params.pageSize
         : 10,
   });
+  const { data: banks } = useGetBanks();
   const { mutate: deleteAccount } = useDeleteAccount();
   const [selected, setSelected] = useState<AccountResponseDto | null>(null);
   const navigate = useNavigate();
+
+  const accountLabels: label<AccountResponseDto>[] = useMemo(() => [
+    {
+      labelName: "Nombre",
+      propName: "name",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        (a.name ?? "").localeCompare(b.name ?? ""),
+    },
+    {
+      labelName: "Nro. Cuenta",
+      propName: "accountNumber",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        (a.accountNumber ?? "").localeCompare(b.accountNumber ?? ""),
+    },
+    {
+      labelName: "Tipo de Cuenta",
+      propName: "accountType",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        a.accountType - b.accountType,
+      transformFunction: (value: number) =>
+        accountTypeMap[value] || "Desconocido",
+    },
+    {
+      labelName: "Banco",
+      propName: "bankId",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        (a.bankId ?? 0) - (b.bankId ?? 0),
+      transformFunction: (value: number | null) => {
+        if (value == null) return "-";
+        return banks?.banks?.find((b) => b.id === value)?.name ?? `Banco #${value}`;
+      },
+    },
+    {
+      labelName: "Saldo Actual",
+      propName: "currentBalance",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        a.currentBalance - b.currentBalance,
+      transformFunction: (value: number) => formatBalance(value),
+    },
+    {
+      labelName: "Saldo Disponible",
+      propName: "availableBalance",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        a.availableBalance - b.availableBalance,
+      transformFunction: (value: number) => formatBalance(value),
+    },
+  ], [banks]);
 
   useEffect(() => {
     if (isError) {

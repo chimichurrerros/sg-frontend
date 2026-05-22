@@ -3,34 +3,24 @@ import {
   type CreateBankFormData,
 } from "@/schemas/banks.schema";
 import { useCreateBank } from "@/queries/banks.queries";
-import { bankMovementTypeMap } from "@/api/banks.api";
+import { type CreateBankRequestDto } from "@/api/banks.api";
 import { toaster } from "@/components/ui/toaster";
 import {
   Button,
-  createListCollection,
   Field,
   Flex,
   Grid,
   GridItem,
   Heading,
   Input,
-  Portal,
-  Select,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
-
-const accountTypeCollection = createListCollection({
-  items: Object.entries(bankMovementTypeMap).map(([value, label]) => ({
-    label,
-    value,
-  })),
-});
 
 export default function BankCreate() {
   const navigate = useNavigate();
@@ -39,21 +29,22 @@ export default function BankCreate() {
 
   const {
     register,
-    control,
     handleSubmit,
     formState: { errors },
   } = useForm<CreateBankFormData>({
     resolver: zodResolver(createBankSchema),
     defaultValues: {
       name: "",
-      accountNumber: "",
-      accountType: 1,
       ruc: "",
     },
   });
 
   const handleCreate = (formData: CreateBankFormData) => {
-    createBank(formData, {
+    const apiData: CreateBankRequestDto = {
+      name: formData.name || null,
+      ruc: formData.ruc || null,
+    };
+    createBank(apiData, {
       onSuccess: () => {
         toaster.create({ title: "Banco creado con éxito" });
         queryClient.invalidateQueries({ queryKey: ["banks"] });
@@ -86,7 +77,7 @@ export default function BankCreate() {
       <Stack as="form" onSubmit={handleSubmit(handleCreate)} gap={4}>
         <Grid templateColumns="2fr 2fr" gap={4} alignItems="center">
           <GridItem colSpan={4}>
-            <Field.Root invalid={!!errors.name} required>
+            <Field.Root invalid={!!errors.name}>
               <Input
                 {...register("name")}
                 placeholder="Nombre del banco"
@@ -98,62 +89,8 @@ export default function BankCreate() {
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.accountNumber} required>
-              <Field.Label>Número de Cuenta</Field.Label>
-              <Input
-                {...register("accountNumber")}
-                placeholder="000-000000-0"
-                disabled={isPending}
-              />
-              <Field.ErrorText>{errors.accountNumber?.message}</Field.ErrorText>
-            </Field.Root>
-          </GridItem>
-
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.accountType} required>
-              <Field.Label>Tipo de Cuenta Bancaria</Field.Label>
-              <Controller
-                name="accountType"
-                control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    collection={accountTypeCollection}
-                    value={[String(field.value)]}
-                    onValueChange={(e) => field.onChange(Number(e.value[0]))}
-                    disabled={isPending}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Seleccionar tipo" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.ClearTrigger />
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {accountTypeCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                )}
-              />
-              <Field.ErrorText>{errors.accountType?.message}</Field.ErrorText>
-            </Field.Root>
-          </GridItem>
-
           <GridItem colSpan={4}>
-            <Field.Root invalid={!!errors.ruc} required>
+            <Field.Root invalid={!!errors.ruc}>
               <Field.Label>RUC</Field.Label>
               <Input
                 {...register("ruc")}
