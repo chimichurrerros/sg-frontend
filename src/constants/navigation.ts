@@ -80,6 +80,12 @@ export const NAV_CONFIG: NavItem[] = [
         icon: ClipboardCheck,
         path: "/compras/ordenes-de-compra"
       },
+      {
+        id: "recepcion-ordenes-compra",
+        label: "Recepción de OC",
+        icon:   Package,
+        path: "/compras/recepcion-ordenes-compra"
+      },
     ]
 
   },

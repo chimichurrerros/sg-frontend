@@ -26,6 +26,7 @@ import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
+import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
           { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
           { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
           { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
+          { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
