@@ -94,7 +94,7 @@ export default function CheckView() {
             <Box bg="white" h="full" w="100%">
                 <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                     <LabelValue label="Número de Cheque" value={check.number} />
-                    <LabelValue label="Fecha de Emisión" value={check.emisionDate} />
+                    <LabelValue label="Fecha de Emisión" value={check.emisionDate || "-"} />
                     <LabelValue label="Situación" value={checkStatusEnum[check.status] ?? "-"} />
 
                     <LabelValue label="Tipo" value={checkTypeEnum[check.type] ?? "-"} />
@@ -102,8 +102,8 @@ export default function CheckView() {
                     <LabelValue label="Receptor" value={check.receiver} />
 
                     <LabelValue label="Monto" value={`${check.amount?.toLocaleString("es-PY") || "-"} ₲`} />
-                    <LabelValue label="Fecha de Disponibilidad" value={check.availabilityDate} />
-                    <LabelValue label="Fecha de Vencimiento" value={check.maturityDate} />
+                    <LabelValue label="Fecha de Disponibilidad" value={check.availabilityDate || "-"} />
+                    <LabelValue label="Fecha de Vencimiento" value={check.maturityDate || "-"} />
 
                     {check.paymentDate && (
                         <GridItem colSpan={3}>
