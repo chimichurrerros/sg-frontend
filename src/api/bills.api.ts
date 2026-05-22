@@ -1,5 +1,5 @@
 import type { Bill } from "@/types/bills";
-import type { PaginationType } from "@/types/types";
+import type { PaginationParams, PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 
 export interface BillsGetResponse {
@@ -42,14 +42,8 @@ export interface UpdateBillRequest {
   taxTotal: number;
   isCredit: boolean;
 }
-
-export interface BillsParams {
-  page?: number;
-  pageSize?: number;
-}
-
 export const billsApi = {
-  getAll: (params?: BillsParams) =>
+  getAll: (params?: PaginationParams) =>
     apiClient
       .get<BillsGetResponse>("/api/bills", { params })
       .then((r) => r.data),

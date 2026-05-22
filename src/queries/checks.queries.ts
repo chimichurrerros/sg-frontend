@@ -56,6 +56,7 @@ export const useUpdateCheck = (id: number, body: UpdateCheckBodyRequest) => {
             toaster.create({
                 title: "Cheque actualizado",
                 description: "El cheque ha sido actualizado exitosamente.",
+                type:"success"
             });
             queryClient.invalidateQueries({ queryKey: ["checks"] });
             queryClient.invalidateQueries({ queryKey: ["check", id] });

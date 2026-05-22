@@ -10,6 +10,7 @@ import { parseDate } from "@/constants/date";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
+import { parsePrice } from "@/constants/price";
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -108,7 +109,7 @@ export default function CheckView() {
                     <LabelValue label="Banco Emisor" value={check.issuingBank} />
                     <LabelValue label="Receptor" value={check.receiver} />
 
-                    <LabelValue label="Monto" value={`${check.amount?.toLocaleString("es-PY") || "-"} ₲`} />
+                    <LabelValue label="Monto" value={ parsePrice(check.amount) || "-"} />
                     <LabelValue label="Fecha de Disponibilidad" value={parseDate(check.availabilityDate) || "-"} />
                     <LabelValue label="Fecha de Vencimiento" value={parseDate(check.maturityDate) || "-"} />
 
