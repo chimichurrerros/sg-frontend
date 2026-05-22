@@ -22,6 +22,7 @@ export interface EditableLabel<T extends { id: number }> {
     inputType?: "text" | "number" | "email" | "date";
     validate?: (value: any) => boolean;
     transform?: (value: any) => any;
+    formatFunction?:(value:any)=>string;
     render?: (item: T) => React.ReactNode;
     isComponent?: boolean
     isSortable?: boolean;
@@ -180,7 +181,6 @@ export default function TableEditable<T extends { id: number }>({
             );
         }
         const finalVal = !displayValue ? label.textIfNull : String(displayValue)
-
         return (
             <HStack
                 justify="space-between"
@@ -193,7 +193,7 @@ export default function TableEditable<T extends { id: number }>({
                 cursor={label.isEditable ? "pointer" : "default"}
                 minH="28px"
             >
-                <Text fontSize="sm">{label.transform ? label.transform(finalVal) : finalVal}</Text>
+                <Text fontSize="sm">{label.formatFunction ? label.formatFunction(finalVal) : finalVal}</Text>
 
             </HStack>
         );

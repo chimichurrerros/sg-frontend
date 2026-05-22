@@ -52,17 +52,15 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
         {
             labelName: "Precio Unitario",
             propName: "price", isEditable: true,
-            transform:(value)=>parsePrice(value),
+            formatFunction:(value)=>parsePrice(value),
             isSortable: true,
             textIfNull: "Definir",
             inputType: "number",
             sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.price || 0) - (b.price || 0)
         },
         {
-            labelName: "IVA", propName: "taxRate", textIfNull: "Definir",
-            isEditable: true,
-            validate: (value: number | string) => Number(value) === 5 || Number(value) === 10,
-            transform: (value: string) => Number.isNaN(Number(value)) ? "Definir" : Number(value)
+            labelName: "IVA", propName: "taxRate", textIfNull: "-",
+            formatFunction:(value)=> value !== "-" ? String(value) + "%":"-"
         }
         // { labelName: "Precio Total", propName: "totalPrice", isSortable: true, sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.totalPrice || 0) - (b.totalPrice || 0) }
     ];
@@ -242,7 +240,6 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                 </Box>
             </Box>
             <Box>
-
                 <Box display="flex" flexWrap="wrap" gap={6} my={6}>
                     <Box minWidth="250px" flex="1">
                         <Box display="flex" flexDirection="row" gap={2}>
