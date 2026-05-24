@@ -19,7 +19,7 @@ import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
 import { useMask } from "@react-input/mask";
-import { parseDate } from "@/constants/date";
+// import { parseDate } from "@/constants/date";
 import { useCreateSale } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
@@ -270,8 +270,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               products: newData
             })
           }} />
-
-        <Box
+        {/* Hidden by moment */}
+        {/* <Box
           w="250px"
           p={3}
           border="1px solid"
@@ -316,7 +316,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text color="green.600">{parsePrice(saleForm.totals.change)}</Text>
             </Flex>
           </Box>
-        </Box>
+        </Box> */}
       </Box>
 
       <Flex mt={4} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">

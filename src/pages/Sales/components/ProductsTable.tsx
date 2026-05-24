@@ -34,19 +34,24 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
     return { ...product, quantity, total: (quantity * product.price) } as ProductSaleDTO
   }
 
-  useEffect(() => {
-    if (!aviableProducts?.products) return;
-    const prod = aviableProducts?.products.find(p => p.barcode == productCode)
-    if (prod) {
-      const exist = products.some(p => p.id === prod.id)
-      if (exist) {
-        onDataChange(products.map(p => p.id === prod.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity + 1) * p.price } : p))
-      } else {
-        onDataChange([...products, { ...prod, quantity: 1, total: prod.price } as ProductSaleDTO])
-      }
-      setProductCode("")
+ useEffect(() => {
+    if (!aviableProducts?.products || !productCode) return; 
+
+    const prod = aviableProducts.products.find(p => p.barcode === productCode) 
+    if (!prod) return;
+
+    const exist = products.some(p => p.id === prod.id);
+    if (exist) {
+        onDataChange(products.map(p =>
+            p.id === prod.id
+                ? { ...p, quantity: p.quantity + 1, total: (p.quantity + 1) * p.price }
+                : p
+        ));
+    } else {
+        onDataChange([...products, { ...prod, quantity: 1, total: prod.price } as ProductSaleDTO]);
     }
-  }, [productCode])
+    setProductCode("");
+}, [productCode, aviableProducts]); 
 
   return (<Box flex={1}>
     {!readOnly && <Box display="flex" flexDirection="row" gap={3}>
