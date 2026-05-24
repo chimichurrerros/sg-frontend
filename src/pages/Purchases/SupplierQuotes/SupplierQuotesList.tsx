@@ -84,7 +84,7 @@ export default function SupplierQuotesList() {
                 onSelect={(item) => setSelected(item)}
                 onDoubleClick={(item) => navigate(`/compras/cotizaciones-proveedores/${item.id}`)}
                 loading={loadingSupplierQuotes}
-                height="50vh"
+                maxHeight="50vh"
                 noItemsComponent={
                     <EmptyDataScreen
                         title="No se encontraron cotizaciones"

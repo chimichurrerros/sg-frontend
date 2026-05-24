@@ -29,6 +29,7 @@ export interface tableSelectProps<T extends { id: number }> {
     loading: boolean
     error?: Error | null
     isError?: boolean
+    maxHeight?:string
 }
 
 /**
@@ -57,7 +58,7 @@ export const getSorticon = (sortDirection: "Asc" | "Desc") => {
 
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
-        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false
+        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false,maxHeight
     }: tableSelectProps<T>) {
 
 
@@ -162,7 +163,7 @@ function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
                     <LoadingScreen message={loadingMessage} height={height || "400px"} />
                 </Box>
             ) : (
-                <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "100%"} minHeight={minheight || "auto"} tabIndex={0} >
+                <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "100%"} minHeight={minheight || "auto"} maxHeight={maxHeight || "60vh"} tabIndex={0} >
                     <Table.Root size="sm" stickyHeader >
                         <Table.Header >
                             <Table.Row bg="bg.subtle" hidden={loading}>
