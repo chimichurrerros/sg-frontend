@@ -22,7 +22,7 @@ export interface EditableLabel<T extends { id: number }> {
     inputType?: "text" | "number" | "email" | "date";
     validate?: (value: any) => boolean;
     transform?: (value: any) => any;
-    formatFunction?:(value:any)=>string;
+    formatFunction?: (value: any) => string;
     render?: (item: T) => React.ReactNode;
     isComponent?: boolean
     isSortable?: boolean;
@@ -38,7 +38,8 @@ export interface TableEditableProps<T extends { id: number }> {
     minHeight?: string;
     loadingMessage?: string;
     loading?: boolean;
-    readOnly?: boolean
+    readOnly?: boolean;
+    maxHeight?: string;
 }
 
 export default function TableEditable<T extends { id: number }>({
@@ -50,7 +51,8 @@ export default function TableEditable<T extends { id: number }>({
     minHeight = "auto",
     loadingMessage = "Cargando datos...",
     loading = false,
-    readOnly = false
+    readOnly = false,
+    maxHeight
 }: TableEditableProps<T>) {
     const [editingCell, setEditingCell] = useState<{ rowId: number; propName: string } | null>(null);
     const [editValue, setEditValue] = useState<any>("");
@@ -152,7 +154,7 @@ export default function TableEditable<T extends { id: number }>({
         const isEditing = editingCell?.rowId === item.id && editingCell?.propName === label.propName;
         const value = item[label.propName];
         const displayValue = value ?? label.textIfNull ?? "-";
-        if (isEditing) {
+        if (isEditing && !readOnly) {
             return (
                 <Box
                     position="relative"
@@ -172,15 +174,14 @@ export default function TableEditable<T extends { id: number }>({
                         py={0}
                         variant="flushed"
                         height="28px"
-                        width={`${(String(item[label.propName]).length + 1) * 3}px`}
-                        border="1px"
+                        width={`clamp(60px, ${String(item[label.propName]).length + 2}ch, 200px)`} border="1px"
                         color={!isValid ? "red" : ""}
                         disabled={readOnly}
                     />
                 </Box>
             );
         }
-        const finalVal = !displayValue ? label.textIfNull : String(displayValue)
+        const finalVal = displayValue === null || displayValue === undefined ? label.textIfNull : String(displayValue)
         return (
             <HStack
                 justify="space-between"
@@ -207,7 +208,7 @@ export default function TableEditable<T extends { id: number }>({
         setFinalData(sortedData);
     };
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} width="100%">
+        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} maxHeight={maxHeight || "60vh"} width="100%">
             <Table.Root size="sm" stickyHeader>
                 <Table.Header>
                     <Table.Row bg="bg.subtle" hidden={loading} userSelect="none">

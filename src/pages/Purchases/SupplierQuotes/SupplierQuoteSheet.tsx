@@ -59,8 +59,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
             sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.price || 0) - (b.price || 0)
         },
         {
-            labelName: "IVA", propName: "taxRate", textIfNull: "-",
-            formatFunction:(value)=> value !== "-" ? String(value) + "%":"-"
+            labelName: "IVA", propName: "taxRate", textIfNull: "-"
         }
         // { labelName: "Precio Total", propName: "totalPrice", isSortable: true, sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.totalPrice || 0) - (b.totalPrice || 0) }
     ];
