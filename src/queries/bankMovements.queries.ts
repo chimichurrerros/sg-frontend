@@ -78,25 +78,4 @@ export const useUpdateMovement = (id: number) => {
     });
 };
 
-export const useDeleteMovement = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id: number) => bankMovementsApi.deleteMovement(id),
-        retry: RETRIES,
-        onSuccess: () => {
-            toaster.create({
-                title: "Movimiento eliminado",
-                description: "El movimiento bancario ha sido eliminado exitosamente.",
-            });
-            queryClient.invalidateQueries({ queryKey: bankMovementsKeys.all });
-        },
-        onError: (error: any) => {
-            const errorMessage = error.response?.data?.title || error.message;
-            toaster.create({
-                title: "Error al eliminar el movimiento",
-                description: "Ha ocurrido un error al intentar eliminar el movimiento: " + errorMessage,
-                type: "error",
-            });
-        },
-    });
-};
+

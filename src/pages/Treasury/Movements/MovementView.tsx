@@ -1,6 +1,6 @@
 import { type AccountResponseDto } from "@/api/bankAccounts.api";
 import { parseDate } from "@/constants/date";
-import { useGetMovementById, useUpdateMovement, useDeleteMovement } from "@/queries/bankMovements.queries";
+import { useGetMovementById, useUpdateMovement } from "@/queries/bankMovements.queries";
 import { useGetAccounts } from "@/queries/bankAccounts.queries";
 import { createMovementSchema, type CreateMovementFormData } from "@/schemas/bankMovements.schema";
 import { toaster } from "@/components/ui/toaster";
@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -53,7 +53,6 @@ export default function MovementView() {
     const { data: movement, isPending, isError, error } = useGetMovementById(movementId);
     const { data: accountsData } = useGetAccounts({ page: 1, pageSize: 100 });
     const { mutate: updateMovement, isPending: isUpdating } = useUpdateMovement(movementId);
-    const { mutate: deleteMovement } = useDeleteMovement();
 
     const accountCollection = useMemo(() =>
         createListCollection({
@@ -113,24 +112,6 @@ export default function MovementView() {
         });
     };
 
-    const handleDelete = () => {
-        if (!movement) return;
-        deleteMovement(movement.id, {
-            onSuccess: () => {
-                toaster.create({ title: "Movimiento bancario eliminado con éxito" });
-                queryClient.invalidateQueries({ queryKey: ["bankMovements"] });
-                navigate("/tesoreria/movimientos");
-            },
-            onError: (err) => {
-                toaster.create({
-                    title: "Error al eliminar el movimiento bancario",
-                    description: err.message,
-                    type: "error",
-                });
-            },
-        });
-    };
-
     if (isPending) {
         return (
             <Box p={4}>
@@ -168,16 +149,10 @@ export default function MovementView() {
                     </IconButton>
 
                     {!isEditing && (
-                        <>
-                            <IconButton padding={2} colorPalette="brand" onClick={() => setIsEditing(true)}>
-                                <Pencil />
-                                Editar
-                            </IconButton>
-                            <IconButton padding={2} variant="outline" colorPalette="red" onClick={handleDelete}>
-                                <Trash2 />
-                                Eliminar
-                            </IconButton>
-                        </>
+                        <IconButton padding={2} colorPalette="brand" onClick={() => setIsEditing(true)}>
+                            <Pencil />
+                            Editar
+                        </IconButton>
                     )}
 
                     {isEditing && (
