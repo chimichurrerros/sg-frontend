@@ -53,8 +53,8 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
     setProductCode("");
 }, [productCode, aviableProducts]); 
 
-  return (<Box flex={1}>
-    {!readOnly && <Box display="flex" flexDirection="row" gap={3}>
+  return (<Box flex={1} display="flex" flexDirection="column" minHeight="0" height="100%">
+    {!readOnly && <Box display="flex" flexDirection="row" gap={3} flexShrink={0}>
       <Input placeholder="Insertar código de producto" mb={3} size="sm" value={productCode} onChange={(e) => setProductCode(e.target.value)} />
       {<SearchProductsDialog
         products={aviableProducts?.products || []}
@@ -67,7 +67,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
           ref={addProdRef}
         >  {aviableProducts ? <Plus /> : <Spinner />} Item </IconButton>} />}
     </Box>}
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden" height="46vh">
+    <Box flex="1" minHeight="0" border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden">
       <TableEditable
         labels={labels}
         data={products}

@@ -1,4 +1,4 @@
-import type { Bill } from "./types";
+import type { Bill } from "./bills";
 
 export interface ProductSaleDTO {
   id: number;
@@ -8,6 +8,8 @@ export interface ProductSaleDTO {
   quantity: number;
   barcode: string;
   total: number;
+  minimumStock:number
+  taxRate:number
 }
 
 // Products in the fast select list

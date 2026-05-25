@@ -17,6 +17,7 @@ interface ComboboxWrapperProps<T extends string = string> {
   value?: T;
   onValueChange?: (value: T) => void;
   clearable?: boolean;
+  disabled?:boolean
 }
 
 export function ComboboxWrapper<T extends string>({
@@ -26,6 +27,7 @@ export function ComboboxWrapper<T extends string>({
   width = "320px",
   defaultValue,
   value,
+  disabled=false,
   onValueChange,
 }: ComboboxWrapperProps<T>) {
   const [inputValue, setInputValue] = useState("");
@@ -58,6 +60,7 @@ export function ComboboxWrapper<T extends string>({
       width={width}
       inputValue={inputValue}
       onInputValueChange={(e) => setInputValue(e.inputValue)}
+      disabled={disabled}
     >
       {label && <Combobox.Label>{label}</Combobox.Label>}
       <Combobox.Control>
