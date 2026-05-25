@@ -34,7 +34,6 @@ export default function SaleListPage() {
         }
     },[isErrorSales, salesError])
 
-
     return (<Box padding={5} display="flex" flexDirection="column" gap={4}>
         <Text fontWeight="bold" fontSize="3xl">Listado de Ventas</Text>
         <Text fontSize="sm" fontStyle="italic" color="gray.600">Doble click o Enter sobre la fila para para abrir ficha de venta</Text>

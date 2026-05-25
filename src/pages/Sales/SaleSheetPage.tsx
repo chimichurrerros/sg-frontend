@@ -101,6 +101,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   useEffect(() => {
     if (!sale || mode !== "view") return;
 //Mandar codigo y descripción en prod detail, mandar ruc en customer, mandar método de pago y condición de venta en sale o pay
+//Ver ruc nnnnnnn-n, pedir que no sea obligatorio mandar cliente y ruc
+//Editar customer, que los campos sean opcionales
+//Guardar el importe del cliente en la venta
     setSaleForm({
         customer: {
             name: sale.customerName,
@@ -233,7 +236,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
   function isValidRuc(ruc: string) {
     const rucRegex = /^\d{6}-\d$/;
-    return rucRegex.test(ruc);
+    return rucRegex.test(ruc) || ruc === "";
   }
   const isAmountValid = dialogAmount >= saleForm.totals.total;
   if (loadingSale && mode !== "create") {
@@ -249,7 +252,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     <Box height="89vh" display="flex" flexDirection="column">
       <Flex justify="space-between" align="center" mb={2} flexShrink={0}>
         <Text fontSize="2xl" fontWeight="bold">
-          {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `(N° ${saleForm.sale.saleNumber})` : ""}
+          {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `(N° ${saleForm.sale.saleNumber}) - ${parseDate(sale?.date)}` : ""}
         </Text>
         <Flex align="center" gap={3}>
           {mode === "view" && <IconButton size="md" padding={4} variant="outline" onClick={()=>navigate("/ventas")}><ArrowLeft /> Volver al listado</IconButton>}
@@ -267,7 +270,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         }>
             <Input 
                 value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"} 
-                w="200px" 
+                w="180px" 
                 size="md" 
                 readOnly
                 pr="2.5rem"

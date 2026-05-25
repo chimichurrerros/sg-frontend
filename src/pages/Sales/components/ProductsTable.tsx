@@ -23,7 +23,7 @@ interface productsTableProps {
 export default function ProductsTable({ products, onDataChange, labels, readOnly }: productsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("")
-  const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useAllProducts()
+  const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useAllProducts(!readOnly)
 
   useHotkeys("ctrl+i", () => {
     if (readOnly) return
@@ -44,7 +44,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
     if (exist) {
         onDataChange(products.map(p =>
             p.id === prod.id
-                ? { ...p, quantity: p.quantity + 1, total: (p.quantity + 1) * p.price }
+                ? { ...p, quantity: Math.min(p.quantity + 1,p.minimumStock), total: (p.quantity + 1) * p.price }
                 : p
         ));
     } else {
@@ -67,7 +67,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
           ref={addProdRef}
         >  {aviableProducts ? <Plus /> : <Spinner />} Item </IconButton>} />}
     </Box>}
-    <Box flex="1" minHeight="0" border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden">
+    <Box flex="1" minHeight="0" borderColor="gray.200" borderRadius="md" overflow="hidden">
       <TableEditable
         labels={labels}
         data={products}

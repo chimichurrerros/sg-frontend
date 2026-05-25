@@ -14,10 +14,11 @@ export const catalogKeys = {
 };
 
 /* ===== Products ===== */
-export const useAllProducts = () => {
+export const useAllProducts = (enabled:boolean = true) => {
   return useQuery({
     queryKey: catalogKeys.products,
     queryFn: catalogApi.getAllProducts,
+    enabled
   });
 };
 
