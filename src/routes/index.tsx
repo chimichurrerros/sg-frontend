@@ -36,6 +36,8 @@ import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
+import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
+import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
 
 export const router = createBrowserRouter([
   {
@@ -97,6 +99,9 @@ export const router = createBrowserRouter([
           { path: "/dash/proveedores", element: <SupplierListPage /> },
           { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
           { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },
+          { path: "/rrhh/empleados", element: <EmployeesPage /> },
+          { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
+          { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
