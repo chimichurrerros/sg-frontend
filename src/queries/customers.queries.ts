@@ -20,11 +20,12 @@ export const useGetCustomerById = (id: number) => {
     });
 };
 
-export const useGetAllCustomers = () => {
+export const useGetAllCustomers = (enabled: boolean = true) => {
     return useQuery({
         queryKey: ["customers", "all"],
         queryFn: () => customerApi.getAll(),
-        retry: RETRIES
+        retry: RETRIES,
+        enabled
     });
 };
 

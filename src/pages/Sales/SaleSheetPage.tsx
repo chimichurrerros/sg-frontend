@@ -7,9 +7,10 @@ import {
   Input,
   Button,
   IconButton,
-  Spinner
+  Spinner,
+  InputGroup
 } from "@chakra-ui/react";
-import { CircleDollarSign, Printer, X } from "lucide-react";
+import { ArrowLeft, CircleDollarSign, ExternalLink, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
@@ -20,10 +21,14 @@ import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
 import { useMask } from "@react-input/mask";
 // import { parseDate } from "@/constants/date";
-import { useCreateSale } from "@/queries/sales.queries";
+import { useCreateSale, useGetSaleById } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import { useGetAllCustomers } from "@/queries/customers.queries";
+import { useNavigate, useParams } from "react-router-dom";
+import { ErrorScreen } from "@/components/ui/screens/error-screen";
+import { LoadingScreen } from "@/components/ui/screens/loading-screen";
+import { parseDate } from "@/constants/date";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -58,8 +63,10 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   const [saleForm, setSaleForm] = useState<Sale>(getSaleTemplate());
   const triggerRef = useRef<HTMLButtonElement>(null);
   const createSale = useCreateSale();
+  const { id } = useParams();
+  const { data: sale, isPending: loadingSale, isError: isErrorSale, error: saleError } = useGetSaleById(Number(id), mode === "view");
   // const [saveCustomer, setSaveCustomer] = useState(false);
-  const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers();
+  const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
 
   const rucInputRef = useMask({
     mask: "nnnnnn-n",
@@ -68,6 +75,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   });
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
+  const navigate = useNavigate();
   useEffect(() => {
     const subtotal = saleForm.products.reduce((sum, p) => sum + (p.total || 0), 0);
     const total = subtotal;
@@ -90,6 +98,45 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       toaster.create({ title: "Error al cargar los clientes", description: errorCustomers.message || "Error desconocido", type: "error" })
     }
   }, [isErrorCustomers, errorCustomers])
+  useEffect(() => {
+    if (!sale || mode !== "view") return;
+//Mandar codigo y descripción en prod detail, mandar ruc en customer, mandar método de pago y condición de venta en sale o pay
+    setSaleForm({
+        customer: {
+            name: sale.customerName,
+            ruc: ""  // FullSaleOrder no tiene ruc, dejalo vacío o agregalo al tipo si el backend lo manda
+        },
+        sale: {
+            date:parseDate(sale.date),
+            cashierNumber: 0,
+            saleNumber: sale.id,
+            bill: sale.bills[0]
+        },
+        pay: {
+            method: "Efectivo",   // FullSaleOrder no tiene method, ajustá si el backend lo manda
+            condition: "Contado"  // igual
+        },
+        products: sale.details.map((d) => ({
+            id: d.productId,
+            name: d.productName,
+            barcode: "",
+            description: "",
+            price: d.price,
+            quantity: d.quantityOrdered,
+            total: d.price * d.quantityOrdered,
+            taxRate: d.taxRate,
+            minimumStock: 0,
+        })),
+        totals: {
+            subtotal: sale.total,
+            iva: 0,
+            total: sale.total,
+            amount: 0,
+            change: 0,
+        }
+    });
+}, [sale, mode]);
+
   const productsLabel: EditableLabel<ProductSaleDTO>[] = [
     { labelName: "Código", propName: "barcode", textIfNull: "-" },
     { labelName: "Nombre", propName: "name", textIfNull: "Producto sin nombre", isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.name || "").localeCompare(b.name || "") },
@@ -102,22 +149,20 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     {
       labelName: "Cantidad", propName: "quantity",
       isEditable: true, inputType: "number",
-      validate: (value: number | string, item?: ProductSaleDTO ) => Number(value) > 0 && ( item ? Number(value) <= item.minimumStock: true),
+      validate: (value: number | string, item?: ProductSaleDTO) => Number(value) > 0 && (item ? Number(value) <= item.minimumStock : true),
       transform: (value: string) => Number(value),
       onEdit: (item: ProductSaleDTO, newValue: string | number | null | undefined) => { if (!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
     },
     { labelName: "Precio Unitario", propName: "price", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price, },
     { labelName: "Total", propName: "total", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull: "0" },
-    { labelName: "IVA", propName:"taxRate", formatFunction:(value)=> String(value) +"%"},
-
-    {
+    { labelName: "IVA", propName: "taxRate", formatFunction: (value) => String(value) + "%" }
+  ];
+  if(mode ==="create"){productsLabel.push({
       labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
         <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setSaleForm({ ...saleForm, products: saleForm.products.filter((p: ProductSaleDTO) => p.id !== item.id) })}>
           <X />
         </IconButton>
-    }
-  ];
-
+    })}
   useHotkeys("ctrl+enter", () => {
     triggerRef.current?.click();
   });
@@ -186,12 +231,20 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     });
   };
 
-function isValidRuc(ruc: string) {
+  function isValidRuc(ruc: string) {
     const rucRegex = /^\d{6}-\d$/;
     return rucRegex.test(ruc);
-}
+  }
   const isAmountValid = dialogAmount >= saleForm.totals.total;
+  if (loadingSale && mode !== "create") {
+    return <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
+      <LoadingScreen message="Cargando Venta..." /> </Box>
+  }
 
+  if (isErrorSale) {
+    return <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
+      <ErrorScreen title="Error al cargar la venta" errorMessage={saleError.message || "Error desconocido"} /></Box>
+  }
   return (
     <Box height="89vh" display="flex" flexDirection="column">
       <Flex justify="space-between" align="center" mb={2} flexShrink={0}>
@@ -199,8 +252,29 @@ function isValidRuc(ruc: string) {
           {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `(N° ${saleForm.sale.saleNumber})` : ""}
         </Text>
         <Flex align="center" gap={3}>
-          {mode === "view" && <><Text fontWeight="bold" fontSize="sm">FACTURA N°</Text>
-            <Input value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"} w="170px" size="sm" readOnly /> </>}
+          {mode === "view" && <IconButton size="md" padding={4} variant="outline" onClick={()=>navigate("/ventas")}><ArrowLeft /> Volver al listado</IconButton>}
+          {mode === "view" && (
+    <Flex align="center" gap={2}>
+        <Text fontWeight="bold" fontSize="sm" whiteSpace="nowrap">FACTURA N°</Text>
+        <InputGroup endElement={
+            <IconButton 
+                size="xs" 
+                variant="ghost"
+                onClick={() => navigate(`/ventas/facturas/${sale?.bills[0]?.id}`)}
+            >
+                <ExternalLink size={16} />
+            </IconButton>
+        }>
+            <Input 
+                value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"} 
+                w="200px" 
+                size="md" 
+                readOnly
+                pr="2.5rem"
+            />
+        </InputGroup>
+    </Flex>
+)}
           <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
             <Printer /> Imprimir Factura Legal
           </IconButton>
@@ -209,20 +283,28 @@ function isValidRuc(ruc: string) {
       {/* <p>{JSON.stringify(saleForm.products)}</p> */}
 
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
+        {mode === "create" && (
         <Box flex={1.5} minW="180px">
-          <Text fontSize="xs" fontWeight="medium" color="gray.600">Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}</Text>
-          <ComboboxWrapper
-            placeholder="Buscar cliente..."
-            value={selectedClient}
-            onValueChange={handleClientSelect}
-            options={
-              customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
-            }
-            disabled={loadingCustomers}
-            width="100%"
-            clearable={true}
-          />
+            <Text fontSize="xs" fontWeight="medium" color="gray.600">
+                Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}
+            </Text>
+            <ComboboxWrapper
+                placeholder="Buscar cliente..."
+                value={selectedClient}
+                onValueChange={handleClientSelect}
+                options={
+                    customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
+                }
+                disabled={loadingCustomers}
+                width="100%"
+                clearable={true}
+                onClear={() => {
+                    setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "" } });
+                    setSelectedClient("Ninguno");
+                }}
+            />
         </Box>
+    )}
 
         <Box flex={2} minW="180px">
           <Flex align="center" justify="space-between" mb={1}>
@@ -248,6 +330,7 @@ function isValidRuc(ruc: string) {
             readOnly={!isClientEditable}
             bg={!isClientEditable ? "gray.100" : "white"}
             placeholder="Nombre del cliente"
+            disabled ={mode === "view"}
           />
         </Box>
 
@@ -256,11 +339,12 @@ function isValidRuc(ruc: string) {
           <Input
             ref={rucInputRef}
             size="md"
-            placeholder="0000000-0"
+            placeholder="Ruc"
             value={saleForm.customer.ruc}
             readOnly={!isClientEditable}
             bg={!isClientEditable ? "gray.100" : "white"}
             onChange={handleRucChange}
+            disabled ={mode === "view"}
           />
         </Box>
 
@@ -271,6 +355,8 @@ function isValidRuc(ruc: string) {
             onValueChange={updatePaymentMethod}
             options={paymentOptions}
             width="100%"
+                        disabled ={mode === "view"}
+
           />
         </Box>
 
@@ -280,6 +366,7 @@ function isValidRuc(ruc: string) {
             value={saleForm.pay.condition}
             onValueChange={updateSaleCondition}
             options={saleConditionOptions}
+            disabled ={mode === "view"}
           />
         </Box>
       </Flex>
@@ -288,7 +375,7 @@ function isValidRuc(ruc: string) {
         <ProductsTable
           products={saleForm.products}
           labels={productsLabel}
-          readOnly={mode !== "create"}
+          readOnly={mode === "view"}
           onDataChange={
             (newData: ProductSaleDTO[]) => {
               setSaleForm({
@@ -348,7 +435,7 @@ function isValidRuc(ruc: string) {
       <Flex flexShrink={0} mt={2} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">
         <Flex gap={4} align="center">
           <Text fontSize="3xl" fontWeight="bold">
-            Total a pagar: <Text as="span" color="green.600">{parsePrice(saleForm.totals.total)}</Text>
+            Total{mode === "view" ? " pagado":" a pagar" }: <Text as="span" color="green.600">{parsePrice(saleForm.totals.total)}</Text>
           </Text>
         </Flex>
 

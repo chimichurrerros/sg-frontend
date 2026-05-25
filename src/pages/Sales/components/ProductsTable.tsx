@@ -72,6 +72,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
         labels={labels}
         data={products}
         height="100%"
+        readOnly={readOnly}
         onDataChange={onDataChange}
         noItemsComponent=
         {<EmptyDataScreen title={"Sin productos"} icon={<PackageOpenIcon />}

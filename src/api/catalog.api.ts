@@ -12,6 +12,7 @@ export interface ProductDTO {
   cost: number;
   minimumStock: number;
   barcode: string;
+  taxRate: number;
 }
 
 export interface ListProductsWrapperDTO {

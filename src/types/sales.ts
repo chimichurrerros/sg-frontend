@@ -1,4 +1,4 @@
-import type { Bill } from "./bills";
+import type { Bill } from "@/api/sales.api";
 
 export interface ProductSaleDTO {
   id: number;
@@ -49,6 +49,7 @@ export interface SaleData{
 export interface Sale {
   customer:CustomerDTO;
   sale: SaleData
+
   pay: {
     method: PaymentMethod;
     condition: SaleCondition;

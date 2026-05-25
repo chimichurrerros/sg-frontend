@@ -148,7 +148,6 @@ export default function BudgetsPage() {
                     buttonColor="brand.secondary"
                     onPageChange={handlePageChange}
                     btnSize={"sm"}
-                    showTextRegistros={true}
                 />
             </Box>
         </Box>
