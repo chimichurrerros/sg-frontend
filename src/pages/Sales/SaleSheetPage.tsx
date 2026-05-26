@@ -19,7 +19,6 @@ import { SelectWrapper } from "@/components/ui/select-wrapper";
 import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
-import { useMask } from "@react-input/mask";
 // import { parseDate } from "@/constants/date";
 import { useCreateSale, useGetSaleById } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
@@ -68,11 +67,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   // const [saveCustomer, setSaveCustomer] = useState(false);
   const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
 
-  const rucInputRef = useMask({
-    mask: "nnnnnn-n",
-    replacement: { n: /\d/ },
-    showMask: true,
-  });
+ 
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
   const navigate = useNavigate();
@@ -223,19 +218,19 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
   const isClientEditable = selectedClient === "Ninguno";
 
-  const handleRucChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedRuc = e.target.value;
-    setSaleForm({
-      ...saleForm,
-      customer: {
-        ...saleForm.customer,
-        ruc: formattedRuc
-      }
-    });
-  };
+  // const handleRucChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const formattedRuc = e.target.value;
+  //   setSaleForm({
+  //     ...saleForm,
+  //     customer: {
+  //       ...saleForm.customer,
+  //       ruc: formattedRuc
+  //     }
+  //   });
+  // };
 
   function isValidRuc(ruc: string) {
-    const rucRegex = /^\d{6}-\d$/;
+    const rucRegex = /^\d{6,7}-\d$/;
     return rucRegex.test(ruc) || ruc === "";
   }
   const isAmountValid = dialogAmount >= saleForm.totals.total;
@@ -339,16 +334,22 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         <Box flex={1.2} minW="150px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">RUC</Text>
-          <Input
-            ref={rucInputRef}
-            size="md"
-            placeholder="Ruc"
-            value={saleForm.customer.ruc}
-            readOnly={!isClientEditable}
-            bg={!isClientEditable ? "gray.100" : "white"}
-            onChange={handleRucChange}
-            disabled ={mode === "view"}
-          />
+<Input
+    size="md"
+    placeholder="000000-0"
+    value={saleForm.customer.ruc}
+    readOnly={!isClientEditable}
+    bg={!isClientEditable ? "gray.100" : "white"}
+    disabled={mode === "view"}
+    maxLength={8} 
+    onChange={(e) => {
+        const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7); // máximo 7 dígitos
+        const formatted = clean.length > 1 
+            ? clean.slice(0, -1) + "-" + clean.slice(-1)
+            : clean;
+        setSaleForm({ ...saleForm, customer: { ...saleForm.customer, ruc: formatted } });
+    }}
+/>
         </Box>
 
         <Box minW="130px">

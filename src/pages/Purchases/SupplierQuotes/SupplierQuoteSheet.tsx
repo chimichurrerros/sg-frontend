@@ -57,9 +57,6 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
             textIfNull: "Definir",
             inputType: "number",
             sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.price || 0) - (b.price || 0)
-        },
-        {
-            labelName: "IVA", propName: "taxRate", textIfNull: "-"
         }
         // { labelName: "Precio Total", propName: "totalPrice", isSortable: true, sortFunction: (a: PurchaseRequestDetails, b: PurchaseRequestDetails) => (a.totalPrice || 0) - (b.totalPrice || 0) }
     ];
@@ -81,7 +78,6 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                 productName: d.productName,
                 quantityRequested: d.quantityAvailable,
                 price: d.price,
-                taxRate: d.taxRate,
             })));
         }
     }, [quoteData])
@@ -96,7 +92,6 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
                     productName: d.productName,
                     quantityRequested: d.quantityAvailable,
                     price: d.price,
-                    taxRate: d.taxRate,
                 }))
                 : purchaseRequests?.purchaseRequests.find(
                     (pr) => pr.id === selectedPurchaseRequestId
