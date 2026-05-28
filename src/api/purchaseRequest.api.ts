@@ -1,4 +1,4 @@
-import type { PaginationType } from "@/types/types";
+import type { PaginationParams, PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 
 export interface PurchaseRequestCreateRequest {
@@ -48,7 +48,7 @@ export const purchaseRequestStateMap: Record<number, string> = {
 };
 
 export const purchaseRequestApi = {
-    get: (params: PaginationType) => apiClient.get<PurchaseRequestGetResponse>(`/api/purchase-requests`, { params }).then((r) => r.data),
+    get: (params: PaginationParams) => apiClient.get<PurchaseRequestGetResponse>(`/api/purchase-requests`, { params }).then((r) => r.data),
     getAll: () => apiClient.get<{purchaseRequests: PurchaseRequest[]}>(`/api/purchase-requests/all`).then((r) => r.data),
     getById: (id: number) => apiClient.get<PurchaseRequestWrapper>(`/api/purchase-requests/${id}`).then((r) => r.data.purchaseRequest),
     create: (data: PurchaseRequestCreateRequest) => apiClient.post<PurchaseRequest>("/api/purchase-requests", data).then((r) => r.data),

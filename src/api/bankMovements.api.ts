@@ -34,7 +34,4 @@ export const bankMovementsApi = {
 
     updateMovement: (id: number, body: CreateBankMovementRequestDto) =>
         apiClient.put<BankMovementResponseDto>(`/api/bank-movements/${id}`, body).then((r) => r.data),
-
-    deleteMovement: (id: number) =>
-        apiClient.delete(`/api/bank-movements/${id}`).then((r) => r.data),
 };

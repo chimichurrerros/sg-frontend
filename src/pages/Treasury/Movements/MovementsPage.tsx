@@ -1,59 +1,23 @@
 import type { BankMovementResponseDto } from "@/api/bankMovements.api";
+import { parseDate } from "@/constants/date";
+import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useGetMovements, useDeleteMovement } from "@/queries/bankMovements.queries";
+import { useGetAccounts } from "@/queries/bankAccounts.queries";
+import { useGetMovements } from "@/queries/bankMovements.queries";
 import type { PaginationParams } from "@/types/types";
-import { Box, IconButton, Input, InputGroup, NumberInput, Text } from "@chakra-ui/react";
-import { ArrowUpDown, Pencil, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Box, IconButton, Input, InputGroup, Text } from "@chakra-ui/react";
+import { ArrowUpDown, Pencil, Plus } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
-import { parseDate } from "@/constants/date";
 import { useNavigate } from "react-router-dom";
 
 const formatBalance = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", minimumFractionDigits: 0 }).format(value);
 
 const formatDate = (value: string) => parseDate(value);
-
-const movementLabels: label<BankMovementResponseDto>[] = [
-    {
-        labelName: "ID",
-        propName: "id",
-        isSortable: true,
-        sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) => a.id - b.id,
-    },
-    {
-        labelName: "Cuenta Bancaria",
-        propName: "bankAccountId",
-        isSortable: true,
-        sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) => a.bankAccountId - b.bankAccountId,
-    },
-    {
-        labelName: "Monto",
-        propName: "amount",
-        isSortable: true,
-        sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) => a.amount - b.amount,
-        transformFunction: (value: number) => formatBalance(value),
-    },
-    {
-        labelName: "Descripción",
-        propName: "description",
-        textIfNull: "-",
-        isSortable: true,
-        sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) =>
-            (a.description ?? "").localeCompare(b.description ?? ""),
-    },
-    {
-        labelName: "Fecha",
-        propName: "date",
-        isSortable: true,
-        sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) =>
-            new Date(a.date).getTime() - new Date(b.date).getTime(),
-        transformFunction: (value: string) => formatDate(value),
-    },
-];
 
 export default function MovementsPage() {
     const [params, setParams] = useState<PaginationParams>({
@@ -67,9 +31,59 @@ export default function MovementsPage() {
                 ? params.pageSize
                 : 10,
     });
-    const { mutate: deleteMovement } = useDeleteMovement();
+    const { data: accountsData } = useGetAccounts({ page: 1, pageSize: 100 });
     const [selected, setSelected] = useState<BankMovementResponseDto | null>(null);
     const navigate = useNavigate();
+
+    const accountsMap = useMemo(() => {
+        const map: Record<number, string> = {};
+        for (const a of accountsData?.accounts ?? []) {
+            map[a.id] = a.name ?? `Cuenta #${a.id}`;
+        }
+        return map;
+    }, [accountsData]);
+
+    const movementLabels: label<BankMovementResponseDto>[] = useMemo(() => [
+        {
+            labelName: "ID",
+            propName: "id",
+            isSortable: true,
+            sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) => a.id - b.id,
+        },
+        {
+            labelName: "Cuenta Bancaria",
+            isComponent: true,
+            render: (item: BankMovementResponseDto) => (
+                <Text>{accountsMap[item.bankAccountId] ?? `Cuenta #${item.bankAccountId}`}</Text>
+            ),
+            isSortable: true,
+            sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) =>
+                (accountsMap[a.bankAccountId] ?? "").localeCompare(accountsMap[b.bankAccountId] ?? ""),
+        },
+        {
+            labelName: "Monto",
+            propName: "amount",
+            isSortable: true,
+            sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) => a.amount - b.amount,
+            transformFunction: (value: number) => formatBalance(value),
+        },
+        {
+            labelName: "Descripción",
+            propName: "description",
+            textIfNull: "-",
+            isSortable: true,
+            sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) =>
+                (a.description ?? "").localeCompare(b.description ?? ""),
+        },
+        {
+            labelName: "Fecha",
+            propName: "date",
+            isSortable: true,
+            sortFunction: (a: BankMovementResponseDto, b: BankMovementResponseDto) =>
+                new Date(a.date).getTime() - new Date(b.date).getTime(),
+            transformFunction: (value: string) => formatDate(value),
+        },
+    ], [accountsMap]);
 
     useEffect(() => {
         if (isError) {
@@ -96,16 +110,7 @@ export default function MovementsPage() {
                     <Text fontSize="sm" color="gray.500" alignSelf="center">
                         Registros por Pág.
                     </Text>
-                    <NumberInput.Root
-                        defaultValue="10"
-                        width="70px"
-                        max={30}
-                        min={5}
-                        onValueChange={(value) => setParams({ ...params, pageSize: value.valueAsNumber })}
-                    >
-                        <NumberInput.Control />
-                        <NumberInput.Input />
-                    </NumberInput.Root>
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
                 </Box>
 
                 <IconButton
@@ -124,21 +129,6 @@ export default function MovementsPage() {
                 >
                     <Pencil />
                     Editar
-                </IconButton>
-                <IconButton
-                    padding={2}
-                    variant="outline"
-                    colorPalette="red"
-                    disabled={!selected}
-                    onClick={() => {
-                        if (selected) {
-                            deleteMovement(selected.id);
-                            setSelected(null);
-                        }
-                    }}
-                >
-                    <Trash2 />
-                    Eliminar
                 </IconButton>
             </Box>
 

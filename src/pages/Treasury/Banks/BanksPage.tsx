@@ -1,4 +1,5 @@
 import type { BankResponseDto } from "@/api/banks.api";
+import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -13,7 +14,6 @@ import {
   IconButton,
   Input,
   InputGroup,
-  NumberInput,
   Text,
 } from "@chakra-ui/react";
 import { Building, Pencil, Plus, Trash2 } from "lucide-react";
@@ -115,18 +115,7 @@ export default function BanksPage() {
           <Text fontSize="sm" color="gray.500" alignSelf="center">
             Registros por Pág.
           </Text>
-          <NumberInput.Root
-            defaultValue="10"
-            width="70px"
-            max={30}
-            min={5}
-            onValueChange={(value) =>
-              setParams({ ...params, pageSize: value.valueAsNumber })
-            }
-          >
-            <NumberInput.Control />
-            <NumberInput.Input />
-          </NumberInput.Root>
+          <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
         </Box>
 
         <IconButton

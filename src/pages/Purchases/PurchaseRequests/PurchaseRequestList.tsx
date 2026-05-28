@@ -1,17 +1,17 @@
 import type { PurchaseRequest } from "@/api/purchaseRequest.api";
 import { purchaseRequestStateMap } from "@/api/purchaseRequest.api";
+import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetPurchaseRequests } from "@/queries/purchase-request.queries";
-import type { PaginationType } from "@/types/types";
+import type { PaginationParams } from "@/types/types";
 import {
   Box,
   IconButton,
   Input,
   InputGroup,
-  NumberInput,
   Text,
 } from "@chakra-ui/react";
 import { NotebookPen, Plus, Eye } from "lucide-react";
@@ -74,12 +74,9 @@ const purchaseRequestLabels: label<PurchaseRequest>[] = [
 ];
 
 export default function PurchaseRequestList() {
-  const [params, setParams] = useState<PaginationType>({
+  const [params, setParams] = useState<PaginationParams>({
     page: 1,
     pageSize: 10,
-    totalPages: 0,
-    totalElements: 0,
-    currentPage: 1,
   });
   const {
     data: purchaseRequests,
@@ -128,18 +125,7 @@ export default function PurchaseRequestList() {
           <Text fontSize="sm" color="gray.500" alignSelf="center">
             Registros por Pág.
           </Text>
-          <NumberInput.Root
-            defaultValue="10"
-            width="70px"
-            max={30}
-            min={5}
-            onValueChange={(value) =>
-              setParams({ ...params, pageSize: value.valueAsNumber })
-            }
-          >
-            <NumberInput.Control />
-            <NumberInput.Input />
-          </NumberInput.Root>
+          <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
         </Box>
 
         <IconButton
