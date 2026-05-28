@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
+import { parseDate } from "@/constants/date";
 import {
   Button,
   ButtonGroup,
@@ -21,18 +22,9 @@ import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { toaster } from "@/components/ui/toaster";
 import { useAllBranches } from "@/queries/branches.queries";
 import { useGetBanks } from "@/queries/banks.queries";
-import {
-  employeesKeys,
-  useCreateEmployee,
-  useEditEmployee,
-  useGetEmployee,
-} from "@/queries/employees.queries";
-import type {
-  CreateEmployeeRequestDTO,
-  EmployeeGender,
-  EmployeeMaritalStatus,
-  EmployeeStatus,
-} from "@/types/employees";
+import { employeesKeys, useCreateEmployee, useEditEmployee, useGetEmployee } from "@/queries/employees.queries";
+import type { CreateEmployeeRequestDTO, CreateEmployeeRelationRequestDto } from "@/types/employees";
+import { employeesApi } from "@/api/employees.api";
 
 const employeeSchema = z.object({
   legajo: z.string().min(1, "El legajo es requerido"),
@@ -103,7 +95,7 @@ const schedules = createListCollection({
   ],
 });
 
-const statuses = createListCollection<{ label: string; value: EmployeeStatus }>({
+const statuses = createListCollection<{ label: string; value: string }>({
   items: [
     { label: "ACTIVO", value: "ACTIVO" },
     { label: "RECESO", value: "RECESO" },
@@ -123,6 +115,47 @@ export default function EmployeeFormPage() {
   const createEmployee = useCreateEmployee();
   const editEmployee = useEditEmployee();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showFamily, setShowFamily] = useState(false);
+  const [familyRelations, setFamilyRelations] = useState<CreateEmployeeRelationRequestDto[]>([]);
+  const [newRelation, setNewRelation] = useState<CreateEmployeeRelationRequestDto>({
+    relationType: 1,
+    name: "",
+    lastname: "",
+    documentNumber: "",
+    birthDate: "",
+    startDate: "",
+    endDate: null,
+  });
+
+  const addRelation = () => {
+    // basic validation
+    if (!newRelation.name || !newRelation.lastname) return;
+    setFamilyRelations((s) => [...s, newRelation]);
+    setNewRelation({ relationType: 1, name: "", lastname: "", documentNumber: "", birthDate: "", startDate: "", endDate: null });
+  };
+
+  const formatDate = (iso?: string | null) => {
+    if (!iso) return "";
+    // accept yyyy-mm-dd or dd/mm/yyyy
+    if (iso.includes("-")) {
+      const parts = iso.split("-");
+      if (parts.length !== 3) return iso;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    if (iso.includes("/")) {
+      const parts = iso.split("/");
+      if (parts.length !== 3) return iso;
+      // assume already dd/mm/yyyy
+      return `${parts[0].padStart(2, "0")}/${parts[1].padStart(2, "0")}/${parts[2]}`;
+    }
+    return iso;
+  };
+
+  const displayDate = (value?: string | null) => {
+    if (!value) return "";
+    if (value.includes("/")) return value;
+    return parseDate(value);
+  };
 
   const branchCollection = useMemo(
     () =>
@@ -153,6 +186,7 @@ export default function EmployeeFormPage() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
@@ -179,30 +213,63 @@ export default function EmployeeFormPage() {
     },
   });
 
+  const watchedBirth = watch("birthDate");
+  const watchedHire = watch("hireDate");
+
   useEffect(() => {
     if (employeeData?.employee) {
       const employee = employeeData.employee;
 
       reset({
-        legajo: employee.legajo,
-        firstName: employee.firstName,
-        lastName: employee.lastName,
-        documentNumber: employee.documentNumber,
-        birthDate: employee.birthDate ?? "",
-        gender: employee.gender,
-        maritalStatus: employee.maritalStatus,
+        legajo: employee.fileNumber ?? "",
+        firstName: employee.name ?? "",
+        lastName: employee.lastname ?? "",
+        documentNumber: employee.documentNumber ?? "",
+        birthDate: (() => {
+          // try backend formats: yyyy-mm-dd or dd/MM/yyyy -> convert to yyyy-mm-dd for input
+          const val = employee.birthDate ?? "";
+          if (!val) return "";
+          if (val.includes("/")) {
+            const [d, m, y] = val.split("/");
+            return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          }
+          return val;
+        })(),
+        gender: employee.genderId === 2 ? "FEMENINO" : employee.genderId === 3 ? "OTRO" : "MASCULINO",
+        maritalStatus: (() => {
+          switch (employee.maritalStatus) {
+            case 1:
+              return "CASADO";
+            case 2:
+              return "DIVORCIADO";
+            case 3:
+              return "VIUDO";
+            case 4:
+              return "UNION_LIBRE";
+            default:
+              return "SOLTERO";
+          }
+        })(),
         phone: employee.phone ?? "",
         email: employee.email ?? "",
         address: employee.address ?? "",
-        branchId: employee.branchId,
-        area: employee.area,
-        position: employee.position,
-        schedule: employee.schedule,
+        branchId: employee.branchId ?? 0,
+        area: employee.area?.name ?? "VENTAS",
+        position: employee.positionId ? String(employee.positionId) : "VENDEDOR",
+        schedule: employee.scheduleId ? String(employee.scheduleId) : "DIURNO 07:00-15:00",
         bankId: employee.bankId,
         bankAccountNumber: employee.bankAccountNumber ?? "",
-        hireDate: employee.hireDate,
-        baseSalary: employee.baseSalary,
-        status: employee.status,
+        hireDate: (() => {
+          const val = employee.hireDate ?? "";
+          if (!val) return "";
+          if (val.includes("/")) {
+            const [d, m, y] = val.split("/");
+            return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          }
+          return val;
+        })(),
+        baseSalary: employee.baseSalary ?? 0,
+        status: employee.isActive ? "ACTIVO" : "RECESO",
       });
     }
   }, [employeeData, reset]);
@@ -210,28 +277,37 @@ export default function EmployeeFormPage() {
   const onSubmit = (formData: EmployeeFormData) => {
     setFormError(null);
 
+    // small mappings from UI labels to numeric IDs expected by backend
+    const genderMap: Record<string, number> = { MASCULINO: 1, FEMENINO: 2, OTRO: 3 };
+    const maritalMap: Record<string, number> = { SOLTERO: 0, CASADO: 1, DIVORCIADO: 2, VIUDO: 3, UNION_LIBRE: 4 };
+    const areaMap: Record<string, number> = { VENTAS: 1, "ADMINISTRACIÓN": 2, INFORMÁTICA: 3, AUDITORÍA: 4 };
+    const positionMap: Record<string, number> = { VENDEDOR: 1, CAJERO: 2, "TÉCNICO": 3, AUDITOR: 4, ENCARGADO: 5 };
+    const scheduleMap: Record<string, number> = {
+      "DIURNO 07:00-15:00": 1,
+      "VESPERTINO 13:00-21:00": 2,
+      "NOCTURNO 21:00-05:00": 3,
+    };
+
     const requestData: CreateEmployeeRequestDTO = {
-      legajo: formData.legajo.trim(),
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
+      fileNumber: formData.legajo.trim(),
+      hireDate: formatDate(formData.hireDate),
+      areaId: areaMap[formData.area] ?? 0,
+      branchId: formData.branchId ?? null,
+      inmediatlyBossId: null,
+      positionId: positionMap[formData.position] ?? 0,
+      scheduleId: scheduleMap[formData.schedule] ?? 0,
+      basicSalary: Number(formData.baseSalary),
+      positionStartDate: formatDate(formData.hireDate),
+      name: formData.firstName.trim(),
+      lastname: formData.lastName.trim(),
+      birthDate: formatDate(formData.birthDate ?? ""),
+      genderId: genderMap[formData.gender] ?? 0,
+      maritalStatus: (maritalMap[formData.maritalStatus] ?? 0) as any,
       documentNumber: formData.documentNumber.trim(),
-      birthDate: formData.birthDate?.trim() ? formData.birthDate : null,
-      gender: formData.gender as EmployeeGender,
-      maritalStatus: formData.maritalStatus as EmployeeMaritalStatus,
-      phone: formData.phone?.trim() ? formData.phone.trim() : null,
       email: formData.email?.trim() ? formData.email.trim() : null,
+      phone: formData.phone?.trim() ? formData.phone.trim() : null,
       address: formData.address?.trim() ? formData.address.trim() : null,
-      branchId: Number(formData.branchId),
-      area: formData.area.trim(),
-      position: formData.position.trim(),
-      schedule: formData.schedule.trim(),
-      bankId: formData.bankId ?? null,
-      bankAccountNumber: formData.bankAccountNumber?.trim()
-        ? formData.bankAccountNumber.trim()
-        : null,
-      hireDate: formData.hireDate,
-      baseSalary: Number(formData.baseSalary),
-      status: formData.status as EmployeeStatus,
+      isActive: formData.status === "ACTIVO",
     };
 
     if (isEditMode && employeeId) {
@@ -256,16 +332,32 @@ export default function EmployeeFormPage() {
     }
 
     createEmployee.mutate(requestData, {
-      onSuccess: () => {
-        toaster.create({ title: "Empleado creado con éxito" });
-        queryClient.invalidateQueries({ queryKey: employeesKeys.all });
-        navigate("/rrhh/empleados");
+      onSuccess: async (data) => {
+        try {
+          const createdId = data?.employee?.id;
+          // if we have family relations, send them after creation
+          if (createdId && familyRelations.length > 0) {
+            await Promise.all(
+              familyRelations.map((rel) =>
+                employeesApi.createEmployeeRelation(createdId, {
+                  ...rel,
+                  birthDate: formatDate(rel.birthDate),
+                  startDate: formatDate(rel.startDate),
+                  endDate: rel.endDate ? formatDate(rel.endDate) : null,
+                }),
+              ),
+            );
+          }
+          toaster.create({ title: "Empleado creado con éxito" });
+          queryClient.invalidateQueries({ queryKey: employeesKeys.all });
+          navigate("/rrhh/empleados");
+        } catch (err) {
+          setFormError(err instanceof Error ? err.message : "Error al crear relaciones");
+        }
       },
       onError: (mutationError) => {
         setFormError(
-          mutationError instanceof Error
-            ? mutationError.message
-            : "No se pudo crear el empleado",
+          mutationError instanceof Error ? mutationError.message : "No se pudo crear el empleado",
         );
       },
     });
@@ -288,7 +380,7 @@ export default function EmployeeFormPage() {
         <Button variant="outline" colorPalette="brand">
           Datos Laborales
         </Button>
-        <Button variant="surface" colorPalette="gray" disabled>
+        <Button variant="surface" colorPalette="gray" onClick={() => setShowFamily((s) => !s)}>
           Núcleo Familiar
         </Button>
       </ButtonGroup>
@@ -329,7 +421,10 @@ export default function EmployeeFormPage() {
               <Field.Label>
                 Fecha de Nacimiento <Text as="span" color="red.500">*</Text>
               </Field.Label>
-              <Input type="date" {...register("birthDate")} disabled={isPending} />
+              <Input type="text" placeholder="dd/mm/yyyy" {...register("birthDate")} disabled={isPending} />
+              {watchedBirth && (
+                <Text fontSize="sm" color="gray.500">{displayDate(watchedBirth)}</Text>
+              )}
               <Field.ErrorText>{errors.birthDate?.message}</Field.ErrorText>
             </Field.Root>
 
@@ -440,6 +535,57 @@ export default function EmployeeFormPage() {
             </Field.Root>
           </Grid>
         </Stack>
+
+        {showFamily && (
+          <Stack gap={4}>
+            <Heading size="md">Núcleo Familiar</Heading>
+            <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
+              <Field.Root>
+                <Field.Label>Tipo</Field.Label>
+                <Select onChange={(e) => setNewRelation({ ...newRelation, relationType: Number(e.target.value) })} value={String(newRelation.relationType)}>
+                  <option value="1">Cónyuge</option>
+                  <option value="2">Hijo/a</option>
+                </Select>
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Nombre</Field.Label>
+                <Input value={newRelation.name} onChange={(e) => setNewRelation({ ...newRelation, name: e.target.value })} />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Apellido</Field.Label>
+                <Input value={newRelation.lastname} onChange={(e) => setNewRelation({ ...newRelation, lastname: e.target.value })} />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Cédula</Field.Label>
+                <Input value={newRelation.documentNumber} onChange={(e) => setNewRelation({ ...newRelation, documentNumber: e.target.value })} />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Fecha de Nacimiento</Field.Label>
+                <Input type="date" value={newRelation.birthDate} onChange={(e) => setNewRelation({ ...newRelation, birthDate: e.target.value })} />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Inicio</Field.Label>
+                <Input type="date" value={newRelation.startDate} onChange={(e) => setNewRelation({ ...newRelation, startDate: e.target.value })} />
+              </Field.Root>
+            </Grid>
+
+            <Button onClick={addRelation} colorPalette="brand">Agregar Miembro</Button>
+
+            {familyRelations.length > 0 && (
+              <Stack>
+                <Heading size="sm">Miembros agregados</Heading>
+                {familyRelations.map((r, idx) => (
+                  <Text key={idx}>{`${r.name} ${r.lastname} (${r.relationType === 1 ? 'Cónyuge' : 'Hijo/a'}) — Nac: ${displayDate(r.birthDate)} — Inicio: ${displayDate(r.startDate)}`}</Text>
+                ))}
+              </Stack>
+            )}
+          </Stack>
+        )}
 
         <Stack gap={4}>
           <Heading size="md">Datos Laborales</Heading>
@@ -620,7 +766,10 @@ export default function EmployeeFormPage() {
               <Field.Label>
                 Fecha de Ingreso <Text as="span" color="red.500">*</Text>
               </Field.Label>
-              <Input type="date" {...register("hireDate")} disabled={isPending} />
+              <Input type="text" placeholder="dd/mm/yyyy" {...register("hireDate")} disabled={isPending} />
+              {watchedHire && (
+                <Text fontSize="sm" color="gray.500">{displayDate(watchedHire)}</Text>
+              )}
               <Field.ErrorText>{errors.hireDate?.message}</Field.ErrorText>
             </Field.Root>
 
