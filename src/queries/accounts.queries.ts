@@ -4,7 +4,7 @@ import {
     type AccountResponseDto,
     type CreateAccountRequestDto,
     type ListAccountsWrapperDto,
-} from "@/api/bankAccounts.api";
+} from "@/api/accounts.api";
 import type { PaginationParams } from "@/types/types";
 import { RETRIES } from "@/constants/queryConstants";
 import { toaster } from "@/components/ui/toaster";
@@ -39,7 +39,7 @@ export const useCreateAccount = () => {
         onSuccess: () => {
             toaster.create({
                 title: "Cuenta creada",
-                description: "La cuenta bancaria ha sido creada exitosamente.",
+                description: "La cuenta ha sido creada exitosamente.",
             });
             queryClient.invalidateQueries({ queryKey: bankAccountsKeys.all });
         },
@@ -62,7 +62,7 @@ export const useUpdateAccount = (id: number) => {
         onSuccess: () => {
             toaster.create({
                 title: "Cuenta actualizada",
-                description: "La cuenta bancaria ha sido actualizada exitosamente.",
+                description: "La cuenta ha sido actualizada exitosamente.",
             });
             queryClient.invalidateQueries({ queryKey: bankAccountsKeys.all });
             queryClient.invalidateQueries({ queryKey: bankAccountsKeys.detail(id) });
@@ -86,7 +86,7 @@ export const useDeleteAccount = () => {
         onSuccess: () => {
             toaster.create({
                 title: "Cuenta eliminada",
-                description: "La cuenta bancaria ha sido eliminada exitosamente.",
+                description: "La cuenta ha sido eliminada exitosamente.",
             });
             queryClient.invalidateQueries({ queryKey: bankAccountsKeys.all });
         },

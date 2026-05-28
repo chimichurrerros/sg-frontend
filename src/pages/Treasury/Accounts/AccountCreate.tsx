@@ -1,10 +1,10 @@
 import {
   createAccountSchema,
   type CreateAccountFormData,
-} from "@/schemas/bankAccounts.schema";
-import { useCreateAccount } from "@/queries/bankAccounts.queries";
+} from "@/schemas/accounts.schema";
+import { useCreateAccount } from "@/queries/accounts.queries";
 import { useGetBanks } from "@/queries/banks.queries";
-import { accountTypeMap, type CreateAccountRequestDto } from "@/api/bankAccounts.api";
+import { accountTypeMap, type CreateAccountRequestDto } from "@/api/accounts.api";
 import { toaster } from "@/components/ui/toaster";
 import {
   Button,
@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +34,7 @@ const accountTypeCollection = createListCollection({
   })),
 });
 
-export default function BankAccountCreate() {
+export default function AccountCreate() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutate: createAccount, isPending } = useCreateAccount();
@@ -50,6 +51,8 @@ export default function BankAccountCreate() {
     register,
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateAccountFormData>({
     resolver: zodResolver(createAccountSchema),
@@ -63,6 +66,14 @@ export default function BankAccountCreate() {
     },
   });
 
+  const accountType = watch("accountType");
+
+  useEffect(() => {
+    if (accountType === 2) {
+      setValue("bankId", undefined);
+    }
+  }, [accountType, setValue]);
+
   const handleCreate = (formData: CreateAccountFormData) => {
     const apiData: CreateAccountRequestDto = {
       name: formData.name || null,
@@ -74,13 +85,13 @@ export default function BankAccountCreate() {
     };
     createAccount(apiData, {
       onSuccess: () => {
-        toaster.create({ title: "Cuenta bancaria creada con éxito" });
+        toaster.create({ title: "Cuenta creada con éxito" });
         queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
-        navigate("/tesoreria/cuentas-bancarias");
+        navigate("/tesoreria/cuentas");
       },
       onError: (error) => {
         toaster.create({
-          title: "Error al crear la cuenta bancaria",
+          title: "Error al crear la cuenta",
           description: error.message,
           type: "error",
         });
@@ -91,12 +102,12 @@ export default function BankAccountCreate() {
   return (
     <Stack gap={4} paddingInline="15%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nueva Cuenta Bancaria</Heading>
+        <Heading size="xl">Nueva Cuenta</Heading>
         <Button
           variant="ghost"
           size="sm"
           alignSelf="start"
-          onClick={() => navigate("/tesoreria/cuentas-bancarias")}
+          onClick={() => navigate("/tesoreria/cuentas")}
         >
           <LuArrowLeft /> Volver al listado
         </Button>
@@ -159,6 +170,7 @@ export default function BankAccountCreate() {
             </Field.Root>
           </GridItem>
 
+          {accountType !== 2 && (
           <GridItem colSpan={2}>
             <Field.Root invalid={!!errors.bankId}>
               <Field.Label>Banco</Field.Label>
@@ -200,6 +212,7 @@ export default function BankAccountCreate() {
               <Field.ErrorText>{errors.bankId?.message}</Field.ErrorText>
             </Field.Root>
           </GridItem>
+          )}
 
           <GridItem colSpan={4}>
             <Field.Root invalid={!!errors.accountNumber}>
@@ -250,7 +263,7 @@ export default function BankAccountCreate() {
 
         {isPending && (
           <Text color="gray.500" fontSize="sm">
-            Creando cuenta bancaria...
+            Creando cuenta...
           </Text>
         )}
 
@@ -260,7 +273,7 @@ export default function BankAccountCreate() {
           loading={isPending}
           alignSelf="start"
         >
-          <LuSave /> Guardar Cuenta Bancaria
+          <LuSave /> Guardar Cuenta
         </Button>
       </Stack>
     </Stack>
