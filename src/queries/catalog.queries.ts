@@ -14,10 +14,19 @@ export const catalogKeys = {
 };
 
 /* ===== Products ===== */
-export const useAllProducts = () => {
+export const useAllProducts = (enabled:boolean = true) => {
   return useQuery({
     queryKey: catalogKeys.products,
     queryFn: catalogApi.getAllProducts,
+    enabled
+  });
+};
+
+export const useProductByBranch = (id: number | null,enabled:boolean = true) => {
+  return useQuery({
+    queryKey: [...catalogKeys.products, "branch", id],
+    queryFn: () => catalogApi.getProductByBranch(id!),
+    enabled: !!id && enabled
   });
 };
 

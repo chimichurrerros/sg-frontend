@@ -6,9 +6,9 @@ import ProductsTable from "../components/ProductsTable";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type SaleCondition } from "@/types/sales";
 import type { EditableLabel } from "@/components/ui/table-edit";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
-import type { CustomerForSales } from "@/types/types";
 import { SelectWrapper } from "@/components/ui/select-wrapper";
 import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
+import type { Customer } from "@/api/customers.api";
 
 interface budgetSheetPageProps {
     mode: "create" | "edit"
@@ -48,8 +48,8 @@ export default function BudgetSheetPage({ mode }: budgetSheetPageProps) {
         condition: "Contado",
         payMethod: "Efectivo"
     })
-    const [selectedClient, setSelectedClient] = useState<CustomerForSales | "">("");
-    const customersMock: CustomerForSales[] = [{ id: 1, name: "Juan Pérez", ruc: "12345678-9" }, { id: 2, name: "María Gómez", ruc: "98765432-1" }, { id: 3, name: "Carlos López", ruc: "45678912-3" }]
+    const [selectedClient, setSelectedClient] = useState<Customer | "">("");
+    const customersMock: Customer[] = [{ id: 1, name: "Juan Pérez", ruc: "12345678-9" }, { id: 2, name: "María Gómez", ruc: "98765432-1" }, { id: 3, name: "Carlos López", ruc: "45678912-3" }]
     const handleClientSelect = (id: string) => {
         const selected = customersMock.find(c => c.id.toString() === id) || ""
         setSelectedClient(selected);

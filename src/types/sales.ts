@@ -1,13 +1,15 @@
-import type { Bill } from "./types";
+import type { Bill } from "@/api/sales.api";
 
 export interface ProductSaleDTO {
   id: number;
   name: string | null
-  description?: string;
+  description: string | null;
   price: number;
   quantity: number;
   barcode: string;
-  total: number;
+  total?: number ;
+  stock: number
+  taxRate:number
 }
 
 // Products in the fast select list
@@ -16,14 +18,14 @@ export interface ProductSelect {
   name: string | null
   barcode?: string;
   price: number;
-  minimumStock: number;
+  quantity: number;
 }
 export interface SaleTotals{
     subtotal: number;
     iva: number;
     total: number;
-    amount: number;
     change: number;
+    importValue: number;
   };
 export type PaymentMethod = "Efectivo" | "Tarjeta" | "Transferencia"
 export type SaleCondition = "Contado" | "Credito";
@@ -47,6 +49,8 @@ export interface SaleData{
 export interface Sale {
   customer:CustomerDTO;
   sale: SaleData
+  branchId?: number | null;
+
   pay: {
     method: PaymentMethod;
     condition: SaleCondition;

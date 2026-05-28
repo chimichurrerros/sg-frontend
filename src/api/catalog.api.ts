@@ -2,16 +2,20 @@ import { apiClient } from "./client";
 
 export interface ProductDTO {
   id: number;
-  productCategoryId: number;
-  productCategoryName: string | null;
-  productBrandId: number;
-  productBrandName: string | null;
+  productCategoryId?: number | null;
+  productCategoryName?: string | null;
+  productBrandId?: number | null;
+  productBrandName?: string | null;
   name: string | null;
   description: string | null;
   price: number;
-  cost: number;
-  minimumStock: number;
+  cost?: number | null;
+  minimumStock?: number;
+  stock: number;
   barcode: string;
+  taxRate: number;
+  quantity: number;
+  total?: number;
 }
 
 export interface ListProductsWrapperDTO {
@@ -67,6 +71,11 @@ export const catalogApi = {
       .then((r) => r.data),
   deleteProduct: (id: number) =>
     apiClient.delete(`/api/products/${id}`).then((r) => r.data),
+
+  getProductByBranch: (id: number) =>
+    apiClient
+      .get<{ productsStock: ProductDTO[] }>(`/api/products/by-branch/${id}`)
+      .then((r) => r.data),
 
   // Categories
   getAllCategories: () =>

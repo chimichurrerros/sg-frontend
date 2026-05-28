@@ -7,7 +7,6 @@ export interface SupplierQuoteProduct {
     productName:       string;
     quantityAvailable: number;
     price:             number;
-    taxRate:           number;
 }
 
 export interface SupplierQuote {
