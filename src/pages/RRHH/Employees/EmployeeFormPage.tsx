@@ -23,8 +23,9 @@ import { toaster } from "@/components/ui/toaster";
 import { useAllBranches } from "@/queries/branches.queries";
 import { useGetBanks } from "@/queries/banks.queries";
 import { employeesKeys, useCreateEmployee, useEditEmployee, useGetEmployee } from "@/queries/employees.queries";
-import type { CreateEmployeeRequestDTO, CreateEmployeeRelationRequestDto } from "@/types/employees";
+import type { CreateEmployeeRequestDTO, CreateEmployeeRelationRequestDto } from "@/api/employees.api";
 import { employeesApi } from "@/api/employees.api";
+import { GenderEnum, type RelationTypeEnum } from "@/types/employees";
 
 const employeeSchema = z.object({
   legajo: z.string().min(1, "El legajo es requerido"),
@@ -32,13 +33,13 @@ const employeeSchema = z.object({
   lastName: z.string().min(1, "El apellido es requerido"),
   documentNumber: z.string().min(1, "La cédula es requerida"),
   birthDate: z.string().optional(),
-  gender: z.string().min(1, "El género es requerido"),
+  gender: z.number().int().min(0).max(3),
   maritalStatus: z.string().min(1, "El estado civil es requerido"),
   phone: z.string().optional(),
   email: z.string().email("Ingrese un correo válido").or(z.literal("")),
   address: z.string().optional(),
-  branchId: z.coerce.number().min(1, "La sucursal es requerida"),
-  area: z.string().min(1, "El área es requerida"),
+  branchId: z.number().min(1, "La sucursal es requerida"),
+  areaId: z.number().min(1, "El área es requerida"),
   position: z.string().min(1, "El cargo es requerido"),
   schedule: z.string().min(1, "El horario es requerido"),
   bankId: z.coerce.number().optional().nullable(),
@@ -49,12 +50,15 @@ const employeeSchema = z.object({
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
+type EmployeeFormInput = z.input<typeof employeeSchema>;
+type EmployeeFormOutput = z.output<typeof employeeSchema>;
 
 const genders = createListCollection({
   items: [
-    { label: "Masculino", value: "MASCULINO" },
-    { label: "Femenino", value: "FEMENINO" },
-    { label: "Otro", value: "OTRO" },
+    { label: "Desconocido", value: String(GenderEnum.Unknown) },
+    { label: "Masculino", value: String(GenderEnum.Male) },
+    { label: "Femenino", value: String(GenderEnum.Female) },
+    { label: "Otro", value: String(GenderEnum.Other) },
   ],
 });
 
@@ -70,10 +74,10 @@ const maritalStatuses = createListCollection({
 
 const areas = createListCollection({
   items: [
-    { label: "VENTAS", value: "VENTAS" },
-    { label: "ADMINISTRACIÓN", value: "ADMINISTRACIÓN" },
-    { label: "INFORMÁTICA", value: "INFORMÁTICA" },
-    { label: "AUDITORÍA", value: "AUDITORÍA" },
+    { label: "VENTAS", value: String(1) },
+    { label: "ADMINISTRACIÓN", value: String(2) },
+    { label: "INFORMÁTICA", value: String(3) },
+    { label: "AUDITORÍA", value: String(4) },
   ],
 });
 
@@ -118,7 +122,7 @@ export default function EmployeeFormPage() {
   const [showFamily, setShowFamily] = useState(false);
   const [familyRelations, setFamilyRelations] = useState<CreateEmployeeRelationRequestDto[]>([]);
   const [newRelation, setNewRelation] = useState<CreateEmployeeRelationRequestDto>({
-    relationType: 1,
+    relationType: 1 as RelationTypeEnum,
     name: "",
     lastname: "",
     documentNumber: "",
@@ -188,7 +192,7 @@ export default function EmployeeFormPage() {
     reset,
     watch,
     formState: { errors },
-  } = useForm<EmployeeFormData>({
+  } = useForm<EmployeeFormInput, any, EmployeeFormOutput>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
       legajo: "",
@@ -196,13 +200,13 @@ export default function EmployeeFormPage() {
       lastName: "",
       documentNumber: "",
       birthDate: "",
-      gender: "MASCULINO",
+      gender: GenderEnum.Male,
       maritalStatus: "SOLTERO",
       phone: "",
       email: "",
       address: "",
       branchId: 0,
-      area: "VENTAS",
+      areaId: 1,
       position: "VENDEDOR",
       schedule: "DIURNO 07:00-15:00",
       bankId: null,
@@ -235,7 +239,7 @@ export default function EmployeeFormPage() {
           }
           return val;
         })(),
-        gender: employee.genderId === 2 ? "FEMENINO" : employee.genderId === 3 ? "OTRO" : "MASCULINO",
+        gender: employee.gender,
         maritalStatus: (() => {
           switch (employee.maritalStatus) {
             case 1:
@@ -254,7 +258,7 @@ export default function EmployeeFormPage() {
         email: employee.email ?? "",
         address: employee.address ?? "",
         branchId: employee.branchId ?? 0,
-        area: employee.area?.name ?? "VENTAS",
+        areaId: employee.areaId ?? 1,
         position: employee.positionId ? String(employee.positionId) : "VENDEDOR",
         schedule: employee.scheduleId ? String(employee.scheduleId) : "DIURNO 07:00-15:00",
         bankId: employee.bankId,
@@ -274,13 +278,10 @@ export default function EmployeeFormPage() {
     }
   }, [employeeData, reset]);
 
-  const onSubmit = (formData: EmployeeFormData) => {
+  const onSubmit = (formData: EmployeeFormOutput) => {
     setFormError(null);
 
-    // small mappings from UI labels to numeric IDs expected by backend
-    const genderMap: Record<string, number> = { MASCULINO: 1, FEMENINO: 2, OTRO: 3 };
     const maritalMap: Record<string, number> = { SOLTERO: 0, CASADO: 1, DIVORCIADO: 2, VIUDO: 3, UNION_LIBRE: 4 };
-    const areaMap: Record<string, number> = { VENTAS: 1, "ADMINISTRACIÓN": 2, INFORMÁTICA: 3, AUDITORÍA: 4 };
     const positionMap: Record<string, number> = { VENDEDOR: 1, CAJERO: 2, "TÉCNICO": 3, AUDITOR: 4, ENCARGADO: 5 };
     const scheduleMap: Record<string, number> = {
       "DIURNO 07:00-15:00": 1,
@@ -291,7 +292,7 @@ export default function EmployeeFormPage() {
     const requestData: CreateEmployeeRequestDTO = {
       fileNumber: formData.legajo.trim(),
       hireDate: formatDate(formData.hireDate),
-      areaId: areaMap[formData.area] ?? 0,
+      areaId: formData.areaId,
       branchId: formData.branchId ?? null,
       inmediatlyBossId: null,
       positionId: positionMap[formData.position] ?? 0,
@@ -301,7 +302,7 @@ export default function EmployeeFormPage() {
       name: formData.firstName.trim(),
       lastname: formData.lastName.trim(),
       birthDate: formatDate(formData.birthDate ?? ""),
-      genderId: genderMap[formData.gender] ?? 0,
+      gender: formData.gender as GenderEnum,
       maritalStatus: (maritalMap[formData.maritalStatus] ?? 0) as any,
       documentNumber: formData.documentNumber.trim(),
       email: formData.email?.trim() ? formData.email.trim() : null,
@@ -438,8 +439,8 @@ export default function EmployeeFormPage() {
                 render={({ field }) => (
                   <Select.Root
                     collection={genders}
-                    value={field.value ? [field.value] : []}
-                    onValueChange={(event) => field.onChange(event.value[0])}
+                      value={field.value !== undefined ? [String(field.value)] : []}
+                      onValueChange={(event) => field.onChange(Number(event.value[0]))}
                     disabled={isPending}
                   >
                     <Select.HiddenSelect />
@@ -542,10 +543,18 @@ export default function EmployeeFormPage() {
             <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
               <Field.Root>
                 <Field.Label>Tipo</Field.Label>
-                <Select onChange={(e) => setNewRelation({ ...newRelation, relationType: Number(e.target.value) })} value={String(newRelation.relationType)}>
+                <select
+                  value={String(newRelation.relationType)}
+                  onChange={(event) =>
+                    setNewRelation({
+                      ...newRelation,
+                      relationType: Number(event.target.value) as RelationTypeEnum,
+                    })
+                  }
+                >
                   <option value="1">Cónyuge</option>
                   <option value="2">Hijo/a</option>
-                </Select>
+                </select>
               </Field.Root>
 
               <Field.Root>
@@ -639,18 +648,18 @@ export default function EmployeeFormPage() {
               <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
             </Field.Root>
 
-            <Field.Root invalid={!!errors.area}>
+            <Field.Root invalid={!!errors.areaId}>
               <Field.Label>
                 Área <Text as="span" color="red.500">*</Text>
               </Field.Label>
               <Controller
-                name="area"
+                name="areaId"
                 control={control}
                 render={({ field }) => (
                   <Select.Root
                     collection={areas}
-                    value={field.value ? [field.value] : []}
-                    onValueChange={(event) => field.onChange(event.value[0])}
+                    value={field.value ? [String(field.value)] : []}
+                    onValueChange={(event) => field.onChange(Number(event.value[0]))}
                     disabled={isPending}
                   >
                     <Select.HiddenSelect />
@@ -677,7 +686,7 @@ export default function EmployeeFormPage() {
                   </Select.Root>
                 )}
               />
-              <Field.ErrorText>{errors.area?.message}</Field.ErrorText>
+              <Field.ErrorText>{errors.areaId?.message}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root invalid={!!errors.position}>

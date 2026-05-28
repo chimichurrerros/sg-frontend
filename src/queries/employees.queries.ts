@@ -1,18 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { employeesApi } from "@/api/employees.api";
+import { employeesApi, type CreateEmployeePositionHistoryRequestDto, type CreateEmployeeRelationRequestDto, type CreateEmployeeRequestDTO, type EmployeeWrapperDto, type ListEmployeePositionHistoriesWrapperDto, type ListEmployeeRelationsWrapperDto, type ListEmployeesWrapperDto, type UpdateEmployeeRequestDTO } from "@/api/employees.api";
 import type {
-  CreateEmployeePositionHistoryRequestDto,
-  CreateEmployeeRelationRequestDto,
-  CreateEmployeeRequestDTO,
-  ListEmployeePositionHistoriesWrapperDto,
-  ListEmployeeRelationsWrapperDto,
-  ListEmployeesWrapperDto,
-  UpdateEmployeeRequestDTO,
-  EmployeeWrapperDto,
+  Employee,
+  EmployeeList,
 } from "@/types/employees";
 import type { PaginationParams } from "@/types/types";
 import { RETRIES } from "@/constants/queryConstants";
 import { toaster } from "@/components/ui/toaster";
+
+const mapEmployeeDtoToEmployee = (employee: EmployeeWrapperDto["employee"]): Employee => ({
+  id: employee.id,
+  legajo: employee.fileNumber ?? "",
+  firstName: employee.name ?? "",
+  lastName: employee.lastname ?? "",
+  documentNumber: employee.documentNumber ?? "",
+  areaId: employee.areaId,
+  branchId: employee.branchId,
+  inmediatlyBossId: employee.inmediatlyBossId,
+  gender: employee.gender,
+  maritalStatus: employee.maritalStatus as Employee["maritalStatus"],
+  positionId: employee.positionId,
+  scheduleId: employee.scheduleId,
+  baseSalary: employee.baseSalary ?? 0,
+  hireDate: employee.hireDate,
+  status: employee.isActive ? "ACTIVO" : "RECESO",
+});
 
 export const employeesKeys = {
   all: ["employees"] as const,
@@ -22,9 +34,13 @@ export const employeesKeys = {
 };
 
 export const useAllEmployees = (params?: PaginationParams) => {
-  return useQuery<ListEmployeesWrapperDto>({
+  return useQuery<ListEmployeesWrapperDto, Error, EmployeeList>({
     queryKey: [...employeesKeys.all, params?.page, params?.pageSize],
     queryFn: () => employeesApi.getAllEmployees(params),
+    select: (data) => ({
+      employees: data.employees.map(mapEmployeeDtoToEmployee),
+      pagination: data.pagination,
+    }),
     retry: RETRIES,
   });
 };

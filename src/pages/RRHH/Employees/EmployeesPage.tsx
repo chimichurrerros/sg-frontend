@@ -26,6 +26,7 @@ import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
+import { useAllBranches } from "@/queries/branches.queries";
 import { useAllEmployees, useDeleteEmployee } from "@/queries/employees.queries";
 import type { Employee } from "@/types/employees";
 
@@ -35,6 +36,7 @@ export default function EmployeesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useAllEmployees();
+  const { data: branchesData } = useAllBranches();
   const deleteEmployee = useDeleteEmployee();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [page, setPage] = useState(1);
@@ -46,24 +48,35 @@ export default function EmployeesPage() {
 
   const employees = data?.employees ?? [];
 
+  const branchNameById = useMemo(
+    () => new Map((branchesData?.branches ?? []).map((branch) => [branch.id, branch.name])),
+    [branchesData],
+  );
+
+  const areaLabelById: Record<number, string> = {
+    1: "VENTAS",
+    2: "ADMINISTRACIÓN",
+    3: "INFORMÁTICA",
+    4: "AUDITORÍA",
+  };
+
   const branchCollection = useMemo(
     () =>
       createListCollection({
-        items: Array.from(
-          new Set(employees.map((employee) => employee.branchName).filter(Boolean)),
-        ).map((branch) => ({ label: branch as string, value: branch as string })),
+        items: (branchesData?.branches ?? []).map((branch) => ({
+          label: branch.name,
+          value: String(branch.id),
+        })),
       }),
-    [employees],
+    [branchesData],
   );
 
   const areaCollection = useMemo(
     () =>
       createListCollection({
-        items: Array.from(new Set(employees.map((employee) => employee.area))).map(
-          (area) => ({ label: area, value: area }),
-        ),
+        items: Object.entries(areaLabelById).map(([id, label]) => ({ label, value: id })),
       }),
-    [employees],
+    [],
   );
 
   const statusCollection = useMemo(
@@ -86,9 +99,9 @@ export default function EmployeesPage() {
         employee.firstName,
         employee.lastName,
         employee.documentNumber,
-        employee.branchName ?? "",
-        employee.area,
-        employee.position,
+        branchNameById.get(employee.branchId ?? 0) ?? "",
+        areaLabelById[employee.areaId] ?? String(employee.areaId),
+        String(employee.positionId ?? ""),
       ]
         .join(" ")
         .toLowerCase()
@@ -96,8 +109,8 @@ export default function EmployeesPage() {
 
     const matchesBranch =
       branchFilter.length === 0 ||
-      (employee.branchName ? branchFilter.includes(employee.branchName) : false);
-    const matchesArea = areaFilter.length === 0 || areaFilter.includes(employee.area);
+      branchFilter.includes(String(employee.branchId ?? ""));
+    const matchesArea = areaFilter.length === 0 || areaFilter.includes(String(employee.areaId));
     const matchesStatus =
       statusFilter.length === 0 || statusFilter.includes(employee.status);
 
@@ -124,9 +137,18 @@ export default function EmployeesPage() {
       sortFunction: (a, b) =>
         `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`),
     },
-    { labelName: "Sucursal", propName: "branchName", textIfNull: "-" },
-    { labelName: "Área", propName: "area" },
-    { labelName: "Cargo", propName: "position" },
+    {
+      labelName: "Sucursal",
+      propName: "branchId",
+      textIfNull: "-",
+      transformFunction: (value) => branchNameById.get(Number(value)) ?? `#${value}`,
+    },
+    {
+      labelName: "Área",
+      propName: "areaId",
+      transformFunction: (value) => areaLabelById[Number(value)] ?? `#${value}`,
+    },
+    { labelName: "Cargo", propName: "positionId", transformFunction: (value) => `#${value}` },
     {
       labelName: "Salario Base",
       propName: "baseSalary",
