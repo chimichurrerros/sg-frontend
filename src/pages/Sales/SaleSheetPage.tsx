@@ -20,7 +20,7 @@ import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { type EditableLabel } from "@/components/ui/table-edit";
 // import { parseDate } from "@/constants/date";
-import { useCreateSale, useGetSaleById } from "@/queries/sales.queries";
+import { paymentMethods, saleConditions, useCreateSale, useGetSaleById } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import { useGetAllCustomers } from "@/queries/customers.queries";
@@ -28,6 +28,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
+import { useAllBranches } from "@/queries/branches.queries";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -48,7 +49,7 @@ const getSaleTemplate = (): Sale => ({
     subtotal: 0,
     iva: 0,
     total: 0,
-    amount: 0,
+    importValue: 0,
     change: 0,
   }
 });
@@ -66,12 +67,21 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   const { data: sale, isPending: loadingSale, isError: isErrorSale, error: saleError } = useGetSaleById(Number(id), mode === "view");
   // const [saveCustomer, setSaveCustomer] = useState(false);
   const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
-
- 
+  const [branchId, setBranchId] = useState<number | null>(null);
+  const { data: branches, isPending: loadingBranches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
   const navigate = useNavigate();
+
   useEffect(() => {
+    if (isErrorBranches) {
+      toaster.create({ title: "Error al cargar las sucursales", description: errorBranches.message || "Error desconocido", type: "error" })
+    }
+
+  }, [isErrorBranches, errorBranches])
+
+  useEffect(() => {
+    if (mode === "view") return;
     const subtotal = saleForm.products.reduce((sum, p) => sum + (p.total || 0), 0);
     const total = subtotal;
     const change = dialogAmount >= total ? dialogAmount - total : 0;
@@ -82,12 +92,15 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         ...prev.totals,
         subtotal,
         total,
-        amount: dialogAmount,
+        importValue: dialogAmount,
         change,
       }
     }));
   }, [saleForm.products, dialogAmount]);
 
+  useEffect(() => {
+    setSaleForm({ ...saleForm, products: [] })
+  }, [branchId])
   useEffect(() => {
     if (isErrorCustomers) {
       toaster.create({ title: "Error al cargar los clientes", description: errorCustomers.message || "Error desconocido", type: "error" })
@@ -95,45 +108,45 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }, [isErrorCustomers, errorCustomers])
   useEffect(() => {
     if (!sale || mode !== "view") return;
-//Mandar codigo y descripción en prod detail, mandar ruc en customer, mandar método de pago y condición de venta en sale o pay
-//Ver ruc nnnnnnn-n, pedir que no sea obligatorio mandar cliente y ruc
-//Editar customer, que los campos sean opcionales
-//Guardar el importe del cliente en la venta
+
+    //Editar customer, que los campos sean opcionales
+
     setSaleForm({
-        customer: {
-            name: sale.customerName,
-            ruc: ""  // FullSaleOrder no tiene ruc, dejalo vacío o agregalo al tipo si el backend lo manda
-        },
-        sale: {
-            date:parseDate(sale.date),
-            cashierNumber: 0,
-            saleNumber: sale.id,
-            bill: sale.bills[0]
-        },
-        pay: {
-            method: "Efectivo",   // FullSaleOrder no tiene method, ajustá si el backend lo manda
-            condition: "Contado"  // igual
-        },
-        products: sale.details.map((d) => ({
-            id: d.productId,
-            name: d.productName,
-            barcode: "",
-            description: "",
-            price: d.price,
-            quantity: d.quantityOrdered,
-            total: d.price * d.quantityOrdered,
-            taxRate: d.taxRate,
-            minimumStock: 0,
-        })),
-        totals: {
-            subtotal: sale.total,
-            iva: 0,
-            total: sale.total,
-            amount: 0,
-            change: 0,
-        }
+      branchId: sale.branchId,
+      customer: {
+        name: sale.customerName || "",
+        ruc: sale.customerRuc || ""
+      },
+      sale: {
+        date: parseDate(sale.date),
+        cashierNumber: 0,
+        saleNumber: sale.id,
+        bill: sale.bills[0]
+      },
+      pay: {
+        method: paymentMethods[sale.paymentMethod],
+        condition: saleConditions[sale.saleCondition]
+      },
+      products: sale.details.map((d) => ({
+        id: d.productId,
+        name: d.productName,
+        barcode: d.barcode,
+        description: d.productDescription,
+        price: d.price,
+        quantity: d.quantityOrdered,
+        total: d.price * d.quantityOrdered,
+        taxRate: d.taxRate,
+        stock: 0,
+      })),
+      totals: {
+        subtotal: sale.total - sale.bills[0].taxTotal,
+        iva: sale.bills[0].taxTotal,
+        total: sale.total,
+        importValue: sale.importValue,
+        change: sale.importValue - (sale.total - sale.bills[0].taxTotal)
+      }
     });
-}, [sale, mode]);
+  }, [sale, mode]);
 
   const productsLabel: EditableLabel<ProductSaleDTO>[] = [
     { labelName: "Código", propName: "barcode", textIfNull: "-" },
@@ -147,7 +160,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     {
       labelName: "Cantidad", propName: "quantity",
       isEditable: true, inputType: "number",
-      validate: (value: number | string, item?: ProductSaleDTO) => Number(value) > 0 && (item ? Number(value) <= item.minimumStock : true),
+      validate: (value: number | string, item?: ProductSaleDTO) => Number(value) > 0 && Number(value) <= (item?.stock || 0),
       transform: (value: string) => Number(value),
       onEdit: (item: ProductSaleDTO, newValue: string | number | null | undefined) => { if (!newValue) return item; return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) } }
     },
@@ -155,12 +168,14 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     { labelName: "Total", propName: "total", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull: "0" },
     { labelName: "IVA", propName: "taxRate", formatFunction: (value) => String(value) + "%" }
   ];
-  if(mode ==="create"){productsLabel.push({
+  if (mode === "create") {
+    productsLabel.push({
       labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
         <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setSaleForm({ ...saleForm, products: saleForm.products.filter((p: ProductSaleDTO) => p.id !== item.id) })}>
           <X />
         </IconButton>
-    })}
+    })
+  }
   useHotkeys("ctrl+enter", () => {
     triggerRef.current?.click();
   });
@@ -245,64 +260,86 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }
   return (
     <Box height="89vh" display="flex" flexDirection="column">
-      <Flex justify="space-between" align="center" mb={2} flexShrink={0}>
-        <Text fontSize="2xl" fontWeight="bold">
-          {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `(N° ${saleForm.sale.saleNumber}) - ${parseDate(sale?.date)}` : ""}
-        </Text>
+      {/* <p>{JSON.stringify(saleForm)}</p> */}
+      <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
+
+        <Box display="flex" gap={3}>
+          <Text fontSize="2xl" fontWeight="bold">
+            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N° ${saleForm.sale.saleNumber}` : ""}
+          </Text>
+          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | {parseDate(sale?.date)}</Text>}
+        </Box>
+
         <Flex align="center" gap={3}>
-          {mode === "view" && <IconButton size="md" padding={4} variant="outline" onClick={()=>navigate("/ventas")}><ArrowLeft /> Volver al listado</IconButton>}
-          {mode === "view" && (
-    <Flex align="center" gap={2}>
-        <Text fontWeight="bold" fontSize="sm" whiteSpace="nowrap">FACTURA N°</Text>
-        <InputGroup endElement={
-            <IconButton 
-                size="xs" 
-                variant="ghost"
-                onClick={() => navigate(`/ventas/facturas/${sale?.bills[0]?.id}`)}
-            >
-                <ExternalLink size={16} />
-            </IconButton>
-        }>
-            <Input 
-                value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"} 
-                w="180px" 
-                size="md" 
-                readOnly
-                pr="2.5rem"
-            />
-        </InputGroup>
-    </Flex>
-)}
-          <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
-            <Printer /> Imprimir Factura Legal
-          </IconButton>
+          <Flex align="flex-end" gap={3}>
+            {mode === "view" && (
+              <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
+                <ArrowLeft /> Volver al listado
+              </IconButton>
+            )}
+
+            {mode === "view" && (
+              <Box display="flex" flexDirection="column" alignItems="flex-start">
+                <Text fontWeight="bold" fontSize="sm" color="gray.600" whiteSpace="nowrap" mb={1}>FACTURA N°</Text>
+                <InputGroup endElement={
+                  <IconButton size="xs" variant="ghost" onClick={() => navigate(`/ventas/facturas/${sale?.bills[0]?.id}`)}>
+                    <ExternalLink size={16} />
+                  </IconButton>
+                }>
+                  <Input
+                    value={saleForm.sale.bill ? saleForm.sale.bill.number : "-"}
+                    w="180px"
+                    size="md"
+                    readOnly
+                    pr="2.5rem"
+                  />
+                </InputGroup>
+              </Box>
+            )}
+            {mode === "create" && <>
+              <SelectWrapper
+                placeholder="Sucursal actual"
+                onValueChange={(value) => { setBranchId(Number(value)) }}
+                options={branches?.branches.map((b) => ({ label: b.name, value: b.id.toString() })) || []} />
+            </>}
+            <Box display="flex" flexDirection="column" alignItems="flex-start">
+              {mode === "view" && <Text fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" mb={1}>
+                Sucursal: {branches?.branches.find(b => b.id == saleForm.branchId)?.name || " "}
+                {loadingBranches && <Spinner size="sm" />}
+              </Text>}
+              <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
+                <Printer /> Imprimir Factura Legal
+              </IconButton>
+            </Box>
+          </Flex>
+
         </Flex>
       </Flex>
       {/* <p>{JSON.stringify(saleForm.products)}</p> */}
 
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
         {mode === "create" && (
-        <Box flex={1.5} minW="180px">
+          <Box flex={1.5} minW="180px">
             <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}
+              Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}
             </Text>
             <ComboboxWrapper
-                placeholder="Buscar cliente..."
-                value={selectedClient}
-                onValueChange={handleClientSelect}
-                options={
-                    customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
-                }
-                disabled={loadingCustomers}
-                width="100%"
-                clearable={true}
-                onClear={() => {
-                    setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "" } });
-                    setSelectedClient("Ninguno");
-                }}
+              placeholder="Buscar cliente..."
+              value={selectedClient}
+              onValueChange={handleClientSelect}
+              options={
+                customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
+              }
+              disabled={loadingCustomers}
+              width="100%"
+              clearable={true}
+              onClear={() => {
+                setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "" } });
+                setSelectedClient("Ninguno");
+              }}
             />
-        </Box>
-    )}
+          </Box>
+        )}
 
         <Box flex={2} minW="180px">
           <Flex align="center" justify="space-between" mb={1}>
@@ -328,28 +365,28 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             readOnly={!isClientEditable}
             bg={!isClientEditable ? "gray.100" : "white"}
             placeholder="Nombre del cliente"
-            disabled ={mode === "view"}
+            disabled={mode === "view"}
           />
         </Box>
 
         <Box flex={1.2} minW="150px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">RUC</Text>
-<Input
-    size="md"
-    placeholder="000000-0"
-    value={saleForm.customer.ruc}
-    readOnly={!isClientEditable}
-    bg={!isClientEditable ? "gray.100" : "white"}
-    disabled={mode === "view"}
-    maxLength={8} 
-    onChange={(e) => {
-        const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7); // máximo 7 dígitos
-        const formatted = clean.length > 1 
-            ? clean.slice(0, -1) + "-" + clean.slice(-1)
-            : clean;
-        setSaleForm({ ...saleForm, customer: { ...saleForm.customer, ruc: formatted } });
-    }}
-/>
+          <Input
+            size="md"
+            placeholder="RUC del cliente"
+            value={saleForm.customer.ruc}
+            readOnly={!isClientEditable}
+            bg={!isClientEditable ? "gray.100" : "white"}
+            disabled={mode === "view"}
+            maxLength={8}
+            onChange={(e) => {
+              const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7);
+              const formatted = clean.length > 1
+                ? clean.slice(0, -1) + "-" + clean.slice(-1)
+                : clean;
+              setSaleForm({ ...saleForm, customer: { ...saleForm.customer, ruc: formatted } });
+            }}
+          />
         </Box>
 
         <Box minW="130px">
@@ -359,8 +396,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             onValueChange={updatePaymentMethod}
             options={paymentOptions}
             width="100%"
-                        disabled ={mode === "view"}
-
+            disabled={mode === "view"}
           />
         </Box>
 
@@ -370,7 +406,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             value={saleForm.pay.condition}
             onValueChange={updateSaleCondition}
             options={saleConditionOptions}
-            disabled ={mode === "view"}
+            disabled={mode === "view"}
           />
         </Box>
       </Flex>
@@ -380,6 +416,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
           products={saleForm.products}
           labels={productsLabel}
           readOnly={mode === "view"}
+          branchId={branchId}
           onDataChange={
             (newData: ProductSaleDTO[]) => {
               setSaleForm({
@@ -426,7 +463,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Importe</Text>
-              <Text color="green.600">{parsePrice(saleForm.totals.amount)}</Text>
+              <Text color="green.600">{parsePrice(saleForm.totals.importValue)}</Text>
             </Flex>
             <Flex justify="space-between" fontWeight="bold" fontSize="md">
               <Text>Vuelto</Text>
@@ -437,10 +474,27 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       </Box>
 
       <Flex flexShrink={0} mt={2} justify="space-between" align="center" border="2px solid" borderColor="gray.200" p={3} px={6} borderRadius="md">
-        <Flex gap={4} align="center">
+        <Flex gap={8} align="center">
           <Text fontSize="3xl" fontWeight="bold">
-            Total{mode === "view" ? " pagado":" a pagar" }: <Text as="span" color="green.600">{parsePrice(saleForm.totals.total)}</Text>
+            {mode === "view" ? "Total pagado" : "Total a pagar"}:&nbsp;
+            <Text as="span" color="green.600">{parsePrice(saleForm.totals.subtotal)}</Text>
           </Text>
+
+          {mode === "view" && (
+            <Box display="flex" alignItems="center" gap={8} justifyContent="space-between">
+              <Text color="gray.300" fontSize="3xl">|</Text>
+              <Text fontSize="3xl" fontWeight="bold">
+                Importe:&nbsp;
+                <Text as="span" color="brand.primary">{parsePrice(saleForm.totals.importValue)}</Text>
+              </Text>
+
+              <Text color="gray.300" fontSize="3xl">|</Text>
+              <Text fontSize="3xl" fontWeight="bold">
+                Vuelto:&nbsp;
+                <Text as="span" color="gray.500">{parsePrice(saleForm.totals.change)}</Text>
+              </Text>
+            </Box>
+          )}
         </Flex>
 
         {mode === "create" && <Flex gap={3}>

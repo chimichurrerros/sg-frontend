@@ -38,7 +38,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
         {labelName:"Cód.",propName:"barcode",textIfNull:"---"},
         { labelName: "Nombre", propName: "name"},
         { labelName: "Precio", propName: "price" },
-        { labelName: "Stock", propName: "minimumStock" }
+        { labelName: "Stock", propName: "quantity" }
     ];
 
     useHotkeys('ctrl+down', (event) => {
@@ -121,7 +121,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                             <IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
                                 <RefreshCcw />
                             </IconButton>
-                            <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.minimumStock! ? "visible" : "hidden"}>
+                            <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.quantity! ? "visible" : "hidden"}>
                                 * La cantidad es mayor al stock disponible del producto seleccionado 
                             </Text>
                             <Box display="flex" gap={2}>
@@ -134,7 +134,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     <Button
                                         variant="surface"
                                         colorPalette="green"
-                                        disabled={!selectedProduct || (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.minimumStock! : false)}
+                                        disabled={!selectedProduct || (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.quantity! : false)}
                                         ref={addref}
                                         onClick={()=>selectedProduct && onSelect(selectedProduct,quantity)}
                                     >

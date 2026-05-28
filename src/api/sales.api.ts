@@ -15,25 +15,32 @@ export interface NewSaleRequest {
     totals:   SaleTotals;
 }
 export interface SaleOrderDetail {
-    id:               number;
-    productId:        number;
-    productName:      string;
-    quantityOrdered:  number;
-    quantityInvoiced: number;
-    price:            number;
-    taxRate:          number;
+    id:                 number;
+    productId:          number;
+    barcode:            string;
+    productDescription: string;
+    productName:        string;
+    quantityOrdered:    number;
+    quantityInvoiced:   number;
+    price:              number;
+    taxRate:            number;
 }
 
 export interface FullSaleOrder {
     id:              number;
     customerId:      number;
     customerName:    string;
+    customerRuc:     string;
+    branchId:        number;
     userId:          number;
     userName:        string;
     number:          string;
     date:            Date;
+    importValue:     number;
     total:           number;
     salesOrderState: number;
+    saleCondition:   number;
+    paymentMethod:   number;
     details:         SaleOrderDetail[];
     bills:           Bill[];
 }

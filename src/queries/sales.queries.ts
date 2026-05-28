@@ -1,10 +1,19 @@
 import { salesApi } from "@/api/sales.api";
 import { toaster } from "@/components/ui/toaster";
-import type { Sale } from "@/types/sales";
+import type { PaymentMethod, Sale, SaleCondition } from "@/types/sales";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PaginationParams } from "@/types/types";
 import { RETRIES } from "@/constants/queryConstants";
 
+export const paymentMethods : Record<number,PaymentMethod> = {
+    1: "Efectivo",
+    2: "Tarjeta",
+    3: "Transferencia"
+}
+export const saleConditions : Record<number,SaleCondition> = {
+    1: "Contado",
+    2: "Credito"
+}
 const payments = { "Efectivo": 1, "Tarjeta": 2, "Transferencia": 3 }
 const conditions = { "Contado": 1, "Credito": 2 }
 

@@ -22,6 +22,14 @@ export const useAllProducts = (enabled:boolean = true) => {
   });
 };
 
+export const useProductByBranch = (id: number | null,enabled:boolean = true) => {
+  return useQuery({
+    queryKey: [...catalogKeys.products, "branch", id],
+    queryFn: () => catalogApi.getProductByBranch(id!),
+    enabled: !!id && enabled
+  });
+};
+
 export const useCreateProduct = () => {
   return useMutation({
     mutationFn: (data: ProductRequestDTO) => catalogApi.createProduct(data),

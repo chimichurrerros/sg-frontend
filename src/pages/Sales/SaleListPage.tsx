@@ -66,6 +66,7 @@ export default function SaleListPage() {
                 loading={isLoadingSales}
                 error={salesError}
                 isError={isErrorSales}
+                maxHeight="50vh"
                 noItemsComponent={
                     <EmptyDataScreen
                         title="Sin Ventas"
