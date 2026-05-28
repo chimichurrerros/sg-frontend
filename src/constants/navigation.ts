@@ -110,10 +110,10 @@ export const NAV_CONFIG: NavItem[] = [
     children: [
       { id: "bancos", label: "Bancos", icon: Building, path: "/tesoreria/bancos" },
       {
-        id: "cuentas-bancarias",
-        label: "Cuentas bancarias",
+        id: "cuentas",
+        label: "Cuentas",
         icon: CreditCard,
-        path: "/tesoreria/cuentas-bancarias",
+        path: "/tesoreria/cuentas",
       },
       {
         id: "movimientos",

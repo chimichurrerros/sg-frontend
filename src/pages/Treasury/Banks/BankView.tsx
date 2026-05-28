@@ -203,7 +203,7 @@ export default function BankView() {
                     </Grid>
 
                     <Text fontSize="lg" fontWeight="semibold" mt={6} mb={3}>
-                        Cuentas Bancarias Asociadas
+                        Cuentas Asociadas
                     </Text>
                     <TableSelect
                         data={bank.accounts ?? []}
@@ -213,8 +213,8 @@ export default function BankView() {
                         minheight="200px"
                         noItemsComponent={
                             <EmptyDataScreen
-                                title="Sin cuentas bancarias"
-                                message="Este banco no tiene cuentas bancarias asociadas."
+                                title="Sin cuentas"
+                                message="Este banco no tiene cuentas asociadas."
                                 icon={<></>}
                             />
                         }

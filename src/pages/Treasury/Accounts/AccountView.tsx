@@ -1,7 +1,7 @@
-import { accountTypeMap, type CreateAccountRequestDto } from "@/api/bankAccounts.api";
-import { useGetAccountById, useUpdateAccount, useDeleteAccount } from "@/queries/bankAccounts.queries";
+import { accountTypeMap, type CreateAccountRequestDto } from "@/api/accounts.api";
+import { useGetAccountById, useUpdateAccount, useDeleteAccount } from "@/queries/accounts.queries";
 import { useGetBanks } from "@/queries/banks.queries";
-import { createAccountSchema, type CreateAccountFormData } from "@/schemas/bankAccounts.schema";
+import { createAccountSchema, type CreateAccountFormData } from "@/schemas/accounts.schema";
 import { toaster } from "@/components/ui/toaster";
 import {
     Box,
@@ -47,7 +47,7 @@ function LabelValue({ label, value }: { label: string; value: string }) {
 const formatBalance = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", minimumFractionDigits: 0 }).format(value);
 
-export default function BankAccountView() {
+export default function AccountView() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -96,7 +96,7 @@ export default function BankAccountView() {
     useEffect(() => {
         if (isError) {
             toaster.create({
-                title: "Error al cargar la cuenta bancaria",
+                title: "Error al cargar la cuenta",
                 description: error?.message || "Error desconocido",
                 type: "error",
             });
@@ -114,13 +114,13 @@ export default function BankAccountView() {
         };
         updateAccount(apiData, {
             onSuccess: () => {
-                toaster.create({ title: "Cuenta bancaria actualizada con éxito" });
+                toaster.create({ title: "Cuenta actualizada con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
                 setIsEditing(false);
             },
             onError: (err) => {
                 toaster.create({
-                    title: "Error al actualizar la cuenta bancaria",
+                    title: "Error al actualizar la cuenta",
                     description: err.message,
                     type: "error",
                 });
@@ -132,13 +132,13 @@ export default function BankAccountView() {
         if (!account) return;
         deleteAccount(account.id, {
             onSuccess: () => {
-                toaster.create({ title: "Cuenta bancaria eliminada con éxito" });
+                toaster.create({ title: "Cuenta eliminada con éxito" });
                 queryClient.invalidateQueries({ queryKey: ["bankAccounts"] });
-                navigate("/tesoreria/cuentas-bancarias");
+                navigate("/tesoreria/cuentas");
             },
             onError: (err) => {
                 toaster.create({
-                    title: "Error al eliminar la cuenta bancaria",
+                    title: "Error al eliminar la cuenta",
                     description: err.message,
                     type: "error",
                 });
@@ -149,7 +149,7 @@ export default function BankAccountView() {
     if (isPending) {
         return (
             <Box p={4}>
-                <Text>Cargando cuenta bancaria...</Text>
+                <Text>Cargando cuenta...</Text>
             </Box>
         );
     }
@@ -157,8 +157,8 @@ export default function BankAccountView() {
     if (isError || !account) {
         return (
             <Box p={4}>
-                <Text color="red.500">Error al cargar la cuenta bancaria.</Text>
-                <Button mt={4} variant="ghost" onClick={() => navigate("/tesoreria/cuentas-bancarias")}>
+                <Text color="red.500">Error al cargar la cuenta.</Text>
+                <Button mt={4} variant="ghost" onClick={() => navigate("/tesoreria/cuentas")}>
                     <ArrowLeft /> Volver al listado
                 </Button>
             </Box>
@@ -169,11 +169,11 @@ export default function BankAccountView() {
         <Box display="flex" flexDirection="column" minHeight="0" p={4}>
             <Box display="flex" flexDirection="row" gap={4} py={2} justifyContent="space-between">
                 <Text fontSize="2xl" fontWeight="bold">
-                    {isEditing ? "Editando: " : ""}{account.name ?? "Cuenta Bancaria"}
+                    {isEditing ? "Editando: " : ""}{account.name ?? "Cuenta"}
                 </Text>
 
                 <Box display="flex" gap={4}>
-                    <IconButton padding={2} variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/cuentas-bancarias")}>
+                    <IconButton padding={2} variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/cuentas")}>
                         <ArrowLeft />
                         Volver al listado
                     </IconButton>
