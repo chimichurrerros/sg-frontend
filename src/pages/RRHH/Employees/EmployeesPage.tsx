@@ -32,7 +32,15 @@ import type { Employee } from "@/types/employees";
 
 const PAGE_SIZE = 10;
 
-export default function EmployeesPage() {
+interface EmployeesPageProps {
+  routeBase?: string;
+  contextLabel?: string;
+}
+
+export default function EmployeesPage({
+  routeBase = "/rrhh/empleados",
+  contextLabel = "RR.HH. / Empleados",
+}: EmployeesPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useAllEmployees();
@@ -43,7 +51,6 @@ export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [branchFilter, setBranchFilter] = useState<string[]>([]);
-  const [areaFilter, setAreaFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const employees = data?.employees ?? [];
@@ -52,13 +59,6 @@ export default function EmployeesPage() {
     () => new Map((branchesData?.branches ?? []).map((branch) => [branch.id, branch.name])),
     [branchesData],
   );
-
-  const areaLabelById: Record<number, string> = {
-    1: "VENTAS",
-    2: "ADMINISTRACIÓN",
-    3: "INFORMÁTICA",
-    4: "AUDITORÍA",
-  };
 
   const branchCollection = useMemo(
     () =>
@@ -69,14 +69,6 @@ export default function EmployeesPage() {
         })),
       }),
     [branchesData],
-  );
-
-  const areaCollection = useMemo(
-    () =>
-      createListCollection({
-        items: Object.entries(areaLabelById).map(([id, label]) => ({ label, value: id })),
-      }),
-    [],
   );
 
   const statusCollection = useMemo(
@@ -100,8 +92,9 @@ export default function EmployeesPage() {
         employee.lastName,
         employee.documentNumber,
         branchNameById.get(employee.branchId ?? 0) ?? "",
-        areaLabelById[employee.areaId] ?? String(employee.areaId),
-        String(employee.positionId ?? ""),
+        employee.areaName ?? String(employee.areaId),
+        employee.positionName ?? String(employee.positionId ?? ""),
+        employee.scheduleName ?? String(employee.scheduleId ?? ""),
       ]
         .join(" ")
         .toLowerCase()
@@ -110,11 +103,10 @@ export default function EmployeesPage() {
     const matchesBranch =
       branchFilter.length === 0 ||
       branchFilter.includes(String(employee.branchId ?? ""));
-    const matchesArea = areaFilter.length === 0 || areaFilter.includes(String(employee.areaId));
     const matchesStatus =
       statusFilter.length === 0 || statusFilter.includes(employee.status);
 
-    return matchesSearch && matchesBranch && matchesArea && matchesStatus;
+    return matchesSearch && matchesBranch && matchesStatus;
   });
 
   const currentEmployees = filteredEmployees.slice(
@@ -145,10 +137,19 @@ export default function EmployeesPage() {
     },
     {
       labelName: "Área",
-      propName: "areaId",
-      transformFunction: (value) => areaLabelById[Number(value)] ?? `#${value}`,
+      isComponent: true,
+      render: (item) => item.areaName ?? `#${item.areaId}`,
     },
-    { labelName: "Cargo", propName: "positionId", transformFunction: (value) => `#${value}` },
+    {
+      labelName: "Cargo",
+      isComponent: true,
+      render: (item) => item.positionName ?? `#${item.positionId ?? "-"}`,
+    },
+    {
+      labelName: "Horario",
+      isComponent: true,
+      render: (item) => item.scheduleName ?? `#${item.scheduleId ?? "-"}`,
+    },
     {
       labelName: "Salario Base",
       propName: "baseSalary",
@@ -188,7 +189,7 @@ export default function EmployeesPage() {
     <Stack gap={4} p={4}>
       <Stack gap={1}>
         <Text fontSize="sm" color="gray.500">
-          RR.HH. / Empleados
+          {contextLabel}
         </Text>
         <Heading size="xl">Empleados</Heading>
       </Stack>
@@ -242,13 +243,13 @@ export default function EmployeesPage() {
             variant="outline"
             colorPalette="brand"
             disabled={!selectedEmployee}
-            onClick={() => selectedEmployee && navigate(`/rrhh/empleados/${selectedEmployee.id}`)}
+            onClick={() => selectedEmployee && navigate(`${routeBase}/${selectedEmployee.id}`)}
           >
             <LuPencil />
             Editar
           </Button>
 
-          <Button colorPalette="brand" onClick={() => navigate("/rrhh/empleados/nuevo")}>
+          <Button colorPalette="brand" onClick={() => navigate(`${routeBase}/nuevo`)}>
             <LuPlus />
             Nuevo
           </Button>
@@ -256,15 +257,11 @@ export default function EmployeesPage() {
       </Box>
 
       <Collapsible.Root open={showFilters}>
-        <Collapsible.Content>
+          <Collapsible.Content>
           <Box borderWidth="1px" rounded="md" p={4} bg="bg.subtle">
             <Stack gap={4}>
               <Text fontWeight="semibold">Filtros</Text>
-              <Box
-                display="grid"
-                gap={4}
-                gridTemplateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
-              >
+              <Box display="grid" gap={4} gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}>
                 <Field.Root>
                   <Field.Label>Sucursal</Field.Label>
                   <Select.Root
@@ -290,42 +287,6 @@ export default function EmployeesPage() {
                       <Select.Positioner>
                         <Select.Content>
                           {branchCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-
-                <Field.Root>
-                  <Field.Label>Área</Field.Label>
-                  <Select.Root
-                    collection={areaCollection}
-                    value={areaFilter}
-                    multiple
-                    onValueChange={(event) => {
-                      setAreaFilter(event.value);
-                      setPage(1);
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Todas" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.ClearTrigger />
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {areaCollection.items.map((item) => (
                             <Select.Item item={item} key={item.value}>
                               {item.label}
                               <Select.ItemIndicator />
@@ -388,7 +349,7 @@ export default function EmployeesPage() {
           <EmptyDataScreen title="No hay empleados" message="Crea un empleado para verlo en la lista." />
         }
         onSelect={(employee) => setSelectedEmployee(employee)}
-        onDoubleClick={(employee) => navigate(`/rrhh/empleados/${employee.id}`)}
+        onDoubleClick={(employee) => navigate(`${routeBase}/${employee.id}`)}
       />
 
       <Box display="flex" justifyContent="center">

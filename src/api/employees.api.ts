@@ -24,7 +24,23 @@ export interface CreateEmployeeRequestDTO {
   isActive: boolean;
 }
 
-export type UpdateEmployeeRequestDTO = CreateEmployeeRequestDTO;
+export interface UpdateEmployeeRequestDTO {
+  fileNumber: string;
+  hireDate: string;
+  areaId: number;
+  branchId?: number | null;
+  inmediatlyBossId?: number | null;
+  name: string;
+  lastname: string;
+  birthDate: string;
+  gender: GenderEnum;
+  maritalStatus: MaritalStatusEnum;
+  documentNumber: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  isActive: boolean;
+}
 
 export interface CreateEmployeePositionHistoryRequestDto {
   positionId: number;
@@ -45,15 +61,13 @@ export interface CreateEmployeeRelationRequestDto {
 
 export interface EmployeeResponseDto {
   id: number;
-  entityId: number;
   fileNumber: string | null;
   areaId: number;
+  areaName: string | null;
   branchId: number | null;
   inmediatlyBossId: number | null;
   hireDate: string;
   maritalStatus: number;
-  baseSalary: number | null;
-  positionStartDate: string | null;
   name: string | null;
   lastname: string | null;
   birthDate: string | null;
@@ -66,6 +80,9 @@ export interface EmployeeResponseDto {
   positionId?: number | null;
   positionName?: string | null;
   scheduleId?: number | null;
+  scheduleName?: string | null;
+  baseSalary: number | null;
+  positionStartDate: string | null;
   bankId?: number | null;
   bankAccountNumber?: string | null;
 }
@@ -85,6 +102,7 @@ export interface EmployeePositionHistoryResponseDto {
   positionId: number;
   positionName: string | null;
   scheduleId: number;
+  scheduleType: number;
   scheduleName: string | null;
   basicSalary: number;
   startDate: string;
@@ -93,6 +111,14 @@ export interface EmployeePositionHistoryResponseDto {
 
 export interface EmployeePositionHistoryWrapperDto {
   history: EmployeePositionHistoryResponseDto;
+}
+
+export interface UpdateEmployeePositionHistoryRequestDto {
+  positionId: number;
+  scheduleId: number;
+  basicSalary: number;
+  startDate: string;
+  endDate?: string | null;
 }
 
 export interface ListEmployeePositionHistoriesWrapperDto {
@@ -148,6 +174,18 @@ export const employeesApi = {
   createEmployeePositionHistory: (id: number, body: CreateEmployeePositionHistoryRequestDto) =>
     apiClient
       .post<EmployeePositionHistoryWrapperDto>(`/api/employees/${id}/position-history`, body)
+      .then((response) => response.data),
+  updateEmployeePositionHistory: (
+    id: number,
+    historyId: number,
+    body: UpdateEmployeePositionHistoryRequestDto,
+  ) =>
+    apiClient
+      .put<EmployeePositionHistoryWrapperDto>(`/api/employees/${id}/position-history/${historyId}`, body)
+      .then((response) => response.data),
+  deleteEmployeePositionHistory: (id: number, historyId: number) =>
+    apiClient
+      .delete(`/api/employees/${id}/position-history/${historyId}`)
       .then((response) => response.data),
   getEmployeeRelations: (id: number) =>
     apiClient

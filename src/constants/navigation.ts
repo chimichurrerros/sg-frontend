@@ -5,7 +5,6 @@ import {
   Settings,
   Plus,
   User,
-  Users,
   Building2,
   Truck,
   CalendarRange,
@@ -123,21 +122,6 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // { id: "rrhh", label: "RR.HH.", icon: Users, path: "/dash/rrhh" },
-  {
-    id: "rrhh",
-    label: "RR.HH.",
-    icon: Users,
-    section: "Administración",
-    children: [
-      {
-        id: "empleados",
-        label: "Empleados",
-        icon: User,
-        path: "/rrhh/empleados",
-      },
-    ],
-  },
   {
     id: "gestiones",
     label: "Gestiones",
@@ -162,6 +146,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Catálogo",
         icon: Receipt,
         path: "/dash/catalogo",
+      },
+      {
+        id: "organizacion",
+        label: "Organización",
+        icon: Building2,
+        path: "/gestiones/organizacion",
       },
       {
         id: "inventario",

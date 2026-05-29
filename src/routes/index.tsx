@@ -38,6 +38,7 @@ import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderLis
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
 import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
 import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
+import OrganizationPage from "@/pages/Organization/OrganizationPage";
 
 export const router = createBrowserRouter([
   {
@@ -102,6 +103,34 @@ export const router = createBrowserRouter([
           { path: "/rrhh/empleados", element: <EmployeesPage /> },
           { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
           { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
+          { path: "/gestiones/organizacion", element: <OrganizationPage /> },
+          {
+            path: "/gestiones/organizacion/empleados",
+            element: (
+              <EmployeesPage
+                routeBase="/gestiones/organizacion/empleados"
+                contextLabel="Gestiones / Organización / Empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/nuevo",
+            element: (
+              <EmployeeFormPage
+                basePath="/gestiones/organizacion/empleados"
+                breadcrumb="Gestiones / Organización / Empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/:id",
+            element: (
+              <EmployeeFormPage
+                basePath="/gestiones/organizacion/empleados"
+                breadcrumb="Gestiones / Organización / Empleados"
+              />
+            ),
+          },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },

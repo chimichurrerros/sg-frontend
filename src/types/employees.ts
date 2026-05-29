@@ -15,12 +15,15 @@ export interface Employee {
   lastName: string;
   documentNumber: string;
   areaId: number;
+  areaName?: string | null;
   branchId: number | null;
   inmediatlyBossId: number | null;
   gender: GenderEnum;
   maritalStatus: MaritalStatusEnum;
   positionId?: number | null;
+  positionName?: string | null;
   scheduleId?: number | null;
+  scheduleName?: string | null;
   baseSalary: number;
   hireDate: string;
   status: string;
