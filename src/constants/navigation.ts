@@ -18,6 +18,7 @@ import {
   TableProperties,
   NotebookPen,
   ClipboardCheck,
+  ListOrdered,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -45,6 +46,12 @@ export const NAV_CONFIG: NavItem[] = [
     icon: ShoppingCart,
     section: "Operaciones",
     children: [
+            {
+        id: "ventas",
+        label: "Listado de Ventas",
+        icon: ListOrdered ,
+        path: "/ventas",
+      },
       {
         id: "nueva-venta",
         label: "Nueva Venta",
@@ -103,10 +110,10 @@ export const NAV_CONFIG: NavItem[] = [
     children: [
       { id: "bancos", label: "Bancos", icon: Building, path: "/tesoreria/bancos" },
       {
-        id: "cuentas-bancarias",
-        label: "Cuentas bancarias",
+        id: "cuentas",
+        label: "Cuentas",
         icon: CreditCard,
-        path: "/tesoreria/cuentas-bancarias",
+        path: "/tesoreria/cuentas",
       },
       {
         id: "movimientos",

@@ -1,5 +1,5 @@
-import type { AccountResponseDto } from "@/api/bankAccounts.api";
-import { accountTypeMap } from "@/api/bankAccounts.api";
+import type { AccountResponseDto } from "@/api/accounts.api";
+import { accountTypeMap } from "@/api/accounts.api";
 import { useGetBanks } from "@/queries/banks.queries";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
@@ -9,7 +9,7 @@ import { toaster } from "@/components/ui/toaster";
 import {
   useGetAccounts,
   useDeleteAccount,
-} from "@/queries/bankAccounts.queries";
+} from "@/queries/accounts.queries";
 import type { PaginationParams } from "@/types/types";
 import {
   Box,
@@ -30,7 +30,7 @@ const formatBalance = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value);
 
-export default function BankAccountsPage() {
+export default function AccountsPage() {
   const [params, setParams] = useState<PaginationParams>({
     page: 1,
     pageSize: 10,
@@ -111,7 +111,7 @@ export default function BankAccountsPage() {
   useEffect(() => {
     if (isError) {
       toaster.create({
-        title: "Error al traer las cuentas bancarias",
+        title: "Error al traer las cuentas",
         description: error?.message || "Error desconocido",
         type: "error",
       });
@@ -128,7 +128,7 @@ export default function BankAccountsPage() {
       minHeight="0"
     >
       <Text fontSize="2xl" fontWeight="bold">
-        Cuentas Bancarias
+        Cuentas
       </Text>
 
       <Box
@@ -139,7 +139,7 @@ export default function BankAccountsPage() {
         alignItems="center"
       >
         <InputGroup flex="1" startElement={<LuSearch />}>
-          <Input placeholder="Buscar cuentas bancarias..." />
+          <Input placeholder="Buscar cuentas..." />
         </InputGroup>
 
         <Box display="flex" flexDirection="row" gap={2}>
@@ -152,7 +152,7 @@ export default function BankAccountsPage() {
         <IconButton
           padding={2}
           colorPalette="brand"
-          onClick={() => navigate("/tesoreria/cuentas-bancarias/nueva")}
+          onClick={() => navigate("/tesoreria/cuentas/nueva")}
         >
           <Plus />
           Nuevo
@@ -162,7 +162,7 @@ export default function BankAccountsPage() {
           variant="outline"
           disabled={!selected}
           onClick={() =>
-            selected && navigate(`/tesoreria/cuentas-bancarias/${selected.id}`)
+            selected && navigate(`/tesoreria/cuentas/${selected.id}`)
           }
         >
           <Pencil />
@@ -195,13 +195,13 @@ export default function BankAccountsPage() {
           minheight="0"
           noItemsComponent={
             <EmptyDataScreen
-              title="No se encontraron cuentas bancarias"
-              message="No hay cuentas bancarias para mostrar en este momento."
+              title="No se encontraron cuentas"
+              message="No hay cuentas para mostrar en este momento."
               icon={<Landmark />}
             />
           }
           onDoubleClick={(account) =>
-            navigate(`/tesoreria/cuentas-bancarias/${account.id}`)
+            navigate(`/tesoreria/cuentas/${account.id}`)
           }
         />
 

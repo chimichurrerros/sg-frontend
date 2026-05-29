@@ -18,9 +18,9 @@ import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BanksPage from "@/pages/Treasury/Banks/BanksPage";
 import BankCreate from "@/pages/Treasury/Banks/BankCreate";
 import BankView from "@/pages/Treasury/Banks/BankView";
-import BankAccountsPage from "@/pages/Treasury/Accounts/BankAccountsPage";
-import BankAccountView from "@/pages/Treasury/Accounts/BankAccountView";
-import BankAccountCreate from "@/pages/Treasury/Accounts/BankAccountCreate";
+import AccountsPage from "@/pages/Treasury/Accounts/AccountsPage";
+import AccountView from "@/pages/Treasury/Accounts/AccountView";
+import AccountCreate from "@/pages/Treasury/Accounts/AccountCreate";
 import MovementsPage from "@/pages/Treasury/Movements/MovementsPage";
 import MovementView from "@/pages/Treasury/Movements/MovementView";
 import MovementCreate from "@/pages/Treasury/Movements/MovementCreate";
@@ -36,9 +36,6 @@ import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
-import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
-import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
-import OrganizationPage from "@/pages/Organization/OrganizationPage";
 
 export const router = createBrowserRouter([
   {
@@ -55,7 +52,9 @@ export const router = createBrowserRouter([
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */
+          { path: "/ventas", element: <SaleListPage /> },
           { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
+          { path: "/ventas/:id", element: <SaleSheetPage mode="view" /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           {
             path: "/ventas/presupuestos/crear",
@@ -84,9 +83,9 @@ export const router = createBrowserRouter([
           { path: "/tesoreria/bancos", element: <BanksPage /> },
           { path: "/tesoreria/bancos/nuevo", element: <BankCreate /> },
           { path: "/tesoreria/bancos/:id", element: <BankView /> },
-          { path: "/tesoreria/cuentas-bancarias", element: <BankAccountsPage /> },
-          { path: "/tesoreria/cuentas-bancarias/nueva", element: <BankAccountCreate /> },
-          { path: "/tesoreria/cuentas-bancarias/:id", element: <BankAccountView /> },
+          { path: "/tesoreria/cuentas", element: <AccountsPage /> },
+          { path: "/tesoreria/cuentas/nueva", element: <AccountCreate /> },
+          { path: "/tesoreria/cuentas/:id", element: <AccountView /> },
           { path: "/tesoreria/movimientos", element: <MovementsPage /> },
           { path: "/tesoreria/movimientos/nueva", element: <MovementCreate /> },
           { path: "/tesoreria/movimientos/:id", element: <MovementView /> },

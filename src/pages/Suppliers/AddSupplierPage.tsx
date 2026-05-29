@@ -85,7 +85,7 @@ export const AddSupplierPage = () => {
             const supplier = supplierData.supplier;
 
             reset({
-                ruc: supplier.ruc,
+                ruc: supplier.documentNumber,
                 businessName: supplier.businessName,
                 fantasyName: supplier.fantasyName ?? "",
                 email: supplier.email ?? "",

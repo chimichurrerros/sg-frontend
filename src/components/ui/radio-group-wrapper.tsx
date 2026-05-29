@@ -13,6 +13,7 @@ interface RadioGroupWrapperProps {
   onValueChange?: (value: string) => void;
   direction?: "row" | "column";
   gap?: number;
+  disabled?: boolean;
 }
 
 export function RadioGroupWrapper({
@@ -22,11 +23,13 @@ export function RadioGroupWrapper({
   onValueChange,
   direction = "row",
   gap = 4,
+  disabled = false,
 }: RadioGroupWrapperProps) {
   return (
     <RadioGroup.Root
       value={value || defaultValue}
       onValueChange={(e: any) => onValueChange?.(e.value)}
+      disabled={disabled}
     >
       <Stack direction={direction} gap={gap}>
         {options.map((option) => (

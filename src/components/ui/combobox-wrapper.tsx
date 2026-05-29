@@ -1,12 +1,10 @@
-// components/ui/combobox-wrapper.tsx
-"use client";
-
 import {
   Combobox,
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
+import { X } from "lucide-react";
 
 interface ComboboxWrapperProps<T extends string = string> {
   placeholder?: string;
@@ -17,6 +15,9 @@ interface ComboboxWrapperProps<T extends string = string> {
   value?: T;
   onValueChange?: (value: T) => void;
   clearable?: boolean;
+  disabled?: boolean;
+  hidden?: boolean;
+  onClear?: () => void;
 }
 
 export function ComboboxWrapper<T extends string>({
@@ -26,6 +27,10 @@ export function ComboboxWrapper<T extends string>({
   width = "320px",
   defaultValue,
   value,
+  disabled = false,
+  clearable = false,
+  hidden = false,
+  onClear,
   onValueChange,
 }: ComboboxWrapperProps<T>) {
   const [inputValue, setInputValue] = useState("");
@@ -39,9 +44,7 @@ export function ComboboxWrapper<T extends string>({
     );
   }, [options, inputValue]);
 
-  const collection = createListCollection({
-    items: filteredOptions,
-  });
+  const collection = createListCollection({ items: filteredOptions });
 
   const initialValue = value ? [value] : defaultValue ? [defaultValue] : undefined;
 
@@ -49,6 +52,13 @@ export function ComboboxWrapper<T extends string>({
     onValueChange?.(e.value[0] as T);
     setInputValue("");
   };
+
+  const handleClear = () => {
+    onValueChange?.("" as T);
+    setInputValue("");
+  };
+
+  const hasValue = !!value && value !== "";
 
   return (
     <Combobox.Root
@@ -58,11 +68,24 @@ export function ComboboxWrapper<T extends string>({
       width={width}
       inputValue={inputValue}
       onInputValueChange={(e) => setInputValue(e.inputValue)}
+      disabled={disabled}
+      hidden={hidden}
     >
       {label && <Combobox.Label>{label}</Combobox.Label>}
       <Combobox.Control>
         <Combobox.Input placeholder={placeholder} />
         <Combobox.IndicatorGroup>
+          {clearable && hasValue && (
+            <X
+              size={14}
+              cursor="pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClear();
+                onClear?.();
+              }}
+            />
+          )}
           <Combobox.Trigger />
         </Combobox.IndicatorGroup>
       </Combobox.Control>
