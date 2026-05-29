@@ -37,6 +37,7 @@ import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
 import SaleListPage from "@/pages/Sales/SaleListPage";
+import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 
 export const router = createBrowserRouter([
   {
@@ -95,6 +96,8 @@ export const router = createBrowserRouter([
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },
+          { path: "/customers", element: <CustomersListPage /> },
+
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
           { path: "/dash/proveedores", element: <SupplierListPage /> },

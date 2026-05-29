@@ -4,8 +4,8 @@ import { apiClient } from "./client";
 
 
 export interface CustomerRequest{
-    name: string;
-    ruc:  string;
+    name?: string;
+    ruc?:  string;
 }
 export interface Customer {
     id:   number;
@@ -23,5 +23,5 @@ export const customerApi ={
     create:(body:CustomerRequest)=>apiClient.post<Customer>("/api/customers",body).then(r=>r.data),
     getById:(id:number) => apiClient.get<Customer>("/api/customers/"+id).then(r=>r.data),
     edit:(id:number, body:CustomerRequest) => apiClient.put("/api/customers/"+id,body).then(r=>r.data), 
-    getAll: ()=> apiClient.get<{customers:Customer[]}>("/api/customers/all").then(r=>r.data)
+    getAll: ()=> apiClient.get<{customers:Customer[]}>("/api/customers/all").then(r=>r.data.customers)
 }
