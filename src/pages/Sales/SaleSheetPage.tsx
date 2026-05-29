@@ -57,6 +57,10 @@ const getSaleTemplate = (): Sale => ({
 interface saleSheetProps {
   mode: "view" | "create"
 }
+  export function isValidRuc(ruc: string) {
+const rucRegex = /^\d{6,8}-\d$/;
+    return rucRegex.test(ruc) || ruc === "";
+  }
 
 export default function SaleSheetPage({ mode }: saleSheetProps) {
   const [selectedClient, setSelectedClient] = useState("Ninguno");
@@ -191,7 +195,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         },
       });
     } else {
-      const customer = customers?.customers.find(c => c.id === Number(value));
+      const customer = customers?.find(c => c.id === Number(value));
       if (customer) {
         setSaleForm({
           ...saleForm,
@@ -244,10 +248,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   //   });
   // };
 
-  function isValidRuc(ruc: string) {
-    const rucRegex = /^\d{6,7}-\d$/;
-    return rucRegex.test(ruc) || ruc === "";
-  }
+
   const isAmountValid = dialogAmount >= saleForm.totals.total;
   if (loadingSale && mode !== "create") {
     return <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
@@ -328,7 +329,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               value={selectedClient}
               onValueChange={handleClientSelect}
               options={
-                customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
+                customers ? customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
               }
               disabled={loadingCustomers}
               width="100%"
