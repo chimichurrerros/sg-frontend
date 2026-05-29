@@ -19,14 +19,16 @@ import {
   NotebookPen,
   ClipboardCheck,
   ListOrdered,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavChild {
   id: string;
   label: string;
-  path: string;
   icon: LucideIcon;
+  path?: string;
+  children?: NavChild[];
 }
 
 export interface NavItem {
@@ -158,7 +160,32 @@ export const NAV_CONFIG: NavItem[] = [
         id: "organizacion",
         label: "Organización",
         icon: Building2,
-        path: "/gestiones/organizacion",
+        children: [
+          {
+            id: "organizacion-empleados",
+            label: "Empleados",
+            icon: Users,
+            path: "/gestiones/organizacion?tab=employees",
+          },
+          {
+            id: "organizacion-cargos",
+            label: "Cargos",
+            icon: UserCog,
+            path: "/gestiones/organizacion?tab=positions",
+          },
+          {
+            id: "organizacion-horarios",
+            label: "Horarios",
+            icon: CalendarRange,
+            path: "/gestiones/organizacion?tab=schedules",
+          },
+          {
+            id: "organizacion-areas",
+            label: "Áreas",
+            icon: Building2,
+            path: "/gestiones/organizacion?tab=areas",
+          },
+        ],
       },
       {
         id: "inventario",
@@ -166,6 +193,15 @@ export const NAV_CONFIG: NavItem[] = [
         icon: Package,
         path: "/inventario",
       },
+    ],
+  },
+  {
+    id: "rrhh",
+    label: "RR.HH.",
+    icon: Users,
+    section: "Administración",
+    children: [
+      { id: "rrhh-novedades", label: "Novedades", icon: NotebookPen, path: "/rrhh/novedades" },
     ],
   },
   // {

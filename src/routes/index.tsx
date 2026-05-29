@@ -13,6 +13,7 @@ import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
 import StockListPage from "@/pages/Stock/StockListPage";
 import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
+import SaleListPage from "@/pages/Sales/SaleListPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BanksPage from "@/pages/Treasury/Banks/BanksPage";
@@ -32,6 +33,10 @@ import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseRe
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
+import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
+import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
+import NovedadesPage from "@/pages/RRHH/NovedadesPage";
+import OrganizationPage from "@/pages/Organization/OrganizationPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
@@ -102,6 +107,7 @@ export const router = createBrowserRouter([
           { path: "/rrhh/empleados", element: <EmployeesPage /> },
           { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
           { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
+          { path: "/rrhh/novedades", element: <NovedadesPage /> },
           { path: "/gestiones/organizacion", element: <OrganizationPage /> },
           {
             path: "/gestiones/organizacion/empleados",

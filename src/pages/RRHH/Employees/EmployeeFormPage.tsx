@@ -93,15 +93,13 @@ const toDateInput = (value?: string | null) => {
   return value;
 };
 
-const normalizeSubmitDate = (value: string) => {
-  if (!value) return "";
-  if (value.includes("-")) {
-    const parts = value.split("-");
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-  }
-  return value;
+const toDateInputToday = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };
 
 export default function EmployeeFormPage({
@@ -182,7 +180,6 @@ export default function EmployeeFormPage({
     control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<EmployeeFormInput, any, EmployeeFormOutput>({
     resolver: zodResolver(employeeSchema),
@@ -202,14 +199,11 @@ export default function EmployeeFormPage({
       inmediatlyBossId: null,
       positionId: 0,
       scheduleId: 0,
-      hireDate: "",
+      hireDate: toDateInputToday(),
       baseSalary: 0,
       status: "ACTIVO",
     },
   });
-
-  const watchedBirth = watch("birthDate");
-  const watchedHire = watch("hireDate");
 
   useEffect(() => {
     if (!employeeData?.employee) return;
@@ -240,13 +234,13 @@ export default function EmployeeFormPage({
   const onSubmit = (formData: EmployeeFormOutput) => {
     const commonData = {
       fileNumber: formData.legajo.trim(),
-      hireDate: normalizeSubmitDate(formData.hireDate),
+      hireDate: formData.hireDate,
       areaId: formData.areaId,
       branchId: formData.branchId ?? null,
       inmediatlyBossId: formData.inmediatlyBossId ?? null,
       name: formData.firstName.trim(),
       lastname: formData.lastName.trim(),
-      birthDate: normalizeSubmitDate(formData.birthDate),
+      birthDate: formData.birthDate,
       gender: formData.gender as import("@/types/employees").GenderEnum,
       maritalStatus: formData.maritalStatus as import("@/types/employees").MaritalStatusEnum,
       documentNumber: formData.documentNumber.trim(),
@@ -275,7 +269,7 @@ export default function EmployeeFormPage({
       positionId: formData.positionId,
       scheduleId: formData.scheduleId,
       basicSalary: Number(formData.baseSalary),
-      positionStartDate: normalizeSubmitDate(formData.hireDate),
+      positionStartDate: formData.hireDate,
     };
 
     createEmployee.mutate(requestData, {
@@ -321,8 +315,7 @@ export default function EmployeeFormPage({
 
             <Field.Root invalid={!!errors.birthDate}>
               <Field.Label>Fecha de Nacimiento <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input type="text" placeholder="dd/mm/yyyy" {...register("birthDate")} disabled={isPending} />
-              {watchedBirth && <Text fontSize="sm" color="gray.500">{watchedBirth}</Text>}
+              <Input type="date" {...register("birthDate")} disabled={isPending} />
               <Field.ErrorText>{errors.birthDate?.message}</Field.ErrorText>
             </Field.Root>
 
@@ -551,8 +544,7 @@ export default function EmployeeFormPage({
 
             <Field.Root invalid={!!errors.hireDate}>
               <Field.Label>Fecha de Ingreso <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input type="text" placeholder="dd/mm/yyyy" {...register("hireDate")} disabled={isPending} />
-              {watchedHire && <Text fontSize="sm" color="gray.500">{watchedHire}</Text>}
+              <Input type="date" {...register("hireDate")} disabled={isPending} />
               <Field.ErrorText>{errors.hireDate?.message}</Field.ErrorText>
             </Field.Root>
 

@@ -1,13 +1,25 @@
+import { useEffect } from "react";
 import { Tabs } from "@chakra-ui/react";
 import { LuBuilding2, LuClock3, LuUsers, LuUserCog } from "react-icons/lu";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
 import { DepartmentsTab } from "./DepartmentsTab";
 import { PositionsTab } from "./PositionsTab";
 import { SchedulesTab } from "./SchedulesTab";
 
 export default function OrganizationPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get("tab") ?? "employees";
+
+  useEffect(() => {
+    if (!["employees", "positions", "schedules", "areas"].includes(tab)) {
+      navigate("/gestiones/organizacion?tab=employees", { replace: true });
+    }
+  }, [navigate, tab]);
+
   return (
-    <Tabs.Root defaultValue="employees" lazyMount>
+    <Tabs.Root value={tab} onValueChange={(event) => navigate(`/gestiones/organizacion?tab=${event.value}`)} lazyMount>
       <Tabs.List>
         <Tabs.Trigger value="employees">
           <LuUsers />
