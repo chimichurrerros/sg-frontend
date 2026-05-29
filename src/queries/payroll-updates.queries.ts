@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RETRIES } from "@/constants/queryConstants";
 import { toaster } from "@/components/ui/toaster";
-import { payrollUpdatesApi, type CreatePayrollUpdateRequestDto } from "@/api/payroll-updates.api";
+import { payrollUpdatesApi, type CreatePayrollUpdateRequestDto, type UpdatePayrollUpdateRequestDto } from "@/api/payroll-updates.api";
 
 export const payrollUpdateKeys = {
   all: ["payroll-updates"] as const,
@@ -23,6 +23,20 @@ export const useCreatePayrollUpdate = () => {
     retry: RETRIES,
     onSuccess: () => {
       toaster.create({ title: "Novedad creada con éxito" });
+      queryClient.invalidateQueries({ queryKey: payrollUpdateKeys.all });
+    },
+  });
+};
+
+export const useUpdatePayrollUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: UpdatePayrollUpdateRequestDto }) =>
+      payrollUpdatesApi.updatePayrollUpdate(id, body),
+    retry: RETRIES,
+    onSuccess: () => {
+      toaster.create({ title: "Novedad actualizada con éxito" });
       queryClient.invalidateQueries({ queryKey: payrollUpdateKeys.all });
     },
   });

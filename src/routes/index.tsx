@@ -36,6 +36,7 @@ import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequ
 import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
 import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
 import NovedadesPage from "@/pages/RRHH/NovedadesPage";
+import ConceptosManualesPage from "@/pages/RRHH/ConceptosManualesPage";
 import OrganizationPage from "@/pages/Organization/OrganizationPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
@@ -107,7 +108,10 @@ export const router = createBrowserRouter([
           { path: "/rrhh/empleados", element: <EmployeesPage /> },
           { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
           { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
+          { path: "/rrhh", element: <Navigate to="/rrhh/novedades" replace /> },
           { path: "/rrhh/novedades", element: <NovedadesPage /> },
+          { path: "/rrhh/conceptos-manuales", element: <ConceptosManualesPage /> },
+          { path: "/rrhh/planillas", element: <NovedadesPage /> },
           { path: "/gestiones/organizacion", element: <OrganizationPage /> },
           {
             path: "/gestiones/organizacion/empleados",

@@ -7,7 +7,7 @@ export interface PayrollUpdateResponseDto {
   formulaTypeId: number;
   formulaTypeName: string;
   name: string;
-  formula: string;
+  formula: string | null;
   ipsDeductible: boolean;
 }
 
@@ -15,9 +15,11 @@ export interface CreatePayrollUpdateRequestDto {
   name: string;
   payrollTypeId: number;
   formulaTypeId: number;
-  formula: string;
+  formula: string | null;
   ipsDeductible: boolean;
 }
+
+export type UpdatePayrollUpdateRequestDto = CreatePayrollUpdateRequestDto;
 
 export const payrollUpdatesApi = {
   getPayrollUpdates: () =>
@@ -27,5 +29,9 @@ export const payrollUpdatesApi = {
   createPayrollUpdate: (body: CreatePayrollUpdateRequestDto) =>
     apiClient
       .post<PayrollUpdateResponseDto>("/api/payroll-updates", body)
+      .then((response) => response.data),
+  updatePayrollUpdate: (id: number, body: UpdatePayrollUpdateRequestDto) =>
+    apiClient
+      .put<PayrollUpdateResponseDto>(`/api/payroll-updates/${id}`, body)
       .then((response) => response.data),
 };
