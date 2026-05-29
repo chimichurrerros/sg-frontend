@@ -16,10 +16,10 @@ import type { ProductDTO } from "@/api/catalog.api";
 //This component is a table where you put product to sell or to make a budget
 interface productsTableProps {
   products: ProductDTO[];
-  onDataChange: (newData: ProductSaleDTO[]) => void
-  labels: EditableLabel<ProductSaleDTO>[]
-  readOnly: boolean
-  branchId: number | null
+  onDataChange: (newData: ProductSaleDTO[]) => void;
+  labels: EditableLabel<ProductSaleDTO>[];
+  readOnly: boolean;
+  branchId: number | null;
 }
 
 export default function ProductsTable({ products, onDataChange, labels, readOnly, branchId }: productsTableProps) {

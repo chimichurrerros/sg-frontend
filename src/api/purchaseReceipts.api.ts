@@ -1,5 +1,5 @@
-import type { Bill } from "@/types/bills";
 import { apiClient } from "./client";
+import type { Bill } from "./sales.api";
 
 export interface PurchaseReceiptDetailRequest {
     productId: number;

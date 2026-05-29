@@ -1,10 +1,11 @@
+import type { Customer } from "@/api/customers.api";
 import type { PaymentMethod, ProductSaleDTO, SaleCondition, } from "./sales";
-import type { CustomerForSales, Bill } from "./types";
+import type { Bill } from "@/api/sales.api";
 
 export interface BudgetForm{
     bill?: Bill
     description?: string
-    customer?:CustomerForSales
+    customer?:Customer
     customerName?:string
     ruc?:string
     creationDate?: string

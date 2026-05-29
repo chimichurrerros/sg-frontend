@@ -1,4 +1,4 @@
-import type { Supplier, SupplierRequestDTO } from "@/types/suppliers";
+import type { Supplier } from "@/types/suppliers";
 import type { PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 
