@@ -261,7 +261,7 @@ function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
                                         <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item)} pl={5}>
                                             {label.isComponent && label.render ?
                                                 label.render(item) :
-                                                String(label.propName && (item[label.propName] !== undefined && item[label.propName] !== null ? label.transformFunction ? label.transformFunction(item[label.propName]) : String(item[label.propName]) : label.textIfNull || "-"))
+                                                String(label.propName && (item[label.propName] !== undefined && item[label.propName] !== null ? label.transformFunction ? label.transformFunction(item[label.propName]) : String(item[label.propName] || "-") : label.textIfNull || "-"))
                                             }</Table.Cell>)}
                                 </Table.Row>
                             )}

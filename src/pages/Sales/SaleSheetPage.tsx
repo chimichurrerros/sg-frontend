@@ -135,7 +135,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         id: d.productId,
         name: d.productName,
         barcode: d.barcode,
-        description: d.productDescription,
+        description: d.description,
         price: d.price,
         quantity: d.quantityOrdered,
         total: d.price * d.quantityOrdered,

@@ -18,7 +18,7 @@ export interface SaleOrderDetail {
     id:                 number;
     productId:          number;
     barcode:            string;
-    productDescription: string;
+    description: string;
     productName:        string;
     quantityOrdered:    number;
     quantityInvoiced:   number;
