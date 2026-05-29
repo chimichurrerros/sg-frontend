@@ -19,7 +19,7 @@ import {
   NotebookPen,
   ClipboardCheck,
   ListOrdered,
-  PersonStanding,
+  Contact,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -138,7 +138,7 @@ export const NAV_CONFIG: NavItem[] = [
     section: "Administración",
     children: [
       { id: "usuarios", label: "Usuarios", icon: User, path: "/register" },
-      { id: "clientes", label: "Clientes", icon: PersonStanding, path: "/customers" },
+      { id: "clientes", label: "Clientes", icon: Contact, path: "/customers" },
 
       {
         id: "sucursales",
