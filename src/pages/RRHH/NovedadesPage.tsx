@@ -22,8 +22,6 @@ import { LuArrowLeft, LuPlus, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import PageSizeControl from "@/components/ui/page-size-control";
-import PaginationControl from "@/components/ui/pagination-control";
 import { toaster } from "@/components/ui/toaster";
 import { useCreatePayrollUpdate, useGetPayrollUpdates } from "@/queries/payroll-updates.queries";
 import type { PayrollUpdateResponseDto } from "@/api/payroll-updates.api";
@@ -48,6 +46,26 @@ const ipsCollection = createListCollection({
     { label: "NO", value: "false" },
   ],
 });
+
+const PayrollTypeId = {
+  Earnings: 1,
+  Deductions: 2,
+} as const;
+
+const FormulaTypeId = {
+  Fixed: 1,
+  Calculated: 2,
+} as const;
+
+const payrollTypeNameMap: Record<string, string> = {
+  Earnings: "HABER",
+  Deductions: "DESCUENTO",
+};
+
+const formulaTypeNameMap: Record<string, string> = {
+  Fixed: "FIJO",
+  Calculated: "CALCULADO",
+};
 
 const novedadSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -79,11 +97,9 @@ const appendVariableToFormula = (currentFormula: string, variable: string) => {
 
 export default function NovedadesPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [selectedUpdate, setSelectedUpdate] = useState<PayrollUpdateResponseDto | null>(null);
 
-  const { data, isPending, isError, error } = useGetPayrollUpdates({ page, pageSize });
+  const { data, isPending, isError, error } = useGetPayrollUpdates();
   const createPayrollUpdate = useCreatePayrollUpdate();
 
   const {
@@ -98,8 +114,8 @@ export default function NovedadesPage() {
     resolver: zodResolver(novedadSchema),
     defaultValues: {
       name: "",
-      payrollTypeId: 1,
-      formulaTypeId: 2,
+      payrollTypeId: PayrollTypeId.Earnings,
+      formulaTypeId: FormulaTypeId.Calculated,
       formula: "",
       ipsDeductible: true,
     },
@@ -130,8 +146,8 @@ export default function NovedadesPage() {
         labelName: "Tipo",
         isComponent: true,
         isSortable: true,
-        sortFunction: (a, b) => (a.payrollType?.name ?? "").localeCompare(b.payrollType?.name ?? ""),
-        render: (item) => item.payrollType?.name ?? "-",
+        sortFunction: (a, b) => (payrollTypeNameMap[a.payrollTypeName ?? ""] ?? a.payrollTypeName ?? "").localeCompare(payrollTypeNameMap[b.payrollTypeName ?? ""] ?? b.payrollTypeName ?? ""),
+        render: (item) => payrollTypeNameMap[item.payrollTypeName ?? ""] ?? item.payrollTypeName ?? "-",
       },
       {
         labelName: "Deducible de IPS",
@@ -146,6 +162,13 @@ export default function NovedadesPage() {
         isSortable: true,
         sortFunction: (a, b) => (a.formula ?? "").localeCompare(b.formula ?? ""),
       },
+      {
+        labelName: "Tipo Fórmula",
+        isComponent: true,
+        isSortable: true,
+        sortFunction: (a, b) => (formulaTypeNameMap[a.formulaTypeName ?? ""] ?? a.formulaTypeName ?? "").localeCompare(formulaTypeNameMap[b.formulaTypeName ?? ""] ?? b.formulaTypeName ?? ""),
+        render: (item) => formulaTypeNameMap[item.formulaTypeName ?? ""] ?? item.formulaTypeName ?? "-",
+      },
     ],
     [],
   );
@@ -153,8 +176,8 @@ export default function NovedadesPage() {
   const resetForm = () => {
     reset({
       name: "",
-      payrollTypeId: 1,
-      formulaTypeId: 2,
+      payrollTypeId: PayrollTypeId.Earnings,
+      formulaTypeId: FormulaTypeId.Calculated,
       formula: "",
       ipsDeductible: true,
     });
@@ -185,9 +208,9 @@ export default function NovedadesPage() {
     );
   };
 
-  const formulaTypeLabel = formulaTypeId === 1 ? "FIJO" : "CALCULADO";
-  const variablesDisabled = formulaTypeId === 1;
-  const tableData = data?.payrollUpdates ?? [];
+  const formulaTypeLabel = formulaTypeId === FormulaTypeId.Fixed ? "FIJO" : "CALCULADO";
+  const variablesDisabled = formulaTypeId === FormulaTypeId.Fixed;
+  const tableData = data ?? [];
 
   return (
     <Stack gap={6} p={4}>
@@ -384,15 +407,6 @@ export default function NovedadesPage() {
       <Stack gap={3}>
         <HStack justifyContent="space-between" flexWrap="wrap" gap={3}>
           <Heading size="md">Conceptos de Nómina</Heading>
-          <PageSizeControl
-            params={{ page, pageSize }}
-            paramsChangeFunction={(next) => {
-              setPageSize(next.pageSize ?? 10);
-              setPage(1);
-            }}
-            min={5}
-            max={30}
-          />
         </HStack>
 
         <TableSelect
@@ -402,11 +416,6 @@ export default function NovedadesPage() {
           onSelect={setSelectedUpdate}
           noItemsComponent={<EmptyDataScreen title="No hay novedades" message="Crea una novedad para empezar a usar los conceptos de nómina." />}
           maxHeight="50vh"
-        />
-
-        <PaginationControl
-          pagination={data?.pagination ?? null}
-          onPageChange={(nextPage) => setPage(nextPage)}
         />
       </Stack>
     </Stack>

@@ -18,6 +18,7 @@ export const Sidebar = ({ collapsed }: Props) => {
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     new Set(["ventas", "rrhh", "gestiones"]),
   );
+  let lastSectionShown: string | undefined;
 
   const toggleGroup = (id: string) =>
     setOpenGroups((prev) => {
@@ -146,10 +147,15 @@ export const Sidebar = ({ collapsed }: Props) => {
           const active = isActive(item.path);
           const groupActive = nodeHasActiveChild(item);
           const isOpen = openGroups.has(item.id);
+          const shouldShowSection = !!item.section && item.section !== lastSectionShown;
+
+          if (shouldShowSection) {
+            lastSectionShown = item.section;
+          }
 
           return (
             <Box key={item.id}>
-              {item.section && !collapsed && (
+              {shouldShowSection && !collapsed && (
                 <Text
                   px="12px"
                   pt="8px"

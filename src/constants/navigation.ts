@@ -132,6 +132,15 @@ export const NAV_CONFIG: NavItem[] = [
     ],
   },
   {
+    id: "rrhh",
+    label: "RR.HH.",
+    icon: Users,
+    section: "Operaciones",
+    children: [
+      { id: "rrhh-novedades", label: "Novedades", icon: NotebookPen, path: "/rrhh/novedades" },
+    ],
+  },
+  {
     id: "gestiones",
     label: "Gestiones",
     icon: UserCog,
@@ -193,15 +202,6 @@ export const NAV_CONFIG: NavItem[] = [
         icon: Package,
         path: "/inventario",
       },
-    ],
-  },
-  {
-    id: "rrhh",
-    label: "RR.HH.",
-    icon: Users,
-    section: "Administración",
-    children: [
-      { id: "rrhh-novedades", label: "Novedades", icon: NotebookPen, path: "/rrhh/novedades" },
     ],
   },
   // {

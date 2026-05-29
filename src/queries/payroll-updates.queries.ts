@@ -7,10 +7,10 @@ export const payrollUpdateKeys = {
   all: ["payroll-updates"] as const,
 };
 
-export const useGetPayrollUpdates = (params?: { page?: number; pageSize?: number; search?: string }) => {
+export const useGetPayrollUpdates = () => {
   return useQuery({
-    queryKey: [...payrollUpdateKeys.all, params?.page, params?.pageSize, params?.search],
-    queryFn: () => payrollUpdatesApi.getPayrollUpdates(params),
+    queryKey: payrollUpdateKeys.all,
+    queryFn: () => payrollUpdatesApi.getPayrollUpdates(),
     retry: RETRIES,
   });
 };
