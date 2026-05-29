@@ -1,9 +1,5 @@
 {
-  "name": "sg-frontend",
-  "main": "worker.ts",
+  "name": "bigotires",
   "compatibility_date": "2026-05-29",
-  "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS",
-  }
+  "pages_build_output_dir": "./dist"
 }
