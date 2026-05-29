@@ -4,19 +4,10 @@ import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import {
-  useGetBanks,
-  useDeleteBank,
-} from "@/queries/banks.queries";
+import { useGetBanks, useDeleteBank } from "@/queries/banks.queries";
 import type { PaginationParams } from "@/types/types";
-import {
-  Box,
-  IconButton,
-  Input,
-  InputGroup,
-  Text,
-} from "@chakra-ui/react";
-import { Building, Pencil, Plus, Trash2 } from "lucide-react";
+import { Box, IconButton, Input, InputGroup, Text } from "@chakra-ui/react";
+import { Building, Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -115,7 +106,12 @@ export default function BanksPage() {
           <Text fontSize="sm" color="gray.500" alignSelf="center">
             Registros por Pág.
           </Text>
-          <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
+          <PageSizeControl
+            paramsChangeFunction={setParams}
+            params={params}
+            max={30}
+            min={5}
+          />
         </Box>
 
         <IconButton
@@ -149,8 +145,8 @@ export default function BanksPage() {
             }
           }}
         >
-          <Trash2 />
-          Eliminar
+          <Power />
+          Activar / Desactivar
         </IconButton>
       </Box>
 
@@ -169,9 +165,7 @@ export default function BanksPage() {
               icon={<Building />}
             />
           }
-          onDoubleClick={(bank) =>
-            navigate(`/tesoreria/bancos/${bank.id}`)
-          }
+          onDoubleClick={(bank) => navigate(`/tesoreria/bancos/${bank.id}`)}
         />
 
         <PaginationControl

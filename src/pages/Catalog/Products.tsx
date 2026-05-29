@@ -54,6 +54,11 @@ export const Products = () => {
     });
   };
 
+  const handleEdit = () => {
+    if (!selected) return;
+    navigation(`/dash/catalogo/productos/${selected.id}`);
+  };
+
   useEffect(()=> {
     if(isError){toaster.create({title:"Error al cargar los productos",description: error?.message || "Error desconocido", type:"error"})}
   },[error,isError])
@@ -62,6 +67,7 @@ export const Products = () => {
     <Stack>
       <TableBar
         onDelete={handleDelete}
+        onEdit={selected ? handleEdit : undefined}
         onCreate={() => navigation("/dash/catalogo/nuevo-producto")}
         selected={selected}
       />
@@ -72,6 +78,7 @@ export const Products = () => {
         onSelect={(item) => {
           setSelecteed(item);
         }}
+        onDoubleClick={(item) => navigation(`/dash/catalogo/productos/${item.id}`)}
         loading={isLoading}
         noItemsComponent={<EmptyDataScreen title="No se cargaron productos" message="Verificar errores de conexión o crear un producto nuevo" icon={<BeanOffIcon/>}/>}
       />

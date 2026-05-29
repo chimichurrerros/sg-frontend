@@ -2,6 +2,7 @@ import { accountTypeMap, type CreateAccountRequestDto } from "@/api/accounts.api
 import { useGetAccountById, useUpdateAccount, useDeleteAccount } from "@/queries/accounts.queries";
 import { useGetBanks } from "@/queries/banks.queries";
 import { createAccountSchema, type CreateAccountFormData } from "@/schemas/accounts.schema";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { toaster } from "@/components/ui/toaster";
 import {
     Box,
@@ -60,7 +61,7 @@ export default function AccountView() {
     const { data: banks } = useGetBanks();
 
     const bankCollection = createListCollection({
-        items: (banks?.banks ?? []).map((bank) => ({
+        items: (banks?.banks ?? []).filter((b) => b.isActive).map((bank) => ({
             label: bank.name ?? `Banco #${bank.id}`,
             value: String(bank.id),
         })),
@@ -325,24 +326,40 @@ export default function AccountView() {
 
                         <Field.Root invalid={!!errors.currentBalance} required>
                             <Field.Label>Saldo Actual</Field.Label>
-                            <Input
-                                {...register("currentBalance", { valueAsNumber: true })}
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                disabled={isUpdating}
+                            <Controller
+                                name="currentBalance"
+                                control={control}
+                                render={({ field }) => (
+                                    <CurrencyInput
+                                        value={field.value}
+                                        onValueChange={(v) =>
+                                            field.onChange(isNaN(v) ? 0 : v)
+                                        }
+                                        disabled={isUpdating}
+                                        min={0}
+                                        invalid={!!errors.currentBalance}
+                                    />
+                                )}
                             />
                             <Field.ErrorText>{errors.currentBalance?.message}</Field.ErrorText>
                         </Field.Root>
 
                         <Field.Root invalid={!!errors.availableBalance} required>
                             <Field.Label>Saldo Disponible</Field.Label>
-                            <Input
-                                {...register("availableBalance", { valueAsNumber: true })}
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                disabled={isUpdating}
+                            <Controller
+                                name="availableBalance"
+                                control={control}
+                                render={({ field }) => (
+                                    <CurrencyInput
+                                        value={field.value}
+                                        onValueChange={(v) =>
+                                            field.onChange(isNaN(v) ? 0 : v)
+                                        }
+                                        disabled={isUpdating}
+                                        min={0}
+                                        invalid={!!errors.availableBalance}
+                                    />
+                                )}
                             />
                             <Field.ErrorText>{errors.availableBalance?.message}</Field.ErrorText>
                         </Field.Root>

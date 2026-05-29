@@ -18,7 +18,7 @@ import {
   InputGroup,
   Text,
 } from "@chakra-ui/react";
-import { Landmark, Pencil, Plus, Trash2 } from "lucide-react";
+import { Landmark, Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -69,6 +69,14 @@ export default function AccountsPage() {
       isSortable: true,
       sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
         (a.accountNumber ?? "").localeCompare(b.accountNumber ?? ""),
+    },
+    {
+      labelName: "Activo",
+      propName: "isActive",
+      isSortable: true,
+      sortFunction: (a: AccountResponseDto, b: AccountResponseDto) =>
+        Number(a.isActive) - Number(b.isActive),
+      transformFunction: (value: boolean) => (value ? "Sí" : "No"),
     },
     {
       labelName: "Tipo de Cuenta",
@@ -180,8 +188,8 @@ export default function AccountsPage() {
             }
           }}
         >
-          <Trash2 />
-          Eliminar
+          <Power />
+          Activar / Desactivar
         </IconButton>
       </Box>
 

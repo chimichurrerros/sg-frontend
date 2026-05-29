@@ -44,4 +44,20 @@ export const createProductSchema = z.object({
     .min(0, "El stock mínimo no puede ser negativo"),
 });
 
+export const createServiceSchema = z.object({
+  name: z
+    .string({ message: "El nombre es requerido" })
+    .min(1, "El nombre es requerido")
+    .min(2, "El nombre debe tener al menos 2 caracteres"),
+  description: z.string().optional(),
+  price: z
+    .number({ message: "El precio es requerido" })
+    .min(0, "El precio no puede ser negativo"),
+  cost: z
+    .number({ message: "El costo es requerido" })
+    .min(0, "El costo no puede ser negativo"),
+});
+
+export type CreateServiceFormData = z.infer<typeof createServiceSchema>;
+
 export type CreateProductFormData = z.infer<typeof createProductSchema>;

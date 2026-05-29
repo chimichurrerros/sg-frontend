@@ -9,6 +9,7 @@ export interface AccountResponseDto {
     currentBalance: number;
     availableBalance: number;
     accountNumber: string | null;
+    isActive: boolean;
 }
 
 export interface ListAccountsWrapperDto {

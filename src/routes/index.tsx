@@ -8,6 +8,7 @@ import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import BudgetsPage from "@/pages/Sales/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
+import { AddService } from "@/pages/Catalog/AddService";
 import BranchesListPage from "@/pages/Branches/BranchesListPage";
 import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
 import StockListPage from "@/pages/Stock/StockListPage";
@@ -100,6 +101,9 @@ export const router = createBrowserRouter([
 
           { path: "/dash/catalogo", element: <CatalogPage /> },
           { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
+          { path: "/dash/catalogo/productos/:id", element: <AddProducts /> },
+          { path: "/dash/catalogo/nuevo-servicio", element: <AddService /> },
+          { path: "/dash/catalogo/servicios/:id", element: <AddService /> },
           { path: "/dash/proveedores", element: <SupplierListPage /> },
           { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
           { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },

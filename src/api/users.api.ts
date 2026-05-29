@@ -41,4 +41,6 @@ export const usersApi = {
       .then((r) => r.data),
   getAll: () =>
     apiClient.get<ListUsersWrapperDto>("/api/users").then((r) => r.data),
+  toggleActive: (id: number) =>
+    apiClient.patch(`/api/users/${id}/status`).then((r) => r.data),
 };
