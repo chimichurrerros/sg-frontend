@@ -1,19 +1,19 @@
-// export interface Bill {
-//   id: number;
-//   billType: number;
-//   billState: number;
-//   customerId: number;
-//   salesOrderId?: number;
-//   purchaseOrderId?: number;
-//   stamp?: string;
-//   number: string;
-//   date: string;
-//   dueDate?: string;
-//   paymentTerms?: string;
-//   total: number;
-//   taxTotal: number;
-//   isCredit: boolean;
-// }
+export interface Bill {
+  id: number;
+  billType: number;
+  billState: number;
+  customerId: number;
+  salesOrderId?: number;
+  purchaseOrderId?: number;
+  stamp?: string;
+  number: string;
+  date: string;
+  dueDate?: string;
+  paymentTerms?: string;
+  total: number;
+  taxTotal: number;
+  isCredit: boolean;
+}
 
 export const BillTypeEnum = {
   CONTADO: 1,

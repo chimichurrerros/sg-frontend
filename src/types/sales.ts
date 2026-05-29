@@ -36,6 +36,11 @@ export const paymentOptions: { label: string; value: PaymentMethod }[] = [
   { label: "Transferencia", value: "Transferencia" },
 ];
 
+export interface CustomerForSales {
+  id: number;
+  name: string;
+  ruc: string;
+}
 export interface CustomerDTO {
   name: string;
   ruc: string;

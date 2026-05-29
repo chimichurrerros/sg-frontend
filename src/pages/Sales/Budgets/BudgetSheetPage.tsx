@@ -165,6 +165,7 @@ export default function BudgetSheetPage({ mode }: budgetSheetPageProps) {
             onDataChange={(newData: ProductSaleDTO[]) => setBudgetForm({ ...budgetForm, products: newData })}
             labels={productsLabel}
             readOnly={mode === "edit"}
+            branchId={null}
         />
     </Box>);
 

@@ -1,5 +1,5 @@
-import type { PaymentMethod, ProductSaleDTO, SaleCondition, } from "./sales";
-import type { CustomerForSales, Bill } from "./types";
+import type { PaymentMethod, ProductSaleDTO, SaleCondition, CustomerForSales } from "./sales";
+import type { Bill } from "@/api/sales.api";
 
 export interface BudgetForm{
     bill?: Bill
