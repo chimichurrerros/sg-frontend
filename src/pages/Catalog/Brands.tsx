@@ -2,7 +2,7 @@ import type { ProductBrandDTO } from "@/api/catalog.api";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { catalogKeys, useAllBrands, useCreateBrand, useDeleteBrand } from "@/queries/catalog.queries";
+import { catalogKeys, useAllBrands, useCreateBrand, useDeleteBrand, useUpdateBrand } from "@/queries/catalog.queries";
 import {
   createBrandSchema,
   type CreateBrandFormData,
@@ -25,20 +25,22 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { LuChevronLeft, LuChevronRight, LuSave, LuX } from "react-icons/lu";
 
+type FormMode = "create" | "edit" | null;
+
 export const Brands = () => {
-  // Create new brand
-  const [create, setCreate] = useState<boolean>(false);
+  const [mode, setMode] = useState<FormMode>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ProductBrandDTO | null>(null);
   const queryClient = useQueryClient();
 
-  const onCreate = () => {
-    setCreate(!create);
-    setCreateError(null);
-  };
+  const isFormOpen = mode !== null;
+  const isEditMode = mode === "edit";
 
   const { mutate: deleteBrand } = useDeleteBrand();
-  const { mutate: createBrand, isPending } = useCreateBrand();
+  const { mutate: createBrand, isPending: isCreatePending } = useCreateBrand();
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand();
+  const isPending = isCreatePending || isUpdatePending;
+
   const {
     register,
     reset,
@@ -63,6 +65,24 @@ export const Brands = () => {
   const allBrands: ProductBrandDTO[] = data ? data.productBrands.sort() : [];
   const brands = allBrands.slice((page - 1) * pageSize, page * pageSize);
 
+  const toggleForm = () => {
+    if (mode) {
+      setMode(null);
+      reset({ name: "" });
+    } else {
+      setMode("create");
+    }
+    setCreateError(null);
+  };
+
+  const handleEdit = () => {
+    if (!selected) return;
+    reset({ name: selected.name });
+    setMode("edit");
+    setCreateError(null);
+    setFocus("name");
+  };
+
   const handleDelete = () => {
     if (!selected) return;
     deleteBrand(selected.id, {
@@ -80,8 +100,28 @@ export const Brands = () => {
     });
   };
 
-  const handleCreate = (formData: CreateBrandFormData) => {
+  const handleSave = (formData: CreateBrandFormData) => {
     setCreateError(null);
+
+    if (isEditMode && selected) {
+      updateBrand(
+        { id: selected.id, data: formData },
+        {
+          onSuccess: () => {
+            reset();
+            toaster.create({ title: "Marca actualizada con éxito" });
+            queryClient.invalidateQueries({ queryKey: catalogKeys.brands });
+            setMode(null);
+          },
+          onError: (err) => {
+            setCreateError(
+              "Ha ocurrido un error al actualizar la marca: " + err,
+            );
+          },
+        },
+      );
+      return;
+    }
 
     createBrand(formData, {
       onSuccess: () => {
@@ -90,9 +130,9 @@ export const Brands = () => {
         queryClient.invalidateQueries({ queryKey: ["brands"] });
         setFocus("name");
       },
-      onError: (createBrandError) => {
+      onError: (err) => {
         setCreateError(
-          "Ha ocurrido un error al crear la marca: " + createBrandError,
+          "Ha ocurrido un error al crear la marca: " + err,
         );
       },
     });
@@ -105,12 +145,17 @@ export const Brands = () => {
 
   return (
     <Stack>
-      <TableBar onCreate={onCreate} onDelete={handleDelete} selected={selected} />
+      <TableBar
+        onCreate={toggleForm}
+        onEdit={selected && !isFormOpen ? handleEdit : undefined}
+        onDelete={handleDelete}
+        selected={selected}
+      />
 
-      {create && (
+      {isFormOpen && (
         <Flex
           as="form"
-          onSubmit={handleSubmit(handleCreate)}
+          onSubmit={handleSubmit(handleSave)}
           columns={2}
           gap="1rem 2.5rem"
           data-state="open"
@@ -132,7 +177,7 @@ export const Brands = () => {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={onCreate}
+                onClick={toggleForm}
                 disabled={isPending}
               >
                 <LuX /> Cancelar
@@ -143,7 +188,7 @@ export const Brands = () => {
                 bgColor="brand.primary"
                 loading={isPending}
               >
-                <LuSave /> Guardar marca
+                <LuSave /> {isEditMode ? "Actualizar marca" : "Guardar marca"}
               </Button>
             </ButtonGroup>
 
@@ -161,7 +206,7 @@ export const Brands = () => {
         labels={brandsLabels}
         onSelect={(item) => setSelected(item)}
         loading={isLoading}
-      ></TableSelect>
+      />
 
       <Pagination.Root
         count={allBrands.length ?? 0}
@@ -179,13 +224,13 @@ export const Brands = () => {
           </Pagination.PrevTrigger>
 
           <Pagination.Items
-            render={(page) => (
+            render={(pageItem) => (
               <IconButton
                 variant={{ base: "outline", _selected: "solid" }}
                 zIndex={{ _selected: "1" }}
                 _selected={{ bg: "brand.primary", color: "white" }}
               >
-                {page.value}
+                {pageItem.value}
               </IconButton>
             )}
           />
