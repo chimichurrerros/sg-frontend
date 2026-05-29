@@ -45,6 +45,22 @@ export interface FullSaleOrder {
     bills:           Bill[];
 }
 
+// export interface Bill {
+//   id: number;
+//   billType: number;
+//   billState: number;
+//   customerId: number;
+//   salesOrderId?: number;
+//   purchaseOrderId?: number;
+//   stamp?: string;
+//   number: string;
+//   date: string;
+//   dueDate?: string;
+//   paymentTerms?: string;
+//   total: number;
+//   taxTotal: number;
+//   isCredit: boolean;
+// }
 export interface Bill {
     id:              number;
     billType:        number;
@@ -54,8 +70,8 @@ export interface Bill {
     purchaseOrderId: number;
     stamp:           string;
     number:          string;
-    date:            Date;
-    dueDate:         Date;
+    date:            string;
+    dueDate:         string;
     paymentTerms:    string;
     total:           number;
     taxTotal:        number;

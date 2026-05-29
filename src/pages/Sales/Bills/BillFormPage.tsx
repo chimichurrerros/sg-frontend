@@ -7,7 +7,7 @@ import {
   VStack,
   HStack,
 } from "@chakra-ui/react";
-import { Save, Plus, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Save, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BillDetail } from "@/types/bill-detail";
@@ -91,6 +91,7 @@ export default function BillFormPage() {
   useEffect(() => {
     if (billDetailsData?.billDetails) {
       setDetails(billDetailsData.billDetails);
+      console.log(selectedDetail);
     }
     if (billDetailsData?.pagination) {
       setPagination(billDetailsData.pagination);
@@ -154,34 +155,34 @@ export default function BillFormPage() {
     }
   };
 
-  const handleNewDetail = () => {
-    if (!isEditing) {
-      toaster.create({
-        title: "Error",
-        description: "Guardá la factura primero",
-        type: "error",
-      });
-      return;
-    }
-    setFormDetailProductId("");
-    setFormDetailQuantity("");
-    setFormDetailPrice("");
-    setFormDetailTaxRate("10");
-    setIsEditingDetail(false);
-    setEditingDetailId(null);
-    setShowDetailForm(true);
-  };
+  // const handleNewDetail = () => {
+  //   if (!isEditing) {
+  //     toaster.create({
+  //       title: "Error",
+  //       description: "Guardá la factura primero",
+  //       type: "error",
+  //     });
+  //     return;
+  //   }
+  //   setFormDetailProductId("");
+  //   setFormDetailQuantity("");
+  //   setFormDetailPrice("");
+  //   setFormDetailTaxRate("10");
+  //   setIsEditingDetail(false);
+  //   setEditingDetailId(null);
+  //   setShowDetailForm(true);
+  // };
 
-  const handleEditDetail = () => {
-    if (!selectedDetail) return;
-    setFormDetailProductId(selectedDetail.productId.toString());
-    setFormDetailQuantity(selectedDetail.quantity.toString());
-    setFormDetailPrice(selectedDetail.price.toString());
-    setFormDetailTaxRate(selectedDetail.taxRate.toString());
-    setIsEditingDetail(true);
-    setEditingDetailId(selectedDetail.id);
-    setShowDetailForm(true);
-  };
+  // const handleEditDetail = () => {
+  //   if (!selectedDetail) return;
+  //   setFormDetailProductId(selectedDetail.productId.toString());
+  //   setFormDetailQuantity(selectedDetail.quantity.toString());
+  //   setFormDetailPrice(selectedDetail.price.toString());
+  //   setFormDetailTaxRate(selectedDetail.taxRate.toString());
+  //   setIsEditingDetail(true);
+  //   setEditingDetailId(selectedDetail.id);
+  //   setShowDetailForm(true);
+  // };
 
   const handleSubmitDetail = async () => {
     if (!formDetailProductId || !formDetailQuantity || !formDetailPrice) {

@@ -3,7 +3,7 @@ import { IconButton, Text } from "@chakra-ui/react";
 import { Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { billStatusEnumParse, billTypeEnumParse, type Bill } from "@/types/bills";
+import { billStatusEnumParse, billTypeEnumParse } from "@/types/bills";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { useAllBills } from "@/queries/bills.queries";
 import { parseDate } from "@/constants/date";
@@ -13,6 +13,7 @@ import { parsePrice } from "@/constants/price";
 import PaginationControl from "@/components/ui/pagination-control";
 import type { PaginationParams } from "@/types/types";
 import PageSizeControl from "@/components/ui/page-size-control";
+import type { Bill } from "@/api/sales.api";
 
 export default function BillsListPage() {
   const navigate = useNavigate();

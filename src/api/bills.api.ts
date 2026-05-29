@@ -1,6 +1,6 @@
-import type { Bill } from "@/types/bills";
 import type { PaginationParams, PaginationType } from "@/types/types";
 import { apiClient } from "./client";
+import type { Bill } from "./sales.api";
 
 export interface BillsGetResponse {
   bills: Bill[];

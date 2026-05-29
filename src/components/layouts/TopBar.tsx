@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Text, Menu, Avatar, Icon } from "@chakra-ui/react";
-import { AlignLeft, LogOut, User, Settings, PanelLeft } from "lucide-react";
+import { LogOut, User, Settings, PanelLeft } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLogout }    from "@/queries/auth.queries";
 import { NAV_CONFIG }   from "@/constants/navigation";
