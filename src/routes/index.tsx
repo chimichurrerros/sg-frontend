@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
           { path: "/ventas/:id", element: <SaleSheetPage mode="view" /> },
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
-          { path: "/ventas/presupuestos/:id", element: <BudgetSheetPage mode="view" /> },
+          { path: "/ventas/presupuestos/:id", element: <BudgetSheetPage mode="edit" /> },
 
 
           { path: "/ventas/facturas", element: <BillsListPage /> },
