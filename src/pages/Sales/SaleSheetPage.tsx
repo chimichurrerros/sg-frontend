@@ -103,7 +103,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }, [saleForm.products, dialogAmount]);
 
   useEffect(() => {
-    setSaleForm({ ...saleForm, products: [] })
+    setSaleForm({ ...saleForm,sale: { ...saleForm.sale, branchId }, products: [] })
   }, [branchId])
   useEffect(() => {
     if (isErrorCustomers) {
@@ -116,7 +116,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     //Editar customer, que los campos sean opcionales
 
     setSaleForm({
-      branchId: sale.branchId,
       customer: {
         name: sale.customerName || "",
         ruc: sale.customerRuc || ""
@@ -125,7 +124,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         date: parseDate(sale.date),
         cashierNumber: 0,
         saleNumber: sale.id,
-        bill: sale.bills[0]
+        bill: sale.bills[0],
+        branchId: sale.branchId
       },
       pay: {
         method: paymentMethods[sale.paymentMethod],
@@ -305,7 +305,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             </>}
             <Box display="flex" flexDirection="column" alignItems="flex-start">
               {mode === "view" && <Text fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" mb={1}>
-                Sucursal: {branches?.branches.find(b => b.id == saleForm.branchId)?.name || " "}
+                Sucursal: {branches?.branches.find(b => b.id == saleForm.sale.branchId)?.name || " "}
                 {loadingBranches && <Spinner size="sm" />}
               </Text>}
               <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>

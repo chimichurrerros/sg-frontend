@@ -230,7 +230,7 @@ export default function TableEditable<T extends { id: number }>({
                                     gap={3}
                                     alignContent="center"
                                 >
-                                    <Text fontWeight="semibold">{label.labelName}</Text>
+                                    <Text fontWeight="bold">{label.labelName}</Text>
                                     {label.isEditable && <Text fontSize="sm" color="brand.secondary">*</Text>}
                                     <Box width="16px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
                                         {label.isSortable && sortHeader === index && getSorticon(sortDirection)}

@@ -49,12 +49,12 @@ export interface SaleData{
     bill?: Bill;
     saleNumber?: number;
     date: string;
+    branchId?: number | null;
     cashierNumber?: number;
   };
 export interface Sale {
   customer:CustomerDTO;
   sale: SaleData
-  branchId?: number | null;
 
   pay: {
     method: PaymentMethod;
