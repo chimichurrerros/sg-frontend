@@ -4,11 +4,14 @@ import {
   type ProductCategoryRequestDTO,
   type ProductRequestDTO,
 } from "@/api/catalog.api";
+import { servicesApi, type ServiceRequestDto } from "@/api/service.api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const catalogKeys = {
   products: ["products"] as const,
+  product: (id: number) => ["product", id] as const,
   services: ["services"] as const,
+  service: (id: number) => ["service", id] as const,
   categories: ["categories"] as const,
   brands: ["brands"] as const,
 };
@@ -19,6 +22,14 @@ export const useAllProducts = (enabled:boolean = true) => {
     queryKey: catalogKeys.products,
     queryFn: catalogApi.getAllProducts,
     enabled
+  });
+};
+
+export const useGetProduct = (id?: number) => {
+  return useQuery({
+    queryKey: id ? catalogKeys.product(id) : ["product", "none"] as const,
+    queryFn: () => catalogApi.getProduct(id!),
+    enabled: Boolean(id),
   });
 };
 
@@ -36,9 +47,16 @@ export const useCreateProduct = () => {
   });
 };
 
+export const useUpdateProduct = () => {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductRequestDTO }) =>
+      catalogApi.updateProduct(id, data),
+  });
+};
+
 export const useDeleteProduct = () => {
   return useMutation({
-    mutationFn: (id: number) => catalogApi.deleteProduct(id), // TODO: delete endpoint should return deleted element
+    mutationFn: (id: number) => catalogApi.deleteProduct(id),
   });
 };
 
@@ -46,13 +64,34 @@ export const useDeleteProduct = () => {
 export const useAllServices = () => {
   return useQuery({
     queryKey: catalogKeys.services,
-    queryFn: catalogApi.getAllProducts,
+    queryFn: servicesApi.getAll,
+  });
+};
+
+export const useGetService = (id?: number) => {
+  return useQuery({
+    queryKey: id ? catalogKeys.service(id) : ["service", "none"] as const,
+    queryFn: () => servicesApi.getById(id!),
+    enabled: Boolean(id),
   });
 };
 
 export const useCreateService = () => {
   return useMutation({
-    mutationFn: (data: ProductRequestDTO) => catalogApi.createProduct(data),
+    mutationFn: (data: ServiceRequestDto) => servicesApi.create(data),
+  });
+};
+
+export const useUpdateService = () => {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ServiceRequestDto }) =>
+      servicesApi.update(id, data),
+  });
+};
+
+export const useDeleteService = () => {
+  return useMutation({
+    mutationFn: (id: number) => servicesApi.delete(id),
   });
 };
 
@@ -68,6 +107,13 @@ export const useCreateCategory = () => {
   return useMutation({
     mutationFn: (data: ProductCategoryRequestDTO) =>
       catalogApi.createCategory(data),
+  });
+};
+
+export const useUpdateCategory = () => {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductCategoryRequestDTO }) =>
+      catalogApi.updateCategory(id, data),
   });
 };
 
@@ -88,6 +134,13 @@ export const useAllBrands = () => {
 export const useCreateBrand = () => {
   return useMutation({
     mutationFn: (data: ProductBrandRequestDTO) => catalogApi.createBrand(data),
+  });
+};
+
+export const useUpdateBrand = () => {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductBrandRequestDTO }) =>
+      catalogApi.updateBrand(id, data),
   });
 };
 

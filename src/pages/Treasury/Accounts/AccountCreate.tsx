@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 const accountTypeCollection = createListCollection({
   items: Object.entries(accountTypeMap).map(([value, label]) => ({
@@ -41,7 +42,7 @@ export default function AccountCreate() {
   const { data: banks } = useGetBanks();
 
   const bankCollection = createListCollection({
-    items: (banks?.banks ?? []).map((bank) => ({
+    items: (banks?.banks ?? []).filter((b) => b.isActive).map((bank) => ({
       label: bank.name ?? `Banco #${bank.id}`,
       value: String(bank.id),
     })),
@@ -128,7 +129,7 @@ export default function AccountCreate() {
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
+          <GridItem colSpan={1}>
             <Field.Root invalid={!!errors.accountType} required>
               <Field.Label>Tipo de Cuenta</Field.Label>
               <Controller
@@ -171,7 +172,7 @@ export default function AccountCreate() {
           </GridItem>
 
           {accountType !== 2 && (
-          <GridItem colSpan={2}>
+          <GridItem colSpan={3}>
             <Field.Root invalid={!!errors.bankId}>
               <Field.Label>Banco</Field.Label>
               <Controller
@@ -226,16 +227,23 @@ export default function AccountCreate() {
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
+          <GridItem colSpan={1}>
             <Field.Root invalid={!!errors.currentBalance} required>
               <Field.Label>Saldo Actual</Field.Label>
-              <Input
-                {...register("currentBalance", { valueAsNumber: true })}
-                type="number"
-                step="0.01"
-                min={0}
-                placeholder="0.00"
-                disabled={isPending}
+              <Controller
+                name="currentBalance"
+                control={control}
+                render={({ field }) => (
+                  <CurrencyInput
+                    value={field.value}
+                    onValueChange={(v) =>
+                      field.onChange(isNaN(v) ? 0 : v)
+                    }
+                    disabled={isPending}
+                    min={0}
+                    invalid={!!errors.currentBalance}
+                  />
+                )}
               />
               <Field.ErrorText>
                 {errors.currentBalance?.message}
@@ -243,16 +251,23 @@ export default function AccountCreate() {
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
+          <GridItem colSpan={3}>
             <Field.Root invalid={!!errors.availableBalance} required>
               <Field.Label>Saldo Disponible</Field.Label>
-              <Input
-                {...register("availableBalance", { valueAsNumber: true })}
-                type="number"
-                step="0.01"
-                min={0}
-                placeholder="0.00"
-                disabled={isPending}
+              <Controller
+                name="availableBalance"
+                control={control}
+                render={({ field }) => (
+                  <CurrencyInput
+                    value={field.value}
+                    onValueChange={(v) =>
+                      field.onChange(isNaN(v) ? 0 : v)
+                    }
+                    disabled={isPending}
+                    min={0}
+                    invalid={!!errors.availableBalance}
+                  />
+                )}
               />
               <Field.ErrorText>
                 {errors.availableBalance?.message}

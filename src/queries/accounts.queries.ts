@@ -85,16 +85,16 @@ export const useDeleteAccount = () => {
         retry: RETRIES,
         onSuccess: () => {
             toaster.create({
-                title: "Cuenta eliminada",
-                description: "La cuenta ha sido eliminada exitosamente.",
+                title: "Cuenta actualizada",
+                description: "La cuenta ha cambiado su estado exitosamente.",
             });
             queryClient.invalidateQueries({ queryKey: bankAccountsKeys.all });
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.title || error.message;
             toaster.create({
-                title: "Error al eliminar la cuenta",
-                description: "Ha ocurrido un error al intentar eliminar la cuenta: " + errorMessage,
+                title: "Error al actualizar la cuenta",
+                description: "Ha ocurrido un error al intentar cambiar el estado de la cuenta: " + errorMessage,
                 type: "error",
             });
         },

@@ -2,7 +2,7 @@ import type { ProductCategoryDTO } from "@/api/catalog.api";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { catalogKeys, useAllCategories, useCreateCategory, useDeleteCategory } from "@/queries/catalog.queries";
+import { catalogKeys, useAllCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "@/queries/catalog.queries";
 import {
   createCategorySchema,
   type CreateCategoryFormData,
@@ -25,20 +25,22 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { LuChevronLeft, LuChevronRight, LuSave, LuX } from "react-icons/lu";
 
+type FormMode = "create" | "edit" | null;
+
 export const Categories = () => {
-  // Create new category
-  const [create, setCreate] = useState<boolean>(false);
+  const [mode, setMode] = useState<FormMode>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ProductCategoryDTO | null>(null);
   const queryClient = useQueryClient();
 
-  const onCreate = () => {
-    setCreate(!create);
-    setCreateError(null);
-  };
+  const isFormOpen = mode !== null;
+  const isEditMode = mode === "edit";
 
   const { mutate: deleteCategory } = useDeleteCategory();
-  const { mutate: createCategory, isPending } = useCreateCategory();
+  const { mutate: createCategory, isPending: isCreatePending } = useCreateCategory();
+  const { mutate: updateCategory, isPending: isUpdatePending } = useUpdateCategory();
+  const isPending = isCreatePending || isUpdatePending;
+
   const {
     register,
     reset,
@@ -53,7 +55,7 @@ export const Categories = () => {
   });
 
   // Categories table
-  const { data, isLoading, error,isError } = useAllCategories();
+  const { data, isLoading, error, isError } = useAllCategories();
   const categoriesLabels: label<ProductCategoryDTO>[] = [
     { labelName: "ID", propName: "id" },
     { labelName: "Nombre", propName: "name" },
@@ -64,6 +66,24 @@ export const Categories = () => {
     ? data.productCategories.sort()
     : [];
   const categories = allCategories.slice((page - 1) * pageSize, page * pageSize);
+
+  const toggleForm = () => {
+    if (mode) {
+      setMode(null);
+      reset({ name: "" });
+    } else {
+      setMode("create");
+    }
+    setCreateError(null);
+  };
+
+  const handleEdit = () => {
+    if (!selected) return;
+    reset({ name: selected.name });
+    setMode("edit");
+    setCreateError(null);
+    setFocus("name");
+  };
 
   const handleDelete = () => {
     if (!selected) return;
@@ -82,36 +102,63 @@ export const Categories = () => {
     });
   };
 
-  const handleCreate = (formData: CreateCategoryFormData) => {
+  const handleSave = (formData: CreateCategoryFormData) => {
     setCreateError(null);
+
+    if (isEditMode && selected) {
+      updateCategory(
+        { id: selected.id, data: formData },
+        {
+          onSuccess: () => {
+            reset();
+            toaster.create({ title: "Categoría actualizada con éxito" });
+            queryClient.invalidateQueries({ queryKey: catalogKeys.categories });
+            setMode(null);
+          },
+          onError: (err) => {
+            setCreateError(
+              "Ha ocurrido un error al actualizar la categoría: " + err,
+            );
+          },
+        },
+      );
+      return;
+    }
 
     createCategory(formData, {
       onSuccess: () => {
         reset();
-        toaster.create({ title: "Categoria creada con éxito" });
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
+        toaster.create({ title: "Categoría creada con éxito" });
+        queryClient.invalidateQueries({ queryKey: catalogKeys.categories });
         setFocus("name");
       },
-      onError: (createCategoryError) => {
+      onError: (err) => {
         setCreateError(
-          "Ha ocurrido un error al crear la categoría: " + createCategoryError,
+          "Ha ocurrido un error al crear la categoría: " + err,
         );
       },
     });
   };
 
-  useEffect(()=> {
-    if(isError){toaster.create({title:"Error al cargar los productos",description: error?.message || "Error desconocido", type:"error"})}
-  },[error,isError])
+  useEffect(() => {
+    if (isError) {
+      toaster.create({ title: "Error al cargar las categorías", description: error?.message || "Error desconocido", type: "error" });
+    }
+  }, [error, isError]);
 
   return (
     <Stack>
-      <TableBar onCreate={onCreate} onDelete={handleDelete} selected={selected} />
+      <TableBar
+        onCreate={toggleForm}
+        onEdit={selected && !isFormOpen ? handleEdit : undefined}
+        onDelete={handleDelete}
+        selected={selected}
+      />
 
-      {create && (
+      {isFormOpen && (
         <Flex
           as="form"
-          onSubmit={handleSubmit(handleCreate)}
+          onSubmit={handleSubmit(handleSave)}
           columns={2}
           gap="1rem 2.5rem"
           data-state="open"
@@ -133,7 +180,7 @@ export const Categories = () => {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={onCreate}
+                onClick={toggleForm}
                 disabled={isPending}
               >
                 <LuX /> Cancelar
@@ -144,7 +191,7 @@ export const Categories = () => {
                 bgColor="brand.primary"
                 loading={isPending}
               >
-                <LuSave /> Guardar categoría
+                <LuSave /> {isEditMode ? "Actualizar categoría" : "Guardar categoría"}
               </Button>
             </ButtonGroup>
 
@@ -162,7 +209,7 @@ export const Categories = () => {
         data={categories}
         onSelect={(item) => setSelected(item)}
         loading={isLoading}
-      ></TableSelect>
+      />
 
       <Pagination.Root
         count={allCategories.length ?? 0}
@@ -180,13 +227,13 @@ export const Categories = () => {
           </Pagination.PrevTrigger>
 
           <Pagination.Items
-            render={(page) => (
+            render={(pageItem) => (
               <IconButton
                 variant={{ base: "outline", _selected: "solid" }}
                 zIndex={{ _selected: "1" }}
                 _selected={{ bg: "brand.primary", color: "white" }}
               >
-                {page.value}
+                {pageItem.value}
               </IconButton>
             )}
           />

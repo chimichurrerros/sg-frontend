@@ -19,8 +19,6 @@ import {
   GridItem,
   Heading,
   Input,
-  InputGroup,
-  NumberInput,
   Portal,
   Select,
   Stack,
@@ -33,6 +31,7 @@ import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 export default function MovementCreate() {
   const navigate = useNavigate();
@@ -42,7 +41,9 @@ export default function MovementCreate() {
   const { data: banksData } = useGetBanks();
 
   const accountCollection = createListCollection({
-    items: (accountsData?.accounts ?? []).map((a: AccountResponseDto) => ({
+    items: (accountsData?.accounts ?? [])
+      .filter((a) => a.isActive)
+      .map((a: AccountResponseDto) => ({
       label: a.name ?? `Cuenta #${a.id}`,
       value: String(a.id),
     })),
@@ -224,25 +225,15 @@ export default function MovementCreate() {
                 name="amount"
                 control={control}
                 render={({ field }) => (
-                  <NumberInput.Root
-                    value={String(field.value ?? 0)}
-                    onValueChange={(details) =>
-                      field.onChange(
-                        isNaN(details.valueAsNumber)
-                          ? 0
-                          : details.valueAsNumber,
-                      )
+                  <CurrencyInput
+                    value={field.value}
+                    onValueChange={(v) =>
+                      field.onChange(isNaN(v) ? 0 : v)
                     }
-                    formatOptions={{ style: "decimal" }}
-                    locale="es-PY"
-                    min={0}
                     disabled={isPending}
+                    min={0}
                     invalid={!!errors.amount}
-                  >
-                    <InputGroup startElement="Gs.">
-                      <NumberInput.Input />
-                    </InputGroup>
-                  </NumberInput.Root>
+                  />
                 )}
               />
               <Field.ErrorText>{errors.amount?.message}</Field.ErrorText>
@@ -403,23 +394,7 @@ export default function MovementCreate() {
             <GridItem>
               <Field.Root>
                 <Field.Label>Monto</Field.Label>
-                <Controller
-                  name="checkDetails.amount"
-                  control={control}
-                  defaultValue={0}
-                  render={() => (
-                    <NumberInput.Root
-                      value={String(watch("amount") ?? 0)}
-                      formatOptions={{ style: "decimal" }}
-                      locale="es-PY"
-                      disabled
-                    >
-                      <InputGroup startElement="Gs.">
-                        <NumberInput.Input />
-                      </InputGroup>
-                    </NumberInput.Root>
-                  )}
-                />
+                <CurrencyInput value={watch("amount")} disabled />
               </Field.Root>
             </GridItem>
           </Grid>
