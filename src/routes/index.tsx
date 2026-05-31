@@ -7,6 +7,7 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
+import LibroDiarioPage from "@/pages/Accounting/LibroDiarioPage";
 import BudgetsPage from "@/pages/Sales/Budgets/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import { AddService } from "@/pages/Catalog/AddService";
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/dash", element: <HomePage /> },
           { path: "/dash/contabilidad", element: <AccountingDashboardPage /> },
+          { path: "/dash/contabilidad/libro-diario", element: <LibroDiarioPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */

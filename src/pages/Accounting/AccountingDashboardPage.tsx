@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Flex, Text, Grid, Button, Icon, Heading } from "@chakra-ui/react";
 import { 
   Calendar, 
@@ -10,6 +11,9 @@ import {
   ChevronRight 
 } from "lucide-react";
 import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
+import { LoadingScreen } from "@/components/ui/screens/loading-screen";
+import { ErrorScreen } from "@/components/ui/screens/error-screen";
 
 interface ReportCardProps {
   title: string;
@@ -86,19 +90,52 @@ const ReportCard = ({ title, description, icon, onViewReport }: ReportCardProps)
 };
 
 export default function AccountingDashboardPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState("2026-04");
+  const navigate = useNavigate();
+  const { data, isLoading, isError, error, refetch } = useAllAccountantProcesses();
+  const [selectedPeriod, setSelectedPeriod] = useState("");
 
-  const periodOptions = [
-    { label: "Enero 2026", value: "2026-01" },
-    { label: "Febrero 2026", value: "2026-02" },
-    { label: "Marzo 2026", value: "2026-03" },
-    { label: "Abril 2026", value: "2026-04" },
-    { label: "Mayo 2026", value: "2026-05" },
-    { label: "Junio 2026", value: "2026-06" },
-  ];
+  useEffect(() => {
+    if (data?.accountantProcesses && data.accountantProcesses.length > 0 && !selectedPeriod) {
+      setSelectedPeriod(data.accountantProcesses[0].name);
+    }
+  }, [data, selectedPeriod]);
+
+  // Update browser tab/document title when selectedPeriod changes, and restore on unmount
+  useEffect(() => {
+    const originalTitle = document.title;
+    if (selectedPeriod) {
+      document.title = `${selectedPeriod} - Dashboard Contabilidad`;
+    }
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [selectedPeriod]);
+
+  if (isLoading) {
+    return <LoadingScreen message="Cargando procesos contables..." height="full" />;
+  }
+
+  if (isError) {
+    return (
+      <ErrorScreen 
+        title="Error al cargar procesos contables" 
+        errorMessage={error?.message || "Error desconocido"} 
+        retry={refetch}
+      />
+    );
+  }
+
+  const periodOptions = data?.accountantProcesses.map((p) => ({
+    label: p.name,
+    value: p.name,
+  })) || [];
 
   const handleViewReport = (reportName: string) => {
-    console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
+    if (reportName === "Libro Diario") {
+      navigate(`/dash/contabilidad/libro-diario?process=${selectedPeriod}`);
+    } else {
+      console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
+    }
   };
 
   return (
@@ -121,12 +158,12 @@ export default function AccountingDashboardPage() {
         </Flex>
 
         {/* Period Selector */}
-        <SelectWrapper
+        {/* <SelectWrapper
           options={periodOptions}
           value={selectedPeriod}
           onValueChange={(val) => setSelectedPeriod(val)}
           width="150px"
-        />
+        /> */}
       </Flex>
 
       {/* Grid of Report Cards */}
