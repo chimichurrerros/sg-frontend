@@ -29,7 +29,7 @@ export interface tableSelectProps<T extends { id: number }> {
     loading: boolean
     error?: Error | null
     isError?: boolean
-    maxHeight?:string
+    maxHeight?: string
 }
 
 /**
@@ -58,7 +58,7 @@ export const getSorticon = (sortDirection: "Asc" | "Desc") => {
 
 export default function TableSelect<T extends { id: number }>(
     { labels, data, onSelect, onDoubleClick, noItemsComponent,
-        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false,maxHeight
+        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false, maxHeight
     }: tableSelectProps<T>) {
 
 
@@ -140,14 +140,14 @@ export default function TableSelect<T extends { id: number }>(
     }, [data]);
 
 
-function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
-    const sortedData = [...finalData].sort(sortFunction); 
-    if (sortDirection === "Desc") {
-        setFinalData(sortedData.reverse());
-    } else {
-        setFinalData(sortedData);
+    function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
+        const sortedData = [...finalData].sort(sortFunction);
+        if (sortDirection === "Desc") {
+            setFinalData(sortedData.reverse());
+        } else {
+            setFinalData(sortedData);
+        }
     }
-}
     return (
         <Box flex="1" minHeight="0" my={3}>
             {loading ? (
@@ -211,7 +211,7 @@ function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
                                     textAlign="center"
 
                                 >
-                                    <ErrorScreen errorMessage={error.message || "Error desconocido"} title={"Error al traer datos"}  />
+                                    <ErrorScreen errorMessage={error.message || "Error desconocido"} title={"Error al traer datos"} />
                                 </Table.Cell>
                             </Table.Row>}
                             {loading &&
@@ -267,10 +267,35 @@ function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
                             )}
                             {!loading && !isError && finalData && finalData.length === 0 &&
                                 <Table.Row>
-                                    <Table.Cell colSpan={labels.length} p={8} height="full" border="hidden">
-                                        {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
+                                    <Table.Cell
+                                        colSpan={labels.length}
+                                        p={0}
+                                        border="hidden"
+                                    >
+                                        <Box
+                                            position="relative"
+                                            height={height || "200px"}
+                                        >
+                                            <Box
+                                                position="absolute"
+                                                top="50%"
+                                                left="50%"
+                                                transform="translate(-50%, -50%)"
+                                                width="100%"
+                                                textAlign="center"
+                                            >
+                                                <Box
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                >
+                                                    {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
+                                                </Box>
+                                            </Box>
+                                        </Box>
                                     </Table.Cell>
-                                </Table.Row>}
+                                </Table.Row>
+                            }
                         </Table.Body>
                     </Table.Root>
 

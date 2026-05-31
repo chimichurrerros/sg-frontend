@@ -20,7 +20,7 @@ export interface EditableLabel<T extends { id: number }> {
     isEditable?: boolean;
     onEdit?: (item: T, newValue: T[keyof T]) => T
     inputType?: "text" | "number" | "email" | "date";
-    validate?: (value: any, item?:T) => boolean;
+    validate?: (value: any, item?: T) => boolean;
     transform?: (value: any) => any;
     formatFunction?: (value: any) => string;
     render?: (item: T) => React.ReactNode;
@@ -83,14 +83,14 @@ export default function TableEditable<T extends { id: number }>({
         setIsValid(true);
     };
 
-    const validateValue = (value: any, label: EditableLabel<T>,item?:T): boolean => {
+    const validateValue = (value: any, label: EditableLabel<T>, item?: T): boolean => {
         if (label.validate) {
-            return label.validate(value,item);
+            return label.validate(value, item);
         }
         return true;
     };
 
-    const saveEdit = (item?:T) => {
+    const saveEdit = (item?: T) => {
         if (!editingCell) return;
 
         const label = labels.find(l => l.propName === editingCell.propName);
@@ -102,7 +102,7 @@ export default function TableEditable<T extends { id: number }>({
             newValue = label.transform(newValue);
         }
 
-        if (!validateValue(newValue, label,item)) {
+        if (!validateValue(newValue, label, item)) {
             setIsValid(false);
             setEditingCell(null)
             return;
@@ -131,21 +131,21 @@ export default function TableEditable<T extends { id: number }>({
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            if(editingCell) saveEdit(finalData.find(item=> item.id === editingCell.rowId) );
+            if (editingCell) saveEdit(finalData.find(item => item.id === editingCell.rowId));
         } else if (e.key === "Escape") {
             e.preventDefault();
             cancelEdit();
         }
     };
 
-    const handleValueChange = (newValue: string, label: EditableLabel<T>,item:T) => {
+    const handleValueChange = (newValue: string, label: EditableLabel<T>, item: T) => {
         setEditValue(newValue);
 
         let valueToValidate: any = newValue;
         if (label.transform) {
             valueToValidate = label.transform(newValue);
         }
-        setIsValid(validateValue(valueToValidate, label,item));
+        setIsValid(validateValue(valueToValidate, label, item));
     };
 
     const renderCellContent = (item: T, label: EditableLabel<T>) => {
@@ -166,9 +166,9 @@ export default function TableEditable<T extends { id: number }>({
                     <Input
                         ref={inputRef}
                         value={editValue}
-                        onChange={(e) => handleValueChange(e.target.value, label,item)}
+                        onChange={(e) => handleValueChange(e.target.value, label, item)}
                         onKeyDown={handleKeyDown}
-                        onBlur={()=>saveEdit(finalData.find(item=> item.id === editingCell.rowId) )}
+                        onBlur={() => saveEdit(finalData.find(item => item.id === editingCell.rowId))}
                         type={label.inputType || "text"}
                         px={0}
                         py={0}
@@ -285,16 +285,28 @@ export default function TableEditable<T extends { id: number }>({
 
                     {!loading && finalData.length === 0 && (
                         <Table.Row border="hidden">
-                            <Table.Cell colSpan={labels.length} border="hidden">
-                                <Flex justify="center" align="center" w="100%" >
-                                    {noItemsComponent ? noItemsComponent : (
-                                        <EmptyDataScreen
-                                            title="No hay datos para mostrar"
-                                            message="Intenta con otros criterios de búsqueda o agregando un dato nuevo"
-                                            icon={<BeanOff />}
-                                        />
-                                    )}
-                                </Flex>
+                            <Table.Cell colSpan={labels.length} border="hidden" alignContent="center" textAlign="center" verticalAlign="middle">
+                                <Box
+                                    height={height || "200px"}
+                                    bg="red"
+                                    w="full"
+                                >
+                                    <Box
+                                        position="absolute"
+                                        top="50%"
+                                        left="50%"
+                                        transform="translate(-50%, -50%)"
+                                        textAlign="center"
+                                        ml={20}
+                                    >
+                                        {noItemsComponent ? noItemsComponent : (
+                                            <EmptyDataScreen
+                                                title="No hay datos para mostrar"
+                                                message="Intenta con otros criterios de búsqueda o agregando un dato nuevo"
+                                                icon={<BeanOff />}
+                                            />
+                                        )}
+                                    </Box></Box>
                             </Table.Cell>
                         </Table.Row>
                     )}
