@@ -6,6 +6,7 @@ import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
+import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
 import BudgetsPage from "@/pages/Sales/Budgets/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import { AddService } from "@/pages/Catalog/AddService";
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
+          { path: "/dash/contabilidad", element: <AccountingDashboardPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */

@@ -20,6 +20,7 @@ import {
   ClipboardCheck,
   ListOrdered,
   Contact,
+  FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -166,12 +167,12 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // {
-  //   id: "contabilidad",
-  //   label: "Contabilidad",
-  //   icon: FileText,
-  //   path: "/dash/contabilidad",
-  // },
+  {
+    id: "contabilidad",
+    label: "Contabilidad",
+    icon: FileText,
+    path: "/dash/contabilidad",
+  },
   {
     id: "configuraciones",
     label: "Configuraciones",
