@@ -17,3 +17,28 @@ export interface LibroDiarioEntry {
 export interface LibroDiarioResponse {
   entries: LibroDiarioEntry[];
 }
+
+export interface LibroMayorMovement {
+  entryId: number;
+  date: string;
+  description: string;
+  debit: number;
+  credit: number;
+  runningBalance: number;
+}
+
+export interface LibroMayorAccount {
+  accountId: number;
+  accountCode: string;
+  accountName: string;
+  initialBalance: number;
+  movements: LibroMayorMovement[];
+  totalDebit: number;
+  totalCredit: number;
+  finalBalance: number;
+}
+
+export interface LibroMayorResponse {
+  accounts: LibroMayorAccount[];
+}
+

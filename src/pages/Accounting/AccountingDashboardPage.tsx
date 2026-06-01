@@ -133,6 +133,8 @@ export default function AccountingDashboardPage() {
   const handleViewReport = (reportName: string) => {
     if (reportName === "Libro Diario") {
       navigate(`/dash/contabilidad/libro-diario?process=${selectedPeriod}`);
+    } else if (reportName === "Libro Mayor") {
+      navigate(`/dash/contabilidad/libro-mayor?process=${selectedPeriod}`);
     } else {
       console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
     }
