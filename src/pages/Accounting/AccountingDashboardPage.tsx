@@ -165,13 +165,26 @@ export default function AccountingDashboardPage() {
           </Text>
         </Flex>
 
-        {/* Period Selector */}
-        {/* <SelectWrapper
-          options={periodOptions}
-          value={selectedPeriod}
-          onValueChange={(val) => setSelectedPeriod(val)}
-          width="150px"
-        /> */}
+        <Flex gap={3} align="center">
+          <Button
+            size="sm"
+            variant="outline"
+            borderColor="brand.primary"
+            color="brand.primary"
+            _hover={{ bg: "brand.primary", color: "white" }}
+            onClick={() => navigate("/dash/contabilidad/plan-cuentas")}
+          >
+            Configurar Plan & Periodos
+          </Button>
+
+          {/* Period Selector */}
+          <SelectWrapper
+            options={periodOptions}
+            value={selectedPeriod}
+            onValueChange={(val) => setSelectedPeriod(val)}
+            width="200px"
+          />
+        </Flex>
       </Flex>
 
       {/* Grid of Report Cards */}
@@ -223,7 +236,7 @@ export default function AccountingDashboardPage() {
           fontSize="14px"
           _hover={{ color: "brand.secondary" }}
           transition="color 0.15s ease"
-          onClick={() => console.log("Crear nuevo asiento manual")}
+          onClick={() => navigate("/dash/contabilidad/nuevo-asiento")}
         >
           <Icon as={FilePlus} boxSize="16px" />
           <Text>Nuevo Asiento Manual</Text>

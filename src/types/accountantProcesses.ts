@@ -5,6 +5,7 @@ export interface AccountantProcess {
   name: string;
   startDate: string;
   endDate: string;
+  isClosed: boolean;
 }
 
 export interface AccountantProcessesGetResponse {
