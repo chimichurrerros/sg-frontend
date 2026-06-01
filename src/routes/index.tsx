@@ -39,6 +39,7 @@ import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderLis
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
 import SaleListPage from "@/pages/Sales/SaleListPage";
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
+import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 
 export const router = createBrowserRouter([
   {
@@ -61,8 +62,6 @@ export const router = createBrowserRouter([
           { path: "/ventas/presupuestos", element: <BudgetsPage /> },
           { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
           { path: "/ventas/presupuestos/:id", element: <BudgetSheetPage mode="edit" /> },
-
-
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
@@ -70,6 +69,7 @@ export const router = createBrowserRouter([
             path: "/ventas/presupuestos/crear",
             element: <BudgetSheetPage mode="create" />,
           },
+          {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
           /* ===== COMPRAS ===== */
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },

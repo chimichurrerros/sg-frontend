@@ -20,6 +20,7 @@ import {
   ClipboardCheck,
   ListOrdered,
   Contact,
+  HandHelping,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -70,6 +71,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Facturas",
         icon: Receipt,
         path: "/ventas/facturas",
+      },
+      {
+        id: "devoluciones",
+        label: "Devoluciones",
+        icon: HandHelping,
+        path: "/ventas/devoluciones",
       },
     ],
   },
