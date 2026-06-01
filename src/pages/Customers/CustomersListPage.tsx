@@ -10,10 +10,12 @@ import { BeanOffIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch, LuPencil, LuPlus, LuX, LuCheck } from "react-icons/lu";
 import { isValidRuc } from "../Sales/SaleSheetPage";
+import { parseDate } from "@/constants/date";
+import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
 
 type FormMode = "create" | "edit" | null;
 
-const emptyForm: CustomerRequest = { name: "", ruc: "" };
+const emptyForm: CustomerRequest = { name: "", ruc: "", email: "", birthDate: "" };
 
 export const CustomersListPage = () => {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
@@ -27,6 +29,8 @@ export const CustomersListPage = () => {
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
         { labelName: "Nombre", propName: "name", isSortable: true, sortFunction: (a, b) => a.name.localeCompare(b.name) },
         { labelName: "RUC", propName: "ruc", isSortable: true, sortFunction: (a, b) => a.ruc.localeCompare(b.ruc) },
+        {labelName: "Email", propName: "email", isSortable: true, sortFunction: (a, b) => (a.email || "").localeCompare(b.email || "")},
+        {labelName: "Fecha de Nacimiento", propName: "birthDate", isSortable: true,transformFunction:(value)=>parseDate(value), sortFunction: (a, b) => new Date(a.birthDate || "").getTime() - new Date(b.birthDate || "").getTime()},
     ];
 
     useEffect(() => {
@@ -41,7 +45,7 @@ export const CustomersListPage = () => {
 
     const handleOpenEdit = () => {
         if (!selected) return;
-        setFormData({ name: selected.name, ruc: selected.ruc });
+        setFormData({ name: selected.name, ruc: selected.ruc, email: selected.email, birthDate: selected.birthDate });
         setFormMode("edit");
     };
 
@@ -93,7 +97,6 @@ export const CustomersListPage = () => {
                     <LuPlus /> Nuevo
                 </Button>
             </Flex>
-
             {/* Card de formulario */}
             {formMode !== null && (
                 <Collapsible.Root open={formMode !== null} onOpenChange={(e) => { if (!e.open) handleCancel(); }}>
@@ -106,7 +109,7 @@ export const CustomersListPage = () => {
                                 <Box flex={2}>
                                     <Text fontSize="xs" color="gray.500" mb={1}>Nombre / Razón Social</Text>
                                     <Input
-                                        size="sm"
+                                        size="md"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="Nombre del cliente"
@@ -115,7 +118,7 @@ export const CustomersListPage = () => {
                                 <Box flex={1}>
                                     <Text fontSize="xs" color="gray.500" mb={1}>RUC</Text>
                                     <Input
-                                        size="sm"
+                                        size="md"
                                         placeholder="RUC del cliente"
                                         value={formData.ruc}
                                         maxLength={9}
@@ -127,6 +130,29 @@ export const CustomersListPage = () => {
                                             setFormData({ ...formData, ruc: formatted });
                                         }}
                                     />
+                                </Box>
+                                <Box flex={2}>
+                                    <Text fontSize="xs" color="gray.500" mb={1}>Email</Text>
+                                    <Input
+                                        size="md"
+                                        placeholder="Email del cliente"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                </Box>
+                                <Box flex={2}>
+                                    <Text fontSize="xs" color="gray.500" mb={1}>Fecha de Nacimiento</Text>
+                                    <DatePickerWrapper
+                                        value={formData.birthDate}
+                                        onChange={(date) => setFormData({ ...formData, birthDate: date[0] })}
+                                    />
+                                    {/* <Input
+                                        size="sm"
+                                        type="date"
+                                        placeholder="Fecha de nacimiento"
+                                        value={formData.birthDate}
+                                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                                    /> */}
                                 </Box>
                                 <Button size="sm" colorPalette="brand" onClick={handleConfirm} disabled={!formData.name || !isValidRuc(formData.ruc || "") || createCustomer.isPending || editCustomer.isPending }>
                                     {createCustomer.isPending || editCustomer.isPending ? <Spinner /> : <LuCheck />} Confirmar

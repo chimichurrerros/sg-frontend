@@ -7,7 +7,7 @@ import TableSelect, { type label } from "@/components/ui/table-select";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useNavigate } from "react-router-dom";
-import type { CustomerQuote, CustomerQuotesParams } from "@/api/customer-quotes.api";
+import { customerQuotesStatus, type CustomerQuote, type CustomerQuotesParams } from "@/api/customer-quotes.api";
 import { useCustomerQuotes } from "@/queries/customer-quotes.queries";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { parsePrice } from "@/constants/price";
@@ -29,8 +29,9 @@ export default function BudgetsPage() {
         { labelName: "Cliente", propName: "customerName", isSortable: true, sortFunction: (a, b) => a.customerName.localeCompare(b.customerName) },
         { labelName: "Fecha", propName: "date", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime() },
         { labelName: "Creado por", propName: "userName", isSortable: true, sortFunction: (a, b) => a.userName.localeCompare(b.userName) },
-        {labelName: "Fecha Expiración", propName: "expirationDate",transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime() },
-        { labelName: "Total", propName: "importValue", transformFunction: (value) => parsePrice(value), isSortable: true, sortFunction: (a, b) => a.importValue - b.importValue },
+        { labelName: "Fecha Expiración", propName: "expirationDate", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime() },
+        { labelName: "Estado", propName: "status", transformFunction: (value) => customerQuotesStatus[value], isSortable: true, sortFunction: (a, b) => a.status - b.status },
+        { labelName: "Total", propName: "total", transformFunction: (value) => parsePrice(value), isSortable: true, sortFunction: (a, b) => a.total - b.total },
     ];
 
     const { data: customers, isPending: isCustomersPending } = useGetAllCustomers()
@@ -57,7 +58,7 @@ export default function BudgetsPage() {
                         <FolderOpen size={20} />
                         Abrir Ficha
                     </IconButton>
-                    <IconButton padding={2} bgColor="brand.secondary" disabled={!selected}>
+                    <IconButton padding={2} bgColor="brand.secondary" disabled={!selected || selected.status!==0}>
                         <DollarSign size={20} />
                         Aprobar presupuesto
                     </IconButton>

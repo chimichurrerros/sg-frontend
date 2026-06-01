@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { customerQuotesApi, type CustomerQuotesParams, type CreateCustomerQuoteRequest } from '@/api/customer-quotes.api';
 import { toaster } from '@/components/ui/toaster';
-import { paymentMethodIds, paymentMethods, saleConditionIds } from './sales.queries';
 
 export const customerQuoteKeys = {
     all: ['customer-quotes'] as const,
@@ -58,6 +57,11 @@ export const useUpdateCustomerQuote = () => {
         mutationFn: ({ id, data }: { id: number; data: Partial<CreateCustomerQuoteRequest> }) =>
             customerQuotesApi.update(id, data),
         onSuccess: (_, variables) => {
+            toaster.create({
+                title: 'Presupuesto actualizado',
+                description: `El presupuesto ha sido actualizado exitosamente.`,
+                type: 'success',
+            });
             queryClient.invalidateQueries({ queryKey: customerQuoteKeys.detail(variables.id) });
             queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
         },
@@ -67,7 +71,52 @@ export const useUpdateCustomerQuote = () => {
                 description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
                 type: 'error',
             });
-            console.error('Error al actualizar presupuesto:', error);
+        },
+    });
+};
+
+export const useSellCustomerQuote = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => customerQuotesApi.sell(id),
+        onSuccess: (_, id) => {
+            toaster.create({
+                title: 'Presupuesto vendido',
+                description: `El presupuesto ha sido aprobado exitosamente.`,
+                type: 'success',
+            });
+            queryClient.invalidateQueries({ queryKey: customerQuoteKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
+        },
+        onError: (error) => {
+            toaster.create({
+                title: 'Error al aprobar presupuesto',
+                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                type: 'error',
+            });
+        },
+    });
+};
+
+export const useRejectCustomerQuote = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => customerQuotesApi.reject(id),
+        onSuccess: (_, id) => {
+            toaster.create({
+                title: 'Presupuesto rechazado',
+                description: `El presupuesto ha sido rechazado exitosamente.`,
+                type: 'success',
+            });
+            queryClient.invalidateQueries({ queryKey: customerQuoteKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
+        },
+        onError: (error) => {
+            toaster.create({
+                title: 'Error al rechazar presupuesto',
+                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                type: 'error',
+            });
         },
     });
 };

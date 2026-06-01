@@ -1,4 +1,3 @@
-// src/pages/Budgets/BudgetSheetPage.tsx
 import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import {
@@ -10,7 +9,7 @@ import {
     IconButton,
     Spinner,
 } from "@chakra-ui/react";
-import { ArrowLeft, CalendarPlus, Printer, X } from "lucide-react";
+import { ArrowLeft, CalendarPlus, DollarSign, ExternalLink, Pencil, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type SaleCondition } from "@/types/sales";
@@ -26,7 +25,7 @@ import { useGetAllCustomers } from "@/queries/customers.queries";
 import { useNavigate, useParams } from "react-router-dom";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
-import { useCustomerQuoteById, useCreateCustomerQuote } from "@/queries/customer-quotes.queries";
+import { useCustomerQuoteById, useCreateCustomerQuote, useUpdateCustomerQuote, useSellCustomerQuote, useRejectCustomerQuote } from "@/queries/customer-quotes.queries";
 import type { CreateCustomerQuoteRequest, CustomerQuote } from "@/api/customer-quotes.api";
 import { useAllBranches } from "@/queries/branches.queries";
 import { parseDate } from "@/constants/date";
@@ -50,7 +49,6 @@ const getBudgetTemplate = (): CreateCustomerQuoteRequest => ({
     },
     products: [],
     totals: {
-        subtotal: 0,
         iva: 0,
         total: 0,
         amount: 0,
@@ -68,123 +66,50 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
     const [budgetForm, setBudgetForm] = useState<CreateCustomerQuoteRequest>(getBudgetTemplate());
     const triggerRef = useRef<HTMLButtonElement>(null);
     const createBudget = useCreateCustomerQuote();
+    const editBudget = useUpdateCustomerQuote();
+    const sell = useSellCustomerQuote();
+    const reject = useRejectCustomerQuote();
     const { id } = useParams();
     const { data: budget, isPending: loadingBudget, isError: isErrorBudget, error: budgetError } = useCustomerQuoteById(Number(id), mode === "edit");
-    const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
+    const [editable, setEditable] = useState<boolean>((budget && budget.status === 0) || mode === "create");
+    const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(editable);
     const [branchId, setBranchId] = useState<number | null>(null);
-    const { data: branches, isPending: loadingBranches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
+    const { data: branches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
+    const [originalBudget, setOriginalBudget] = useState<CreateCustomerQuoteRequest | null>(null);
     const navigate = useNavigate();
+    const [hasNewChanges, setHasNewChanges] = useState(false);
 
-    useEffect(() => {
-        if (mode === "edit") return;
-        const subtotal = budgetForm.products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
-        const iva = subtotal * 0.1;
-        const total = subtotal + iva;
-
-        setBudgetForm(prev => ({
-            ...prev,
-            totals: {
-                ...prev.totals,
-                subtotal,
-                iva,
-                total,
-                importValue: total,
-            }
-        }));
-    }, [budgetForm.products, mode]);
-
-    // Sincronizar branchId
-    useEffect(() => {
-        if (branchId) {
-            setBudgetForm(prev => ({
-                ...prev,
-                sale: { ...prev.sale, branchId }
-            }));
-        }
-    }, [branchId]);
-
-    // Cargar datos del presupuesto cuando esté en modo vista
-    useEffect(() => {
-        if (!budget || mode !== "edit") return;
-
-        setBudgetForm({
-            customer: {
-                id: budget.customerId,
-                name: budget.customerName,
-                ruc: budget.customerRuc,
-            },
-            sale: {
-                bill: 1,
-                date: new Date(budget.date),
-                branchId: budget.branchId,
-                accountId: 0,
-                movementType: 0,
-            },
-            pay: {
-                method: budget.paymentMethod,
-                condition: budget.saleCondition,
-            },
-            products: budget.details.map((d) => ({
-                productId: d.productId,
-                barcode: "",
-                description: d.description,
-                productName: d.productName,
-                quantity: d.quantity,
-                price: d.price,
-            })),
-            totals: {
-                subtotal: budget.total - (budget.total * 0.1),
-                iva: budget.total * 0.1,
-                total: budget.total,
-                amount: budget.importValue,
-                change: 0,
-                importValue: budget.importValue,
-            },
-        });
-
-        setSelectedClient(budget.customerId.toString());
-    }, [budget, mode]);
-
-    useEffect(() => {
-        if (isErrorCustomers) {
-            toaster.create({ title: "Error al cargar los clientes", description: errorCustomers?.message || "Error desconocido", type: "error" });
-        }
-    }, [isErrorCustomers, errorCustomers]);
-
-    useEffect(() => {
-        if (isErrorBranches) {
-            toaster.create({ title: "Error al cargar las sucursales", description: errorBranches?.message || "Error desconocido", type: "error" });
-        }
-    }, [isErrorBranches, errorBranches]);
-
-    let productsLabel: EditableLabel<ProductSaleDTO>[] = [
-
-    ]
+    let productsLabel: EditableLabel<ProductSaleDTO>[] = []
     if (mode === "create") { productsLabel.push({ labelName: "Código", propName: "barcode", textIfNull: "-" },) }
     productsLabel.push({ labelName: "Nombre", propName: "name", textIfNull: "Producto sin nombre", isSortable: true, sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.name || "").localeCompare(b.name || "") })
 
-    if (mode === "create") { productsLabel.push({ labelName: "Descripción", propName: "description", textIfNull: "Sin Descripción" }) }
+    if (mode === "create") { productsLabel.push({ labelName: "Descripción", propName: "description", textIfNull: "Sin Descripción", formatFunction: (d: string) => d && d.length > 35 ? d.slice(0, 35) + "..." : d }) }
 
     productsLabel = [...productsLabel,
 
-        {
-            labelName: "Cantidad", propName: "quantity",
-            isEditable: true, inputType: "number",
-            validate: (value: number | string) => Number(value) > 0,
-            transform: (value: string) => Number(value),
-            onEdit: (item: ProductSaleDTO, newValue: string | number | null | undefined) => {
-                if (!newValue) return item;
-                return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) };
-            }
-        },
-        { labelName: "Precio Unitario", propName: "price", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price },
-        { labelName: "Total", propName: "total", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull: "0" },
+    {
+        labelName: "Cantidad", propName: "quantity",
+        isEditable: true, inputType: "number",
+        validate: (value: number | string,) => Number(value) > 0,
+        transform: (value: string) => Number(value),
+        onEdit: (item: ProductSaleDTO, newValue: string | number | null | undefined) => {
+            if (!newValue) return item;
+            return { ...item, quantity: Number(newValue), total: item.price * Number(newValue) };
+        }
+    },
+    { labelName: "Precio Unitario", propName: "price", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => a.price - b.price },
+    { labelName: "Total", propName: "total", isSortable: true, formatFunction: (value) => parsePrice(value), sortFunction: (a: ProductSaleDTO, b: ProductSaleDTO) => (a.total || 0) - (b.total || 0), textIfNull: "0" },
     ];
 
-    if (mode === "create") {
+    if (editable) {
         productsLabel.push({
             labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
-                <IconButton size="xs" variant="ghost" colorPalette="red" onClick={() => setBudgetForm({ ...budgetForm, products: budgetForm.products.filter((p) => p.productId !== item.id) })}>
+                <IconButton size="xs" variant="ghost" colorPalette="red"
+                 onClick={() => setBudgetForm({
+                     ...budgetForm, 
+                     products: budgetForm.products.filter((p) => p.productId !== item.id) ,
+                     totals: {...budgetForm.totals, total: (budgetForm.totals.total || 0) - (item.price * item.quantity)}
+                     })}>
                     <X />
                 </IconButton>
         });
@@ -243,6 +168,88 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
         }));
     };
 
+    useEffect(() => {
+        setHasNewChanges(JSON.stringify(budgetForm) !== JSON.stringify(originalBudget));
+    }, [budgetForm, originalBudget]);
+
+    // useEffect(() => {
+    //     if (mode === "edit") return;
+    //     const subtotal = budgetForm.products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+
+    //     setBudgetForm(prev => ({
+    //         ...prev,
+    //         totals: {
+    //             ...prev.totals,
+    //             subtotal
+    //         }
+    //     }));
+    // }, [budgetForm.products, mode]);
+
+    useEffect(() => {
+        if (branchId) {
+            setBudgetForm(prev => ({
+                ...prev,
+                sale: { ...prev.sale, branchId }
+            }));
+        }
+    }, [branchId]);
+
+    useEffect(() => {
+        setEditable((budget && budget.status === 0) || mode === "create");
+
+        if (!budget || mode !== "edit") return;
+
+        const filled: CreateCustomerQuoteRequest = {
+            customer: {
+                id: budget.customerId,
+                name: budget.customerName,
+                ruc: budget.customerRuc,
+            },
+            sale: {
+                bill: 1,
+                date: new Date(budget.date),
+                branchId: budget.branchId,
+                accountId: 0,
+                movementType: 0,
+            },
+            pay: {
+                method: budget.paymentMethod,
+                condition: budget.saleCondition,
+            },
+            products: budget.details.map((d) => ({
+                productId: d.productId,
+                barcode: "",
+                description: d.description,
+                productName: d.productName,
+                quantity: d.quantity,
+                price: d.price,
+            })),
+            totals: {
+                iva: budget.total * 0.1,
+                total: budget.total,
+                amount: budget.importValue,
+                change: 0,
+                importValue: budget.importValue,
+            },
+        };
+
+        setBudgetForm(filled);
+        setOriginalBudget(filled);
+        setSelectedClient(budget.customerId.toString());
+    }, [budget, mode]);
+
+    useEffect(() => {
+        if (isErrorCustomers) {
+            toaster.create({ title: "Error al cargar los clientes", description: errorCustomers?.message || "Error desconocido", type: "error" });
+        }
+    }, [isErrorCustomers, errorCustomers]);
+
+    useEffect(() => {
+        if (isErrorBranches) {
+            toaster.create({ title: "Error al cargar las sucursales", description: errorBranches?.message || "Error desconocido", type: "error" });
+        }
+    }, [isErrorBranches, errorBranches]);
+
     if (loadingBudget && mode !== "create") {
         return (
             <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
@@ -264,20 +271,35 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
             <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
                 <Box display="flex" gap={3}>
                     <Text fontSize="2xl" fontWeight="bold">
-                        {mode === "create" && "Nuevo"} Presupuesto {budget?.number ? `N° ${budget.number}` : ""}
+                        {mode === "create" && "Nuevo"} Presupuesto {budget?.number ? budget.number : ""}
                     </Text>
                     {mode === "edit" && budget?.date && (
-                        <Text fontSize="2xl" fontWeight="bold" color="gray.600">
+                        <><Text fontSize="2xl" fontWeight="bold" color="gray.500">
                             | Creado el:  {parseDate(new Date(budget.date))}
                         </Text>
+                            {budget.status !== 2 ? <Text fontSize="2xl" fontWeight="bold" color="red.400">
+                                | {budget.status === 1 ? "Expiró" : "Expira"} el:  {parseDate(new Date(budget.expirationDate))} {budget.status === 0 && ` (${Math.ceil((new Date(budget.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días)`}
+                            </Text> : <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                                | Presupuesto Aprobado, ver Venta N° {budget.associatedSalesOrderId}
+                            </Text>}
+                        </>
+
                     )}
+                    {mode === "create" && <Text fontSize="2xl" fontWeight="bold" color="gray.400"> Los presupuestos tienen una vigencia de 10 dias hábiles antes de expirarse.</Text>}
                 </Box>
 
                 <Flex align="center" gap={3}>
+                    <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas/presupuestos")}>
+                                <ArrowLeft /> Volver al listado
+                            </IconButton>
                     {mode === "edit" && (
-                        <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas/presupuestos")}>
-                            <ArrowLeft /> Volver al listado
-                        </IconButton>
+                        <>
+                            
+                            {budget.associatedSalesOrderId &&
+                                <IconButton size="md" padding={4} variant="ghost" onClick={() => navigate("/ventas/" + budget.associatedSalesOrderId)}>
+                                    <ExternalLink /> Ver venta asociada
+                                </IconButton>}
+                        </>
                     )}
 
                     {mode === "create" && (
@@ -285,6 +307,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                             <SelectWrapper
                                 placeholder="Sucursal"
                                 onValueChange={(value) => setBranchId(Number(value))}
+                                disabled={branchId !== null}
                                 options={branches?.branches.map((b) => ({ label: b.name, value: b.id.toString() })) || []}
                             />
                         </>
@@ -294,26 +317,26 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
             </Flex>
 
             <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
-                {mode === "create" && (
-                    <Box flex={1.5} minW="180px">
-                        <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                            Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}
-                        </Text>
-                        <ComboboxWrapper
-                            placeholder="Buscar cliente..."
-                            value={selectedClient}
-                            onValueChange={handleClientSelect}
-                            options={customers ? customers.map(c => ({ label: c.name, value: c.id.toString() })) : []}
-                            disabled={loadingCustomers}
-                            width="100%"
-                            clearable={true}
-                            onClear={() => {
-                                setBudgetForm(prev => ({ ...prev, customer: { id: 0, name: "", ruc: "" } }));
-                                setSelectedClient("");
-                            }}
-                        />
-                    </Box>
-                )}
+
+                {editable && <Box flex={1.5} minW="180px">
+                    <Text fontSize="xs" fontWeight="medium" color="gray.600">
+                        Cargar Cliente {loadingCustomers && <Spinner size="sm" ml={2} />}
+                    </Text>
+                    <ComboboxWrapper
+                        placeholder="Buscar cliente..."
+                        value={selectedClient}
+                        onValueChange={handleClientSelect}
+                        options={customers ? customers.map(c => ({ label: c.name, value: c.id.toString() })) : []}
+                        disabled={loadingCustomers}
+                        width="100%"
+                        clearable={true}
+                        onClear={() => {
+                            setBudgetForm(prev => ({ ...prev, customer: { id: 0, name: "", ruc: "" } }));
+                            setSelectedClient("");
+                        }}
+                    />
+                </Box>}
+
 
                 <Box flex={2} minW="180px">
                     <Text fontSize="xs" fontWeight="medium" color="gray.600">Nombre/Razón Social</Text>
@@ -321,10 +344,9 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         size="md"
                         value={budgetForm.customer.name}
                         onChange={(e) => updateCustomerName(e.target.value)}
-                        readOnly={!isClientEditable || mode === "edit"}
+                        readOnly={!isClientEditable}
                         bg={!isClientEditable ? "gray.100" : "white"}
                         placeholder="Nombre del cliente"
-                        disabled={mode === "edit"}
                     />
                 </Box>
 
@@ -334,15 +356,14 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         size="md"
                         placeholder="RUC del cliente"
                         value={budgetForm.customer.ruc}
-                        readOnly={!isClientEditable || mode === "edit"}
+                        readOnly={!isClientEditable}
                         bg={!isClientEditable ? "gray.100" : "white"}
-                        disabled={mode === "edit"}
                         onChange={handleRucChange}
                     />
                 </Box>
                 <Box display="flex" flexDirection="column" alignItems="flex-start">
                     {mode === "edit" && (
-                        <Input fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" disabled
+                        <Input fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" readOnly
                             value={`Sucursal: ${branches?.branches.find(b => b.id === budget?.branchId)?.name || " "}`} />
                     )}
                 </Box>
@@ -353,7 +374,6 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         onValueChange={updatePaymentMethod}
                         options={paymentOptions}
                         width="100%"
-                        disabled={mode === "edit"}
                     />
                 </Box>
 
@@ -363,7 +383,6 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         value={saleConditions[budgetForm.pay.condition]}
                         onValueChange={updateSaleCondition}
                         options={saleConditionOptions}
-                        disabled={mode === "edit"}
                     />
                 </Box>
             </Flex>
@@ -382,8 +401,9 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         stock: 0,
                     }))}
                     labels={productsLabel}
-                    readOnly={mode === "edit"}
-                    branchId={branchId}
+                    readOnly={!editable}
+                    branchId={budgetForm.sale.branchId}
+                    careStock={false}
                     onDataChange={(newData: ProductSaleDTO[]) => {
                         setBudgetForm({
                             ...budgetForm,
@@ -395,6 +415,10 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                                 quantity: p.quantity,
                                 price: p.price,
                             })),
+                            totals: {
+                                ...budgetForm.totals,
+                                total: newData.reduce((sum, p) => sum + (p.price * p.quantity), 0)
+                            }
                         });
                     }}
                 />
@@ -407,44 +431,71 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         <Text as="span" color="green.600">{parsePrice(budgetForm.totals.total)}</Text>
                     </Text>
                 </Flex>
-
-                {mode === "create" && (
-                    <Flex gap={3}>
+                 {/* <p>{JSON.stringify(budgetForm)}</p> */}
+                
+                <Box gap={2} display="flex" alignItems="center">
+                    {editable && mode === "edit" && <>
                         <DestructiveActionDialog
-                            title="Cancelar Presupuesto"
-                            description="¿Estás seguro de que deseas cancelar este presupuesto? Se perderán todos los datos ingresados."
-                            onAccept={() => {
-                                setSelectedClient("");
-                                setBudgetForm(getBudgetTemplate());
-                            }}
-                            trigger={
-                                <Button variant="surface" size="lg">
-                                    Cancelar
-                                </Button>
-                            }
+                            trigger={<IconButton size="md" padding={4} variant="outline" color="brand.secondary" disabled = {sell.isPending || reject.isPending}>
+                                {reject.isPending ? <Spinner /> : <X />} Rechazar Presupuesto
+                            </IconButton>}
+                            title="Rechazar Presupuesto"
+                            description={"Al rechazar este presupuesto, se cancelará y no podrá ser aprobado posteriormente. ¿Estás seguro/a de que deseas rechazar este presupuesto?"}
+                            onAccept={() => {reject.mutate(budget.id) }}
                         />
-
                         <ConfirmActionDialog
-                            title="Confirmar Presupuesto"
-                            description="¿Estás seguro de que deseas generar este presupuesto?"
+                            trigger={<IconButton size="lg" padding={4} bgColor="brand.secondary" >
+                                {sell.isPending ? <Spinner /> : <DollarSign />} Aprobar Presupuesto
+                            </IconButton>}
+                            title="Aprobar Presupuesto"
+                            description={"Al aprobar este presupuesto, se generará la venta correspondiente a " + budgetForm.customer.name}
                             onAccept={() => {
-                                createBudget.mutate(budgetForm);
+
+                                if (hasNewChanges) {
+                                    toaster.create({
+                                        title: 'Actualizando presupuesto',
+                                        description: 'Guardando tus cambios antes de generar la venta...',
+                                    });
+
+                                    editBudget.mutate({ id: budget!.id, data: budgetForm }, {
+                                        onSuccess: () => {
+                                            sell.mutate(budget!.id);
+                                        }
+                                    });
+                                    return;
+                                }
+                                sell.mutate(budget.id)
                             }}
-                            trigger={
-                                <IconButton
-                                    bg="brand.primary"
-                                    padding={4}
-                                    size="lg"
-                                    color="white"
-                                    ref={triggerRef}
-                                    disabled={budgetForm.products.length === 0 || createBudget.isPending}
-                                >
-                                    {createBudget.isPending ? <Spinner /> : <CalendarPlus />} Generar Presupuesto
-                                </IconButton>
-                            }
                         />
-                    </Flex>
-                )}
+                        </>}
+                    {editable && 
+                    <ConfirmActionDialog
+                        title={mode === "create" ? "Generar Presupuesto" : "Actualizar Presupuesto"}
+                        description={mode === "create" ? "¿Estás seguro de que deseas generar este presupuesto?" : "¿Estás seguro de que deseas actualizar este presupuesto?"}
+                        onAccept={() => {
+                            if (mode === "edit" && hasNewChanges) {
+                                editBudget.mutate({ id: budget.id, data: budgetForm });
+                            } else {
+                                createBudget.mutate(budgetForm,{onSuccess:()=>{setSelectedClient("Ninguno");
+                                    setBudgetForm(getBudgetTemplate());
+                                    setBranchId(null);
+                                    }});
+                            }
+                        }}
+                        trigger={
+                            <IconButton
+                                bg="brand.primary"
+                                padding={4}
+                                size="lg"
+                                color="white"
+                                ref={triggerRef}
+                                disabled={budgetForm.products.length === 0 || createBudget.isPending || editBudget.isPending || (mode === "edit" && !hasNewChanges)}
+                            >
+                                {createBudget.isPending || editBudget.isPending ? <Spinner /> : mode === "create" ? <CalendarPlus /> : <Pencil />} {mode === "create" ? "Generar" : "Actualizar"} Presupuesto
+                            </IconButton>
+                        }
+                    />}
+                </Box>
             </Flex>
         </Box>
     );

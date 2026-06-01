@@ -6,11 +6,15 @@ import { apiClient } from "./client";
 export interface CustomerRequest{
     name?: string;
     ruc?:  string;
+    email?: string;
+    birthDate?: string;
 }
 export interface Customer {
     id:   number;
     name: string;
     ruc:  string;
+    email: string;
+    birthDate: string;
 }
 
 export interface GetCustomersResponse {
