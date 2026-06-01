@@ -5,6 +5,7 @@ import {
   type GetLibroMayorParams,
   type GetBalanceGeneralParams,
   type GetBalanceSumasSaldosParams,
+  type GetBalanceResultadosParams,
 } from "@/api/accounting.api";
 
 export const accountingKeys = {
@@ -16,6 +17,8 @@ export const accountingKeys = {
     ["accounting", "balanceGeneral", params] as const,
   balanceSumasSaldos: (params: GetBalanceSumasSaldosParams) =>
     ["accounting", "balanceSumasSaldos", params] as const,
+  balanceResultados: (params: GetBalanceResultadosParams) =>
+    ["accounting", "balanceResultados", params] as const,
 };
 
 const RETRIES = 2;
@@ -51,6 +54,15 @@ export const useBalanceSumasSaldos = (params: GetBalanceSumasSaldosParams, enabl
   return useQuery({
     queryKey: accountingKeys.balanceSumasSaldos(params),
     queryFn: () => accountingApi.getBalanceSumasSaldos(params),
+    retry: RETRIES,
+    enabled: enabled && !!params.accountantProcessId && !!params.startDate && !!params.endDate,
+  });
+};
+
+export const useBalanceResultados = (params: GetBalanceResultadosParams, enabled = true) => {
+  return useQuery({
+    queryKey: accountingKeys.balanceResultados(params),
+    queryFn: () => accountingApi.getBalanceResultados(params),
     retry: RETRIES,
     enabled: enabled && !!params.accountantProcessId && !!params.startDate && !!params.endDate,
   });

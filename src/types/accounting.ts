@@ -78,3 +78,12 @@ export interface BalanceSumasSaldosResponse {
   totalDebitBalance: number;
   totalCreditBalance: number;
 }
+
+export interface BalanceResultadosResponse {
+  revenues: BalanceGeneralItem[];
+  expenses: BalanceGeneralItem[];
+  totalRevenues: number;
+  totalExpenses: number;
+  netIncome: number;
+}
+

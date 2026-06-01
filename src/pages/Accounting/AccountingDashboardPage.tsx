@@ -139,6 +139,8 @@ export default function AccountingDashboardPage() {
       navigate(`/dash/contabilidad/balance-general?process=${selectedPeriod}`);
     } else if (reportName === "Balance de Sumas y Saldos") {
       navigate(`/dash/contabilidad/balance-sumas-saldos?process=${selectedPeriod}`);
+    } else if (reportName === "Balance de Resultados") {
+      navigate(`/dash/contabilidad/balance-resultados?process=${selectedPeriod}`);
     } else {
       console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
     }
