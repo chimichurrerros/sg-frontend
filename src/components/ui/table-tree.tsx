@@ -248,7 +248,6 @@ export default function TableTree({
                           fontSize="xs"
                           fontWeight={row.depth === 0 ? "bold" : row.depth === 1 ? "semibold" : "normal"}
                           color={row.depth === 0 ? "gray.900" : row.depth === 1 ? "gray.850" : "gray.750"}
-                          textTransform={row.depth === 0 ? "uppercase" : "none"}
                         >
                           {row.name}
                         </Text>

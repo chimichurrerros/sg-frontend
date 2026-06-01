@@ -294,7 +294,7 @@ export default function LibroDiarioPage() {
           {/* Collapsible Tree Table for General Journal */}
           <TableTree
             codeHeader="Asiento"
-            conceptHeader="Descripción / Cuenta Contable"
+            conceptHeader="Fecha - Descripción [Módulo] / Cuenta Contable"
             notesHeader="Código" // Notes column maps to accountCode
             valueHeaders={["Debe (Debit)", "Haber (Credit)"]}
             data={treeRows}
