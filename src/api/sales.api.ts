@@ -1,6 +1,7 @@
-import type { CustomerDTO,  Sale,  SaleData, SaleTotals } from "@/types/sales";
+import type {  Sale,  SaleData, SaleTotals } from "@/types/sales";
 import { apiClient } from "./client";
 import type { PaginationParams, PaginationType } from "@/types/types";
+import type { Customer } from "./customers.api";
 
 export interface SendProductDTO{
     productId:number
@@ -8,7 +9,7 @@ export interface SendProductDTO{
     quantity:number
 }
 export interface NewSaleRequest {
-    customer: CustomerDTO;
+    customer: Partial<Customer>;
     sale:     SaleData;
     pay:      {method: number,condition:number};
     products: SendProductDTO[];

@@ -42,10 +42,6 @@ export interface CustomerForSales {
   name: string;
   ruc: string;
 }
-export interface CustomerDTO {
-  name: string;
-  ruc: string;
-}
 export interface SaleData{
     bill?: Bill;
     saleNumber?: number;
