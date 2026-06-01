@@ -30,6 +30,8 @@ export interface FullSaleOrder {
     id:              number;
     customerId:      number;
     customerName:    string;
+    customerEmail:   string;
+    customerBirthDate: string;
     customerRuc:     string;
     branchId:        number;
     userId:          number;

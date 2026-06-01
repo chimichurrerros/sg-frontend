@@ -14,6 +14,7 @@ import { Box, Kbd } from "@chakra-ui/react";
 import TableSelect, { type label } from "../table-select";
 import type { ProductSelect } from "@/types/sales";
 import EmptyDataScreen from "../screens/empty-data-screen";
+import { parsePrice } from "@/constants/price";
 
 
 interface SearchProductsDialogProps {
@@ -24,9 +25,10 @@ interface SearchProductsDialogProps {
     loading:boolean
     isError:boolean
     error:Error | null
+    careStock?:boolean
 }
 
-export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError }: SearchProductsDialogProps) => {
+export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError,careStock=true }: SearchProductsDialogProps) => {
 
     const [selectedProduct, setSelectedProduct] = React.useState<ProductSelect | null>(null);
     const addref = React.useRef<HTMLButtonElement>(null);
@@ -37,10 +39,10 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
     const labels: label<ProductSelect>[] = [
         {labelName:"Cód.",propName:"barcode",textIfNull:"---"},
         { labelName: "Nombre", propName: "name"},
-        { labelName: "Precio", propName: "price" },
-        { labelName: "Stock", propName: "quantity" }
+        { labelName: "Precio", propName: "price", transformFunction: (value) => parsePrice(value) },
     ];
 
+    if(careStock){ labels.push({ labelName: "Stock", propName: "quantity" })}
     useHotkeys('ctrl+down', (event) => {
         event.preventDefault();
         setQuantity(Math.max(1, quantity - 1));
@@ -103,7 +105,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                             />
                         </Dialog.Body>
                         <Dialog.Footer display="flex" justifyContent="space-between" alignItems="center">
-                            <NumberInput.Root value={String(quantity)} unstyled spinOnPress={false}>
+                            {careStock && <NumberInput.Root value={String(quantity)} unstyled spinOnPress={false}>
                                 <HStack gap="2">
                                     <NumberInput.DecrementTrigger asChild>
                                         <IconButton variant="outline" size="xs" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
@@ -117,13 +119,13 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                         </IconButton>
                                     </NumberInput.IncrementTrigger>
                                 </HStack>
-                            </NumberInput.Root>
-                            <IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
+                            </NumberInput.Root>}
+                            {careStock && <><IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
                                 <RefreshCcw />
                             </IconButton>
                             <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.quantity! ? "visible" : "hidden"}>
                                 * La cantidad es mayor al stock disponible del producto seleccionado 
-                            </Text>
+                            </Text></>}
                             <Box display="flex" gap={2}>
                                 <Dialog.ActionTrigger asChild>
                                     <Button variant="surface" colorPalette="gray">
@@ -134,7 +136,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     <Button
                                         variant="surface"
                                         colorPalette="green"
-                                        disabled={!selectedProduct || (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.quantity! : false)}
+                                        disabled={careStock ?(!selectedProduct|| (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.quantity! : false)) : false}
                                         ref={addref}
                                         onClick={()=>selectedProduct && onSelect(selectedProduct,quantity)}
                                     >

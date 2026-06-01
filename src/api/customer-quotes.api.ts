@@ -1,11 +1,13 @@
 import type { PaginationParams, PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 import type { Customer } from "./customers.api";
-import type { PaymentMethod, SaleCondition } from "@/types/sales";
+import type { FullSaleOrder } from "./sales.api";
 
 export const customerQuotesStatus: Record<number, string> = {
     0 : "Abierto",
-    1 : "Expirado"
+    1 : "Expirado",
+    2 : "Aprobado",
+    3 : "Rechazado"
 }
 export interface CustomerQuotesParams extends PaginationParams {
     date?: string;
@@ -47,7 +49,7 @@ export interface CustomerQuoteDetail {
 }
 
 export interface CreateCustomerQuoteRequest {
-    customer: Customer;
+    customer: Partial<Customer>;
     sale:     CustomerQuoteData;
     pay:      Pay;
     products: CustomerQuoteProductDTO[];
@@ -77,7 +79,7 @@ export interface CustomerQuoteData {
 }
 
 export interface Totals {
-    subtotal:    number;
+    subtotal?:    number;
     iva:         number;
     total:       number;
     amount:      number;
@@ -91,4 +93,6 @@ export const customerQuotesApi ={
     getById: (id: number) => apiClient.get<{ customerQuote: CustomerQuote }>(`api/customerquotes/${id}`).then(response => response.data.customerQuote),
     create: (data: CreateCustomerQuoteRequest) => apiClient.post("api/customerquotes", data).then(response => response.data),
     update: (id: number, data: Partial<CreateCustomerQuoteRequest>) => apiClient.put(`api/customerquotes/${id}`, data).then(response => response.data),
+    sell: (id: number) => apiClient.post<{ salesOrder: FullSaleOrder}>(`api/customerquotes/${id}/sell`).then(response => response.data.salesOrder),
+    reject: (id: number) => apiClient.post(`api/customerquotes/${id}/cancel`).then(response => response.data),
 }

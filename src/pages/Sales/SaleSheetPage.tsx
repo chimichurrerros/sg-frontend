@@ -29,6 +29,7 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
 import { useAllBranches } from "@/queries/branches.queries";
+import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -113,12 +114,14 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   useEffect(() => {
     if (!sale || mode !== "view") return;
 
-    //Editar customer, que los campos sean opcionales
+  
 
     setSaleForm({
       customer: {
         name: sale.customerName || "",
-        ruc: sale.customerRuc || ""
+        ruc: sale.customerRuc || "",
+        email: sale.customerEmail || "",
+        birthDate: sale.customerBirthDate || ""
       },
       sale: {
         date: parseDate(sale.date),
@@ -158,7 +161,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     {
       labelName: "Descripción", propName: "description",
       textIfNull: "Sin Descripción",
-      transform: (d: string) => d && d.length > 35 ? d.slice(0, 35) + "..." : d
+      formatFunction: (d: string) => d && d.length > 35 ? d.slice(0, 35) + "..." : d
     },
 
     {
@@ -192,6 +195,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         customer: {
           name: "",
           ruc: "",
+          email: "",
+          birthDate: ""
         },
       });
     } else {
@@ -214,7 +219,24 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       },
     });
   };
-
+  const updateCustomerEmail = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      customer: {
+        ...saleForm.customer,
+        email: value,
+      },
+    });
+  };
+    const updateCustomerBirthdate = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      customer: {
+        ...saleForm.customer,
+        birthDate: value,
+      },
+    });
+  };
   const updatePaymentMethod = (value: PaymentMethod) => {
     setSaleForm({
       ...saleForm,
@@ -266,18 +288,18 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         <Box display="flex" gap={3}>
           <Text fontSize="2xl" fontWeight="bold">
-            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N° ${saleForm.sale.saleNumber}` : ""}
+            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}
           </Text>
-          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | {parseDate(sale?.date)}</Text>}
+          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
         </Box>
 
         <Flex align="center" gap={3}>
           <Flex align="flex-end" gap={3}>
-            {mode === "view" && (
+           
               <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
-            )}
+            
 
             {mode === "view" && (
               <Box display="flex" flexDirection="column" alignItems="flex-start">
@@ -335,7 +357,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               width="100%"
               clearable={true}
               onClear={() => {
-                setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "" } });
+                setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "", email: "", birthDate: "" } });
                 setSelectedClient("Ninguno");
               }}
             />
@@ -363,10 +385,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             size="md"
             value={saleForm.customer.name}
             onChange={(e) => updateCustomerName(e.target.value)}
-            readOnly={!isClientEditable}
+            readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
             placeholder="Nombre del cliente"
-            disabled={mode === "view"}
           />
         </Box>
 
@@ -376,9 +397,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             size="md"
             placeholder="RUC del cliente"
             value={saleForm.customer.ruc}
-            readOnly={!isClientEditable}
+            readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
-            disabled={mode === "view"}
             maxLength={8}
             onChange={(e) => {
               const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7);
@@ -389,6 +409,33 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             }}
           />
         </Box>
+            
+        <Box flex={2} minW="180px">
+          <Flex align="center" justify="space-between" mb={1}>
+            <Text fontSize="xs" fontWeight="medium" color="gray.600">Correo Electrónico</Text>
+          </Flex>
+          <Input
+            size="md"
+            value={saleForm.customer.email}
+            onChange={(e) => updateCustomerEmail(e.target.value)}
+            readOnly={!isClientEditable || mode === "view"}
+            bg={!isClientEditable ? "gray.100" : "white"}
+            placeholder="Email del cliente (opcional)"
+          />
+        </Box>
+        <Box flex={2} minW="180px">
+          <Flex align="center" justify="space-between" mb={1}>
+            <Text fontSize="xs" fontWeight="medium" color="gray.600">Fecha de Nacimiento</Text>
+          </Flex>
+         <DatePickerWrapper
+            value={saleForm.customer.birthDate}
+            onChange={(dates: string[]) => updateCustomerBirthdate(dates[0])}
+            readOnly= {!isClientEditable || mode === "view"}
+            placeholder="Fecha de nacimiento (opcional)"
+
+            />
+        </Box>
+        
 
         <Box minW="130px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Método de Pago</Text>
@@ -397,7 +444,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             onValueChange={updatePaymentMethod}
             options={paymentOptions}
             width="100%"
-            disabled={mode === "view"}
+            readOnly={mode === "view"}
+
           />
         </Box>
 
@@ -484,7 +532,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
           {mode === "view" && (
             <Box display="flex" alignItems="center" gap={8} justifyContent="space-between">
               <Text color="gray.300" fontSize="3xl">|</Text>
-              <Text fontSize="3xl" fontWeight="bold">
+              {saleForm.totals.importValue > saleForm.totals.total && <><Text fontSize="3xl" fontWeight="bold">
                 Importe:&nbsp;
                 <Text as="span" color="brand.primary">{parsePrice(saleForm.totals.importValue)}</Text>
               </Text>
@@ -493,7 +541,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text fontSize="3xl" fontWeight="bold">
                 Vuelto:&nbsp;
                 <Text as="span" color="gray.500">{parsePrice(saleForm.totals.change)}</Text>
-              </Text>
+              </Text></>}
             </Box>
           )}
         </Flex>
@@ -522,7 +570,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 toaster.create({ title: "Monto del importe es menor que el precio a pagar", type: "error" })
                 return;
               }
-              createSale.mutate(saleForm)
+              createSale.mutate(saleForm,{onSuccess:()=>{setSelectedClient("Ninguno");
+                setSaleForm(getSaleTemplate());
+                setDialogAmount(0);}})
             }}
             trigger={
               <IconButton

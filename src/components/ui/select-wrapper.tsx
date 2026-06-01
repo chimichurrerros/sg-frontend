@@ -7,6 +7,7 @@ interface SelectWrapperProps<T extends string = string> {
   width?: string;
   defaultValue?: T;
   value?: T;
+  readOnly?: boolean;
   disabled?: boolean;
   onValueChange?: (value: T) => void;
 }
@@ -17,6 +18,7 @@ export function SelectWrapper<T extends string>({
   width = "200px",
   defaultValue,
   disabled = false,
+  readOnly = false,
   value,
   onValueChange,
 }: SelectWrapperProps<T>) {
@@ -44,6 +46,7 @@ export function SelectWrapper<T extends string>({
       }}
       width={width}
       disabled={disabled}
+      readOnly={readOnly}
     >
       <Select.HiddenSelect />
       <Select.Control>

@@ -1,3 +1,4 @@
+import type { Customer } from "@/api/customers.api";
 import type { Bill } from "@/api/sales.api";
 
 export interface ProductSaleDTO {
@@ -53,7 +54,7 @@ export interface SaleData{
     cashierNumber?: number;
   };
 export interface Sale {
-  customer:CustomerDTO;
+  customer: Partial<Customer>;
   sale: SaleData
 
   pay: {
