@@ -60,3 +60,21 @@ export interface BalanceGeneralResponse {
   totalLiabilitiesAndEquity: number;
 }
 
+export interface BalanceSumasSaldosItem {
+  accountId: number;
+  accountCode: string;
+  accountName: string;
+  isAcceptor: boolean;
+  debitSum: number;
+  creditSum: number;
+  debitBalance: number;
+  creditBalance: number;
+}
+
+export interface BalanceSumasSaldosResponse {
+  items: BalanceSumasSaldosItem[];
+  totalDebitSum: number;
+  totalCreditSum: number;
+  totalDebitBalance: number;
+  totalCreditBalance: number;
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Box, Flex, Text, Button, Heading, HStack, Stack, Grid } from "@chakra-ui/react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { LuArrowLeft, LuCalendar, LuFilter, LuBookOpen } from "react-icons/lu";
+import { LuArrowLeft, LuCalendar, LuFilter, LuBookOpen, LuScale } from "react-icons/lu";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { useLibroDiario } from "@/queries/accounting.queries";
 import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
@@ -178,6 +178,23 @@ export default function LibroDiarioPage() {
             Libro Diario
           </Heading>
         </Stack>
+        <Button
+          size="md"
+          variant="outline"
+          borderColor="brand.primary"
+          color="brand.primary"
+          _hover={{ bg: "brand.primary", color: "white" }}
+          onClick={() =>
+            navigate(
+              `/dash/contabilidad/balance-sumas-saldos?process=${selectedProcessName}&startDate=${startDate}&endDate=${endDate}`
+            )
+          }
+          display="flex"
+          alignItems="center"
+          gap={2}
+        >
+          <LuScale /> Ver Sumas y Saldos
+        </Button>
       </Flex>
 
       {/* Filters Box */}

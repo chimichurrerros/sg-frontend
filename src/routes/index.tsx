@@ -10,6 +10,7 @@ import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage"
 import LibroDiarioPage from "@/pages/Accounting/LibroDiarioPage";
 import LibroMayorPage from "@/pages/Accounting/LibroMayorPage";
 import BalanceGeneralPage from "@/pages/Accounting/BalanceGeneralPage";
+import BalanceSumasSaldosPage from "@/pages/Accounting/BalanceSumasSaldosPage";
 import BudgetsPage from "@/pages/Sales/Budgets/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import { AddService } from "@/pages/Catalog/AddService";
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
           { path: "/dash/contabilidad/libro-diario", element: <LibroDiarioPage /> },
           { path: "/dash/contabilidad/libro-mayor", element: <LibroMayorPage /> },
           { path: "/dash/contabilidad/balance-general", element: <BalanceGeneralPage /> },
+          { path: "/dash/contabilidad/balance-sumas-saldos", element: <BalanceSumasSaldosPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */
