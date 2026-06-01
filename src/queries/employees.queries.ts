@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { employeesApi, type CreateEmployeePositionHistoryRequestDto, type CreateEmployeeRelationRequestDto, type CreateEmployeeRequestDTO, type EmployeeWrapperDto, type ListEmployeePositionHistoriesWrapperDto, type ListEmployeeRelationsWrapperDto, type ListEmployeesWrapperDto, type UpdateEmployeeRequestDTO } from "@/api/employees.api";
+import { employeesApi, type CreateEmployeePositionHistoryRequestDto, type CreateEmployeeRelationRequestDto, type CreateEmployeeRequestDTO, type EmployeeWrapperDto, type ListEmployeePositionHistoriesWrapperDto, type ListEmployeeRelationsWrapperDto, type ListEmployeesWrapperDto, type UpdateEmployeePositionHistoryRequestDto, type UpdateEmployeeRequestDTO } from "@/api/employees.api";
 import type {
   Employee,
   EmployeeList,
@@ -134,11 +134,58 @@ export const useCreateEmployeeHistory = (id: number) => {
   });
 };
 
+export const useUpdateEmployeeHistory = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ historyId, data }: { historyId: number; data: UpdateEmployeePositionHistoryRequestDto }) =>
+      employeesApi.updateEmployeePositionHistory(id, historyId, data),
+    retry: RETRIES,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: employeesKeys.history(id) });
+    },
+  });
+};
+
+export const useDeleteEmployeeHistory = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (historyId: number) => employeesApi.deleteEmployeePositionHistory(id, historyId),
+    retry: RETRIES,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: employeesKeys.history(id) });
+    },
+  });
+};
+
 export const useCreateEmployeeRelation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateEmployeeRelationRequestDto) =>
       employeesApi.createEmployeeRelation(id, data),
+    retry: RETRIES,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: employeesKeys.relations(id) });
+    },
+  });
+};
+
+export const useUpdateEmployeeRelation = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ relationId, data }: { relationId: number; data: CreateEmployeeRelationRequestDto }) =>
+      employeesApi.updateEmployeeRelation(id, relationId, data),
+    retry: RETRIES,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: employeesKeys.relations(id) });
+    },
+  });
+};
+
+export const useDeleteEmployeeRelation = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (relationId: number) =>
+      employeesApi.deleteEmployeeRelation(id, relationId),
     retry: RETRIES,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: employeesKeys.relations(id) });

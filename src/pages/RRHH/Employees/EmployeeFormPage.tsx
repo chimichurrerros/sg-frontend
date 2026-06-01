@@ -1,34 +1,54 @@
 import { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
 import {
+  Box,
   Button,
   ButtonGroup,
-  createListCollection,
+  Card,
   Field,
   Grid,
   Heading,
+  HStack,
   Input,
   Portal,
   Select,
   Stack,
   Text,
+  createListCollection,
 } from "@chakra-ui/react";
-import { LuArrowLeft, LuSave } from "react-icons/lu";
+import {
+  LuArrowLeft,
+  LuBriefcaseBusiness,
+  LuSave,
+  LuUsers,
+} from "react-icons/lu";
 import { toaster } from "@/components/ui/toaster";
 import { useAllBranches } from "@/queries/branches.queries";
 import { useGetDepartments } from "@/queries/departments.queries";
 import { useGetPositions } from "@/queries/positions.queries";
 import { useGetSchedules } from "@/queries/schedules.queries";
-import { useAllEmployees, useCreateEmployee, useEditEmployee, useGetEmployee } from "@/queries/employees.queries";
-import type { CreateEmployeeRequestDTO, UpdateEmployeeRequestDTO } from "@/api/employees.api";
-import { GenderEnum } from "@/types/employees";
+import {
+  useAllEmployees,
+  useCreateEmployee,
+  useEditEmployee,
+  useGetEmployee,
+} from "@/queries/employees.queries";
+import type {
+  CreateEmployeeRequestDTO,
+  UpdateEmployeeRequestDTO,
+} from "@/api/employees.api";
+import type {
+  GenderEnum,
+  MaritalStatusEnum,
+} from "@/types/employees";
 import type { DepartmentResponseDto, PositionResponseDto, ScheduleResponseDto } from "@/types/organization";
+import { parseApiError } from "@/utils/api-error";
 
 const employeeSchema = z.object({
-  legajo: z.string().min(1, "El legajo es requerido"),
+  legajo: z.string().optional().or(z.literal("")),
   firstName: z.string().min(1, "El nombre es requerido"),
   lastName: z.string().min(1, "El apellido es requerido"),
   documentNumber: z.string().min(1, "La cédula es requerida"),
@@ -53,10 +73,10 @@ type EmployeeFormOutput = z.output<typeof employeeSchema>;
 
 const genders = createListCollection({
   items: [
-    { label: "Desconocido", value: String(GenderEnum.Unknown) },
-    { label: "Masculino", value: String(GenderEnum.Male) },
-    { label: "Femenino", value: String(GenderEnum.Female) },
-    { label: "Otro", value: String(GenderEnum.Other) },
+    { label: "Desconocido", value: String(0) },
+    { label: "Masculino", value: String(1) },
+    { label: "Femenino", value: String(2) },
+    { label: "Otro", value: String(3) },
   ],
 });
 
@@ -90,7 +110,7 @@ const toDateInput = (value?: string | null) => {
     const [day, month, year] = value.split("/");
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
-  return value;
+  return value.slice(0, 10);
 };
 
 const toDateInputToday = () => {
@@ -102,14 +122,22 @@ const toDateInputToday = () => {
   return `${year}-${month}-${day}`;
 };
 
+const getFullName = (employee?: { name?: string | null; lastname?: string | null; firstName?: string | null; lastName?: string | null } | null) =>
+  `${employee?.name ?? employee?.firstName ?? ""} ${employee?.lastname ?? employee?.lastName ?? ""}`.trim();
+
 export default function EmployeeFormPage({
   basePath = "/rrhh/empleados",
-  breadcrumb = "RR.HH. / Empleados",
 }: EmployeeFormPageProps) {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const employeeId = id ? Number(id) : undefined;
   const isEditMode = Boolean(employeeId);
+  const [searchParams] = useSearchParams();
+  const isViewMode = isEditMode && searchParams.get("view") === "true";
+
+  const navigateBack = () => {
+    navigate(basePath);
+  };
 
   const { data: employeeData } = useGetEmployee(employeeId);
   const { data: employeesData } = useAllEmployees({ page: 1, pageSize: 100 });
@@ -135,7 +163,7 @@ export default function EmployeeFormPage({
     () =>
       createListCollection({
         items: (employeesData?.employees ?? []).map((employee) => ({
-          label: `${employee.firstName} ${employee.lastName}`.trim(),
+          label: getFullName(employee),
           value: String(employee.id),
         })),
       }),
@@ -168,7 +196,9 @@ export default function EmployeeFormPage({
     () =>
       createListCollection({
         items: (schedulesData?.schedules ?? []).map((schedule: ScheduleResponseDto) => ({
-          label: schedule.name ?? `Horario #${schedule.id}`,
+          label: schedule.name
+            ? `${schedule.name} (${schedule.arrivalTime.slice(0, 5)} - ${schedule.departureTime.slice(0, 5)})`
+            : `Horario #${schedule.id}`,
           value: String(schedule.id),
         })),
       }),
@@ -189,7 +219,7 @@ export default function EmployeeFormPage({
       lastName: "",
       documentNumber: "",
       birthDate: "",
-      gender: GenderEnum.Male,
+      gender: 1,
       maritalStatus: 1,
       phone: "",
       email: "",
@@ -205,10 +235,26 @@ export default function EmployeeFormPage({
     },
   });
 
-  useEffect(() => {
-    if (!employeeData?.employee) return;
+  const watchedAreaId = useWatch({ control, name: "areaId" });
 
-    const employee = employeeData.employee;
+  const filteredBossCollection = useMemo(
+    () =>
+      createListCollection({
+        items: (employeesData?.employees ?? [])
+          .filter((employee) => employee.areaId === watchedAreaId)
+          .map((employee) => ({
+            label: getFullName(employee),
+            value: String(employee.id),
+          })),
+      }),
+    [employeesData, watchedAreaId],
+  );
+
+  const employee = employeeData?.employee ?? null;
+
+  useEffect(() => {
+    if (!employee) return;
+
     reset({
       legajo: employee.fileNumber ?? "",
       firstName: employee.name ?? "",
@@ -229,11 +275,11 @@ export default function EmployeeFormPage({
       baseSalary: employee.baseSalary ?? 0,
       status: employee.isActive ? "ACTIVO" : "RECESO",
     });
-  }, [employeeData, reset]);
+  }, [employee, reset]);
 
   const onSubmit = (formData: EmployeeFormOutput) => {
     const commonData = {
-      fileNumber: formData.legajo.trim(),
+      fileNumber: formData.legajo?.trim() || undefined,
       hireDate: formData.hireDate,
       areaId: formData.areaId,
       branchId: formData.branchId ?? null,
@@ -241,8 +287,8 @@ export default function EmployeeFormPage({
       name: formData.firstName.trim(),
       lastname: formData.lastName.trim(),
       birthDate: formData.birthDate,
-      gender: formData.gender as import("@/types/employees").GenderEnum,
-      maritalStatus: formData.maritalStatus as import("@/types/employees").MaritalStatusEnum,
+      gender: formData.gender as GenderEnum,
+      maritalStatus: formData.maritalStatus as MaritalStatusEnum,
       documentNumber: formData.documentNumber.trim(),
       email: formData.email?.trim() ? formData.email.trim() : null,
       phone: formData.phone?.trim() ? formData.phone.trim() : null,
@@ -257,7 +303,11 @@ export default function EmployeeFormPage({
         {
           onSuccess: () => {
             toaster.create({ title: "Empleado actualizado con éxito" });
-            navigate(basePath);
+            navigateBack();
+          },
+          onError: (error) => {
+            const parsed = parseApiError(error as unknown);
+            toaster.create({ title: "No se pudo actualizar el empleado", description: parsed.message, type: "error" });
           },
         },
       );
@@ -273,23 +323,39 @@ export default function EmployeeFormPage({
     };
 
     createEmployee.mutate(requestData, {
-      onSuccess: () => {
-        toaster.create({ title: "Empleado creado con éxito" });
-        navigate(basePath);
+      onSuccess: (data) => {
+        toaster.create({ title: "Empleado creado", description: `Legajo: ${data.employee.fileNumber}` });
+        navigateBack();
+      },
+      onError: (error) => {
+        const parsed = parseApiError(error as unknown);
+        toaster.create({ title: "No se pudo crear el empleado", description: parsed.message, type: "error" });
       },
     });
   };
 
   const isPending = createEmployee.isPending || editEmployee.isPending;
+  const formDisabled = isPending || isViewMode;
 
   return (
     <Stack gap={6} p={4} maxW="1200px">
-      <Stack gap={1}>
-        <Text fontSize="sm" color="gray.500">
-          {breadcrumb}
-        </Text>
-        <Heading size="xl">{isEditMode ? "Editar empleado" : "Nuevo empleado"}</Heading>
-      </Stack>
+      <HStack justify="space-between" align="start" flexWrap="wrap" gap={4}>
+        <Heading size="xl">
+          {isViewMode ? "Ver empleado" : isEditMode ? "Editar empleado" : "Nuevo empleado"}
+        </Heading>
+        {isEditMode && (
+          <HStack gap={3}>
+            <Button variant="outline" colorPalette="brand" onClick={() => navigate(`${basePath}/${employeeId}/cargos`)}>
+              <LuBriefcaseBusiness />
+              Cargos
+            </Button>
+            <Button variant="outline" colorPalette="brand" onClick={() => navigate(`${basePath}/${employeeId}/nucleo-familiar`)}>
+              <LuUsers />
+              Núcleo Familiar
+            </Button>
+          </HStack>
+        )}
+      </HStack>
 
       <Stack as="form" onSubmit={handleSubmit(onSubmit)} gap={8}>
         <Stack gap={4}>
@@ -297,25 +363,25 @@ export default function EmployeeFormPage({
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
             <Field.Root invalid={!!errors.firstName}>
               <Field.Label>Nombre <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input {...register("firstName")} placeholder="Nombre" disabled={isPending} />
+              <Input {...register("firstName")} placeholder="Nombre" disabled={formDisabled} />
               <Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root invalid={!!errors.lastName}>
               <Field.Label>Apellido <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input {...register("lastName")} placeholder="Apellido" disabled={isPending} />
+              <Input {...register("lastName")} placeholder="Apellido" disabled={formDisabled} />
               <Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root invalid={!!errors.documentNumber}>
               <Field.Label>Cédula de Identidad <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input {...register("documentNumber")} placeholder="Número de documento" disabled={isPending} />
+              <Input {...register("documentNumber")} placeholder="Número de documento" disabled={formDisabled} />
               <Field.ErrorText>{errors.documentNumber?.message}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root invalid={!!errors.birthDate}>
               <Field.Label>Fecha de Nacimiento <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input type="date" {...register("birthDate")} disabled={isPending} />
+              <Input type="date" {...register("birthDate")} disabled={formDisabled} />
               <Field.ErrorText>{errors.birthDate?.message}</Field.ErrorText>
             </Field.Root>
 
@@ -329,7 +395,7 @@ export default function EmployeeFormPage({
                     collection={genders}
                     value={[String(field.value)]}
                     onValueChange={(event) => field.onChange(Number(event.value[0]))}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -368,7 +434,7 @@ export default function EmployeeFormPage({
                     collection={maritalStatuses}
                     value={[String(field.value)]}
                     onValueChange={(event) => field.onChange(Number(event.value[0]))}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -399,18 +465,18 @@ export default function EmployeeFormPage({
 
             <Field.Root invalid={!!errors.phone}>
               <Field.Label>Teléfono</Field.Label>
-              <Input {...register("phone")} placeholder="Teléfono" disabled={isPending} />
+              <Input {...register("phone")} placeholder="Teléfono" disabled={formDisabled} />
             </Field.Root>
 
             <Field.Root invalid={!!errors.email}>
               <Field.Label>Email</Field.Label>
-              <Input {...register("email")} placeholder="correo@dominio.com" disabled={isPending} />
+              <Input {...register("email")} placeholder="correo@dominio.com" disabled={formDisabled} />
               <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root gridColumn={{ base: "1 / -1", md: "1 / -1" }} invalid={!!errors.address}>
               <Field.Label>Dirección</Field.Label>
-              <Input {...register("address")} placeholder="Dirección" disabled={isPending} />
+              <Input {...register("address")} placeholder="Dirección" disabled={formDisabled} />
               <Field.ErrorText>{errors.address?.message}</Field.ErrorText>
             </Field.Root>
           </Grid>
@@ -421,7 +487,7 @@ export default function EmployeeFormPage({
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
             <Field.Root invalid={!!errors.legajo}>
               <Field.Label>Legajo <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input {...register("legajo")} placeholder="Legajo" disabled={isPending} />
+              <Input {...register("legajo")} placeholder="Legajo" disabled={formDisabled} />
               <Field.ErrorText>{errors.legajo?.message}</Field.ErrorText>
             </Field.Root>
 
@@ -432,10 +498,10 @@ export default function EmployeeFormPage({
                 control={control}
                 render={({ field }) => (
                   <Select.Root
-                    collection={bossCollection}
+                    collection={branchCollection}
                     value={field.value ? [String(field.value)] : []}
                     onValueChange={(event) => field.onChange(event.value[0] ? Number(event.value[0]) : null)}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -474,7 +540,7 @@ export default function EmployeeFormPage({
                     collection={areaCollection}
                     value={field.value ? [String(field.value)] : []}
                     onValueChange={(event) => field.onChange(Number(event.value[0]))}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -510,10 +576,10 @@ export default function EmployeeFormPage({
                 control={control}
                 render={({ field }) => (
                   <Select.Root
-                    collection={branchCollection}
+                    collection={filteredBossCollection}
                     value={field.value ? [String(field.value)] : []}
                     onValueChange={(event) => field.onChange(event.value[0] ? Number(event.value[0]) : null)}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -544,7 +610,7 @@ export default function EmployeeFormPage({
 
             <Field.Root invalid={!!errors.hireDate}>
               <Field.Label>Fecha de Ingreso <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input type="date" {...register("hireDate")} disabled={isPending} />
+              <Input type="date" {...register("hireDate")} disabled={formDisabled} />
               <Field.ErrorText>{errors.hireDate?.message}</Field.ErrorText>
             </Field.Root>
 
@@ -558,7 +624,7 @@ export default function EmployeeFormPage({
                     collection={statusCollection}
                     value={field.value ? [field.value] : []}
                     onValueChange={(event) => field.onChange(event.value[0])}
-                    disabled={isPending}
+                    disabled={formDisabled}
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -599,7 +665,7 @@ export default function EmployeeFormPage({
                         collection={positionCollection}
                         value={field.value ? [String(field.value)] : []}
                         onValueChange={(event) => field.onChange(Number(event.value[0]))}
-                        disabled={isPending}
+                        disabled={formDisabled}
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
@@ -638,7 +704,7 @@ export default function EmployeeFormPage({
                         collection={scheduleCollection}
                         value={field.value ? [String(field.value)] : []}
                         onValueChange={(event) => field.onChange(Number(event.value[0]))}
-                        disabled={isPending}
+                        disabled={formDisabled}
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
@@ -675,7 +741,7 @@ export default function EmployeeFormPage({
                     min="0"
                     {...register("baseSalary", { valueAsNumber: true })}
                     placeholder="0"
-                    disabled={isPending}
+                    disabled={formDisabled}
                   />
                   <Field.ErrorText>{errors.baseSalary?.message}</Field.ErrorText>
                 </Field.Root>
@@ -685,14 +751,20 @@ export default function EmployeeFormPage({
         </Stack>
 
         <ButtonGroup justifyContent="space-between">
-          <Button variant="outline" onClick={() => navigate(basePath)} disabled={isPending}>
+          <Button variant="outline" onClick={navigateBack} disabled={isPending}>
             <LuArrowLeft />
             Cancelar
           </Button>
-          <Button type="submit" colorPalette="brand" loading={isPending}>
-            <LuSave />
-            Guardar
-          </Button>
+          {isViewMode ? (
+            <Button colorPalette="brand" onClick={navigateBack}>
+              Cerrar
+            </Button>
+          ) : (
+            <Button type="submit" colorPalette="brand" loading={isPending}>
+              <LuSave />
+              Guardar
+            </Button>
+          )}
         </ButtonGroup>
       </Stack>
     </Stack>

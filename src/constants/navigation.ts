@@ -5,7 +5,6 @@ import {
   Settings,
   Plus,
   User,
-  Building2,
   Truck,
   CalendarRange,
   Package,
@@ -14,12 +13,18 @@ import {
   Building,
   CreditCard,
   BanknoteArrowUp,
-  ScrollText,
   TableProperties,
-  NotebookPen,
-  ClipboardCheck,
   ListOrdered,
-  Users,
+  BadgeCheck,
+  Megaphone,
+  ListChecks,
+  Calculator,
+  GitBranch,
+  Building2,
+  NotebookPen,
+  ScrollText,
+  ClipboardCheck,
+  UserCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -134,12 +139,13 @@ export const NAV_CONFIG: NavItem[] = [
   {
     id: "rrhh",
     label: "RR.HH.",
-    icon: Users,
+    icon: BadgeCheck,
     section: "Operaciones",
     children: [
-      { id: "rrhh-novedades", label: "Novedades", icon: NotebookPen, path: "/rrhh/novedades" },
-      { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ScrollText, path: "/rrhh/conceptos-manuales" },
-      { id: "rrhh-planillas", label: "Planillas", icon: ClipboardCheck, path: "/rrhh/planillas" },
+      { id: "rrhh-novedades", label: "Novedades", icon: Megaphone, path: "/rrhh/novedades" },
+      { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ListChecks, path: "/rrhh/conceptos-manuales" },
+      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
+      { id: "rrhh-asistencia", label: "Asistencia", icon: UserCheck, path: "/rrhh/asistencia" },
     ],
   },
   {
@@ -170,33 +176,8 @@ export const NAV_CONFIG: NavItem[] = [
       {
         id: "organizacion",
         label: "Organización",
-        icon: Building2,
-        children: [
-          {
-            id: "organizacion-empleados",
-            label: "Empleados",
-            icon: Users,
-            path: "/gestiones/organizacion?tab=employees",
-          },
-          {
-            id: "organizacion-cargos",
-            label: "Cargos",
-            icon: UserCog,
-            path: "/gestiones/organizacion?tab=positions",
-          },
-          {
-            id: "organizacion-horarios",
-            label: "Horarios",
-            icon: CalendarRange,
-            path: "/gestiones/organizacion?tab=schedules",
-          },
-          {
-            id: "organizacion-areas",
-            label: "Áreas",
-            icon: Building2,
-            path: "/gestiones/organizacion?tab=areas",
-          },
-        ],
+        icon: GitBranch,
+        path: "/gestiones/organizacion",
       },
       {
         id: "inventario",

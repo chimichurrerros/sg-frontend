@@ -18,6 +18,7 @@ export function DepartmentsTab() {
   const [pageSize, setPageSize] = useState(10);
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [name, setName] = useState("");
   const [bossId, setBossId] = useState("");
 
@@ -42,6 +43,7 @@ export function DepartmentsTab() {
     setName("");
     setBossId("");
     setIsEditing(false);
+    setTouched(false);
     setShowForm(false);
   };
 
@@ -49,6 +51,7 @@ export function DepartmentsTab() {
     setName("");
     setBossId("");
     setIsEditing(false);
+    setTouched(false);
     setShowForm(true);
   };
 
@@ -61,6 +64,7 @@ export function DepartmentsTab() {
   };
 
   const onSave = async () => {
+    setTouched(true);
     if (!name.trim()) {
       toaster.create({ title: "El nombre es requerido", type: "error" });
       return;
@@ -124,7 +128,7 @@ export function DepartmentsTab() {
         <Stack gap={4}>
           <Heading size="md">{isEditing ? "Editar área" : "Nueva área"}</Heading>
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
-            <Field.Root invalid={!name.trim()}>
+            <Field.Root invalid={touched && !name.trim()}>
               <Field.Label>
                 Nombre <Text as="span" color="red.500">*</Text>
               </Field.Label>

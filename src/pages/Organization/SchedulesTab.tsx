@@ -48,10 +48,17 @@ export function SchedulesTab() {
   const labels: label<ScheduleResponseDto>[] = [
     { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
     { labelName: "Nombre", propName: "name", isSortable: true, sortFunction: (a, b) => (a.name ?? "").localeCompare(b.name ?? "") },
-    { labelName: "Hora ingreso", propName: "arrivalTime" },
-    { labelName: "Hora salida", propName: "departureTime" },
+    { labelName: "Hora ingreso", propName: "arrivalTime", transformFunction: (value) => String(value).slice(0, 5) },
+    { labelName: "Hora salida", propName: "departureTime", transformFunction: (value) => String(value).slice(0, 5) },
     { labelName: "Horas", propName: "numberOfHours" },
-    { labelName: "Tipo", propName: "scheduleType", transformFunction: (value) => String(value) },
+    {
+      labelName: "Tipo",
+      propName: "scheduleType",
+      transformFunction: (value) => {
+        const map: Record<number, string> = { 0: "Desconocido", 1: "Mañana", 2: "Tarde", 3: "Noche", 4: "Tiempo completo", 5: "Medio tiempo" };
+        return map[Number(value)] ?? String(value);
+      },
+    },
   ];
 
   const resetForm = () => {
@@ -149,19 +156,19 @@ export function SchedulesTab() {
           <Heading size="md">{isEditing ? "Editar horario" : "Nuevo horario"}</Heading>
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
             <Field.Root>
-              <Field.Label>Hora de ingreso</Field.Label>
+              <Field.Label>Hora de ingreso <Text as="span" color="red.500">*</Text></Field.Label>
               <Input type="time" value={arrivalTime} onChange={(event) => setArrivalTime(event.target.value)} disabled={saving} />
             </Field.Root>
             <Field.Root>
-              <Field.Label>Hora de salida</Field.Label>
+              <Field.Label>Hora de salida <Text as="span" color="red.500">*</Text></Field.Label>
               <Input type="time" value={departureTime} onChange={(event) => setDepartureTime(event.target.value)} disabled={saving} />
             </Field.Root>
             <Field.Root>
-              <Field.Label>Cantidad de horas</Field.Label>
+              <Field.Label>Cantidad de horas <Text as="span" color="red.500">*</Text></Field.Label>
               <Input type="number" min="0" value={numberOfHours} onChange={(event) => setNumberOfHours(event.target.value)} disabled={saving} />
             </Field.Root>
             <Field.Root>
-              <Field.Label>Tipo de horario</Field.Label>
+              <Field.Label>Tipo de horario <Text as="span" color="red.500">*</Text></Field.Label>
               <Select.Root
                 collection={scheduleTypeCollection}
                 value={[scheduleType]}

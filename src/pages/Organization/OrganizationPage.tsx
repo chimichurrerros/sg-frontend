@@ -42,7 +42,6 @@ export default function OrganizationPage() {
       <Tabs.Content value="employees">
         <EmployeesPage
           routeBase="/gestiones/organizacion/empleados"
-          contextLabel="Gestiones / Organización / Empleados"
         />
       </Tabs.Content>
       <Tabs.Content value="positions">

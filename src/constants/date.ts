@@ -10,3 +10,16 @@ export const parseDate = (value: string | Date | null | undefined): string => {
     year: "numeric",
   });
 };
+
+export const formatDateLong = (value: string | Date | null | undefined): string => {
+  if (!value) return "";
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("es-PY", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};

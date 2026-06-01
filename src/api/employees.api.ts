@@ -3,7 +3,7 @@ import type { GenderEnum, MaritalStatusEnum, RelationTypeEnum } from "@/types/em
 import type { PaginationParams } from "@/types/types";
 
 export interface CreateEmployeeRequestDTO {
-  fileNumber: string;
+  fileNumber?: string;
   hireDate: string;
   areaId: number;
   branchId?: number | null;
@@ -25,7 +25,7 @@ export interface CreateEmployeeRequestDTO {
 }
 
 export interface UpdateEmployeeRequestDTO {
-  fileNumber: string;
+  fileNumber?: string;
   hireDate: string;
   areaId: number;
   branchId?: number | null;
@@ -55,8 +55,6 @@ export interface CreateEmployeeRelationRequestDto {
   lastname: string;
   documentNumber: string;
   birthDate: string;
-  startDate: string;
-  endDate?: string | null;
 }
 
 export interface EmployeeResponseDto {
@@ -65,6 +63,7 @@ export interface EmployeeResponseDto {
   areaId: number;
   areaName: string | null;
   branchId: number | null;
+  branchName: string | null;
   inmediatlyBossId: number | null;
   hireDate: string;
   maritalStatus: number;
@@ -133,8 +132,6 @@ export interface EmployeeRelationResponseDto {
   lastname: string | null;
   documentNumber: string | null;
   birthDate: string;
-  startDate: string;
-  endDate: string | null;
 }
 
 export interface EmployeeRelationWrapperDto {
@@ -194,5 +191,17 @@ export const employeesApi = {
   createEmployeeRelation: (id: number, body: CreateEmployeeRelationRequestDto) =>
     apiClient
       .post<EmployeeRelationWrapperDto>(`/api/employees/${id}/relations`, body)
+      .then((response) => response.data),
+  updateEmployeeRelation: (
+    id: number,
+    relationId: number,
+    body: CreateEmployeeRelationRequestDto,
+  ) =>
+    apiClient
+      .put<EmployeeRelationWrapperDto>(`/api/employees/${id}/relations/${relationId}`, body)
+      .then((response) => response.data),
+  deleteEmployeeRelation: (id: number, relationId: number) =>
+    apiClient
+      .delete(`/api/employees/${id}/relations/${relationId}`)
       .then((response) => response.data),
 };

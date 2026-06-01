@@ -20,9 +20,30 @@ export interface ManualConceptResponseDto {
   payrollProcessId?: number | null;
 }
 
+export type ManualConceptIncidentCreateDto = CreateManualConceptRequestDto;
+
+export interface ManualConceptIncidentResponseDto {
+  id: number;
+  employeeId: number;
+  employeeFullName?: string;
+  payrollUpdateId: number;
+  conceptName?: string;
+  payrollTypeName?: string;
+  occurrenceDate: string;
+  amount: number;
+  statusName?: string;
+  payrollProcessId?: number | null;
+}
+
 export const manualConceptsApi = {
-  createManualConcept: (body: CreateManualConceptRequestDto) => apiClient.post<ManualConceptResponseDto>(`/api/manual-concepts`, body),
-  getPendingManualConcepts: () => apiClient.get<ManualConceptResponseDto[]>(`/api/manual-concepts/pending`),
+  createManualConcept: (body: ManualConceptIncidentCreateDto) =>
+    apiClient.post<ManualConceptIncidentResponseDto>("/api/manual-concepts", body),
+  getPendingManualConcepts: () =>
+    apiClient.get<ManualConceptIncidentResponseDto[]>("/api/manual-concepts/pending"),
+  updateManualConcept: (id: number, body: ManualConceptIncidentCreateDto) =>
+    apiClient.put<ManualConceptIncidentResponseDto>(`/api/manual-concepts/${id}`, body),
+  deleteManualConcept: (id: number) =>
+    apiClient.delete(`/api/manual-concepts/${id}`),
 };
 
 export default manualConceptsApi;

@@ -6,7 +6,6 @@ import {
   ButtonGroup,
   Collapsible,
   Field,
-  Heading,
   IconButton,
   Input,
   InputGroup,
@@ -34,12 +33,10 @@ const PAGE_SIZE = 10;
 
 interface EmployeesPageProps {
   routeBase?: string;
-  contextLabel?: string;
 }
 
 export default function EmployeesPage({
   routeBase = "/rrhh/empleados",
-  contextLabel = "RR.HH. / Empleados",
 }: EmployeesPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -136,19 +133,9 @@ export default function EmployeesPage({
       transformFunction: (value) => branchNameById.get(Number(value)) ?? `#${value}`,
     },
     {
-      labelName: "Área",
-      isComponent: true,
-      render: (item) => item.areaName ?? `#${item.areaId}`,
-    },
-    {
       labelName: "Cargo",
       isComponent: true,
       render: (item) => item.positionName ?? `#${item.positionId ?? "-"}`,
-    },
-    {
-      labelName: "Horario",
-      isComponent: true,
-      render: (item) => item.scheduleName ?? `#${item.scheduleId ?? "-"}`,
     },
     {
       labelName: "Salario Base",
@@ -162,7 +149,6 @@ export default function EmployeesPage({
       propName: "hireDate",
       transformFunction: parseDate,
     },
-    { labelName: "Estado", propName: "status" },
   ];
 
   const handleDelete = () => {
@@ -187,12 +173,6 @@ export default function EmployeesPage({
 
   return (
     <Stack gap={4} p={4}>
-      <Stack gap={1}>
-        <Text fontSize="sm" color="gray.500">
-          {contextLabel}
-        </Text>
-        <Heading size="xl">Empleados</Heading>
-      </Stack>
 
       <Box
         display="flex"
@@ -349,7 +329,7 @@ export default function EmployeesPage({
           <EmptyDataScreen title="No hay empleados" message="Crea un empleado para verlo en la lista." />
         }
         onSelect={(employee) => setSelectedEmployee(employee)}
-        onDoubleClick={(employee) => navigate(`${routeBase}/${employee.id}`)}
+        onDoubleClick={(employee) => navigate(`${routeBase}/${employee.id}?view=true`)}
       />
 
       <Box display="flex" justifyContent="center">

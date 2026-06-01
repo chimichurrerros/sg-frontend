@@ -1,9 +1,9 @@
 import { apiClient } from "./client";
 
 export interface PayrollVariableResponseDto {
-  id?: number;
+  code: string;
   name: string;
-  description?: string | null;
+  description: string;
 }
 
 export const payrollVariablesApi = {

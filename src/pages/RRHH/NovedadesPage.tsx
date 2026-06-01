@@ -22,6 +22,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { Tooltip } from "@/components/ui/tooltip";
 import { LuArrowLeft, LuCalculator, LuPencil, LuPlus, LuRefreshCw, LuSave, LuTrash2 } from "react-icons/lu";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -32,8 +33,10 @@ import { useAllEmployees } from "@/queries/employees.queries";
 import { useCalculatePayrollProcess, useDeletePayrollProcessManualDetail, useGetPayrollProcess, useGetPayrollProcessManualDetails, useUpsertPayrollProcessManualDetail } from "@/queries/payroll-processes.queries";
 import { useGetPendingManualConcepts } from "@/queries/manual-concepts.queries";
 import { useCreatePayrollUpdate, useGetPayrollUpdates, useUpdatePayrollUpdate } from "@/queries/payroll-updates.queries";
+import { useGetPayrollVariables } from "@/queries/payroll-variables.queries";
 import type { PayrollUpdateResponseDto } from "@/api/payroll-updates.api";
-import type { PayrollProcessCalculationSummaryDto, PayrollProcessManualDetailResponseDto } from "@/api/payroll-processes.api";
+import type { PayrollProcessCalculationResponseDto, PayrollManualDetailResponseDto } from "@/api/payroll-processes.api";
+import type { PayrollVariableResponseDto } from "@/api/payroll-variables.api";
 import { parseApiError } from "@/utils/api-error";
 
 const payrollTypeCollection = createListCollection({
@@ -96,7 +99,7 @@ const payrollUpdateSchema = z
     name: z.string().trim().min(1, "El nombre es requerido"),
     payrollTypeId: z.coerce.number().min(1, "El tipo es requerido"),
     formulaTypeId: z.coerce.number().min(1, "El tipo de fórmula es requerido"),
-    formula: z.string().min(1, "La fórmula es requerida"),
+    formula: z.string().optional().or(z.literal("")),
     ipsDeductible: z.boolean(),
   })
   .superRefine((data, ctx) => {
@@ -124,31 +127,28 @@ type PayrollUpdateFormOutput = z.output<typeof payrollUpdateSchema>;
 type ManualDetailFormInput = z.input<typeof manualDetailSchema>;
 type ManualDetailFormOutput = z.output<typeof manualDetailSchema>;
 
-const formulaVariables = [
-  "DiasTrabajados",
-  "DiasHabiles",
-  "DiasTardanza",
-  "DiasAusencia",
-  "JornalDiario",
-  "JornalMinimo",
-  "CantidadHijos",
+const DEFAULT_VARIABLES: PayrollVariableResponseDto[] = [
+  { code: "SalarioBase", name: "SalarioBase", description: "Salario mensual estipulado en el contrato del funcionario." },
+  { code: "JornalDiario", name: "JornalDiario", description: "Salario base dividido 30 días. Es el costo de un día de trabajo." },
+  { code: "DiasTrabajados", name: "DiasTrabajados", description: "Días efectivamente laborados en el mes (30 menos ausencias injustificadas)." },
+  { code: "DiasAusencia", name: "DiasAusencia", description: "Cantidad de inasistencias injustificadas registradas en el periodo." },
+  { code: "DiasTardanza", name: "DiasTardanza", description: "Cantidad de llegadas tardías injustificadas registradas en el periodo." },
+  { code: "CantidadHijos", name: "CantidadHijos", description: "Número de hijos menores de 18 años asociados al núcleo familiar del empleado." },
+  { code: "TotalDeducibleIPS", name: "TotalDeducibleIPS", description: "Suma total acumulada de todos los haberes del mes que tienen activado el parámetro Deducible de IPS." },
 ];
 
 const payrollSectionConfig = {
   novedades: {
     path: "/rrhh/novedades",
     title: "Novedades",
-    description: "Crea y administra los conceptos de nómina con fórmulas fijas o calculadas.",
   },
   manuales: {
     path: "/rrhh/conceptos-manuales",
     title: "Conceptos Manuales",
-    description: "Asigna conceptos fijos por funcionario y período para el proceso de nómina.",
   },
   planillas: {
     path: "/rrhh/planillas",
     title: "Planillas",
-    description: "Ejecuta el cálculo de la planilla y revisa el resultado antes de pagar.",
   },
 } as const;
 
@@ -173,25 +173,19 @@ const appendVariableToFormula = (currentFormula: string, variable: string) => {
 
 const normalizeProcessStatus = (value?: string | null) => (value ?? "").toLowerCase();
 
-const isProcessOpen = (process?: { isOpen?: boolean | null; status?: string | null; statusName?: string | null; state?: string | null; stateName?: string | null } | null) => {
+const isProcessOpen = (process?: { payrollStatusName?: string | null; payrollStatusId?: number | null } | null) => {
   if (!process) {
     return false;
   }
-
-  if (process.isOpen !== undefined && process.isOpen !== null) {
-    return process.isOpen;
-  }
-
-  const statusText = normalizeProcessStatus(process.statusName ?? process.status ?? process.stateName ?? process.state);
-  if (!statusText) {
+  const text = normalizeProcessStatus(process.payrollStatusName);
+  if (!text) {
     return true;
   }
-
-  return !/(cerrad|closed|procesad|finaliz|complet|terminad)/.test(statusText);
+  return text.includes("abierto");
 };
 
-const statusLabelFromProcess = (process?: { status?: string | null; statusName?: string | null; state?: string | null; stateName?: string | null } | null) => {
-  const text = process?.statusName ?? process?.status ?? process?.stateName ?? process?.state;
+const statusLabelFromProcess = (process?: { payrollStatusName?: string | null } | null) => {
+  const text = process?.payrollStatusName;
   return text && text.trim().length > 0 ? text : "Sin estado";
 };
 
@@ -208,8 +202,8 @@ export default function NovedadesPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedUpdate, setSelectedUpdate] = useState<PayrollUpdateResponseDto | null>(null);
-  const [selectedManualDetail, setSelectedManualDetail] = useState<PayrollProcessManualDetailResponseDto | null>(null);
-  const [calculationSummary, setCalculationSummary] = useState<PayrollProcessCalculationSummaryDto | null>(null);
+  const [selectedManualDetail, setSelectedManualDetail] = useState<PayrollManualDetailResponseDto | null>(null);
+  const [calculationSummary, setCalculationSummary] = useState<PayrollProcessCalculationResponseDto | null>(null);
   const [processIdInput, setProcessIdInput] = useState(searchParams.get("processId") ?? "");
 
   const selectedProcessId = useMemo(() => {
@@ -235,8 +229,9 @@ export default function NovedadesPage() {
   const deleteManualDetail = useDeletePayrollProcessManualDetail(selectedProcessId ?? undefined);
   const calculatePayrollProcess = useCalculatePayrollProcess(selectedProcessId ?? undefined);
 
+  const payrollVariablesQuery = useGetPayrollVariables();
   const payrollUpdates = useMemo(() => payrollUpdatesQuery.data ?? [], [payrollUpdatesQuery.data]);
-  const payrollVariables = formulaVariables;
+  const payrollVariables = useMemo(() => payrollVariablesQuery.data ?? DEFAULT_VARIABLES, [payrollVariablesQuery.data]);
   const employees = useMemo(() => employeesQuery.data?.employees ?? [], [employeesQuery.data]);
   const manualDetails = manualDetailsQuery.data ?? [];
   const process = processQuery.data ?? null;
@@ -406,7 +401,7 @@ export default function NovedadesPage() {
 
     manualReset({
       employeeId: selectedManualDetail?.employeeId ?? 0,
-      payrollUpdateId: selectedManualDetail?.payrollUpdateId ?? 0,
+      payrollUpdateId: 0,
       amount: selectedManualDetail ? String(selectedManualDetail.amount) : "",
     });
   }, [selectedProcessId, manualReset, selectedManualDetail]);
@@ -527,7 +522,7 @@ export default function NovedadesPage() {
     );
   };
 
-  const handleDeleteManualDetail = (manualDetail: PayrollProcessManualDetailResponseDto) => {
+  const handleDeleteManualDetail = (manualDetail: PayrollManualDetailResponseDto) => {
     deleteManualDetail.mutate(manualDetail.id, {
       onSuccess: () => {
         if (selectedManualDetail?.id === manualDetail.id) {
@@ -561,11 +556,6 @@ export default function NovedadesPage() {
       return;
     }
 
-    if (manualDetails.length === 0) {
-      toaster.create({ title: "Carga manuales antes de calcular", description: "Este proceso aún no tiene novedades manuales cargadas.", type: "error" });
-      return;
-    }
-
     calculatePayrollProcess.mutate(undefined, {
       onSuccess: (result) => {
         setCalculationSummary(result);
@@ -590,33 +580,42 @@ export default function NovedadesPage() {
       return <Text color="gray.500">Aún no se ejecutó el cálculo masivo para este proceso.</Text>;
     }
 
-    const resultDetails = calculationSummary.details ?? [];
+    const employeesList = calculationSummary.employees ?? [];
 
     return (
       <Stack gap={3}>
-        <Text>{calculationSummary.message || calculationSummary.summary || "Cálculo ejecutado correctamente."}</Text>
+        <Text>Cálculo ejecutado correctamente.</Text>
         <HStack wrap="wrap" gap={3}>
-          {typeof calculationSummary.totalEmployees === "number" && <Badge colorPalette="green">Empleados: {calculationSummary.totalEmployees}</Badge>}
-          {typeof calculationSummary.totalManualDetails === "number" && <Badge colorPalette="blue">Manuales: {calculationSummary.totalManualDetails}</Badge>}
-          {typeof calculationSummary.totalConcepts === "number" && <Badge colorPalette="purple">Conceptos: {calculationSummary.totalConcepts}</Badge>}
+          <Badge colorPalette="green">Empleados: {calculationSummary.employeesProcessed}</Badge>
+          <Badge colorPalette="blue">Haberes: {calculationSummary.totalHaberes.toFixed(2)}</Badge>
+          <Badge colorPalette="orange">Descuentos: {calculationSummary.totalDescuentos.toFixed(2)}</Badge>
+          <Badge colorPalette="purple">Neto: {calculationSummary.totalNeto.toFixed(2)}</Badge>
         </HStack>
-        {resultDetails.length > 0 ? (
+        {employeesList.length > 0 ? (
           <Box borderWidth="1px" borderColor="gray.200" rounded="md" overflow="hidden">
             <Table.ScrollArea>
               <Table.Root size="sm" stickyHeader>
                 <Table.Header>
                   <Table.Row bg="bg.subtle">
                     <Table.ColumnHeader>Empleado</Table.ColumnHeader>
-                    <Table.ColumnHeader>ID</Table.ColumnHeader>
-                    <Table.ColumnHeader>Mensaje</Table.ColumnHeader>
+                    <Table.ColumnHeader>Salario Base</Table.ColumnHeader>
+                    <Table.ColumnHeader>Jornal</Table.ColumnHeader>
+                    <Table.ColumnHeader>Días</Table.ColumnHeader>
+                    <Table.ColumnHeader>Haberes</Table.ColumnHeader>
+                    <Table.ColumnHeader>Descuentos</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="end">Neto</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {resultDetails.map((detail, index) => (
-                    <Table.Row key={`${detail.employeeId ?? index}-${index}`}>
-                      <Table.Cell>{detail.employeeFullName ?? "-"}</Table.Cell>
-                      <Table.Cell>{detail.employeeId ?? "-"}</Table.Cell>
-                      <Table.Cell>{detail.message ?? "Procesado"}</Table.Cell>
+                  {employeesList.map((emp) => (
+                    <Table.Row key={emp.employeeId}>
+                      <Table.Cell>{emp.employeeName}</Table.Cell>
+                      <Table.Cell>{emp.salarioBase.toFixed(2)}</Table.Cell>
+                      <Table.Cell>{emp.jornalDiario.toFixed(2)}</Table.Cell>
+                      <Table.Cell>{emp.diasTrabajados}</Table.Cell>
+                      <Table.Cell>{emp.totalHaberes.toFixed(2)}</Table.Cell>
+                      <Table.Cell>{emp.totalDescuentos.toFixed(2)}</Table.Cell>
+                      <Table.Cell textAlign="end">{emp.totalNeto.toFixed(2)}</Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
@@ -637,20 +636,12 @@ export default function NovedadesPage() {
   const payrollUpdatePending = createPayrollUpdate.isPending || updatePayrollUpdate.isPending;
   const manualPending = upsertManualDetail.isPending || deleteManualDetail.isPending || calculatePayrollProcess.isPending;
   const conceptManualOptions = payrollUpdates.filter((update) => update.formulaTypeId === FormulaTypeId.Fixed);
-  const formulaTypeLabel = formulaTypeId === FormulaTypeId.Fixed ? "FIJO" : "CALCULADO";
-  const variablesDisabled = formulaTypeId === FormulaTypeId.Fixed;
 
   return (
     <Stack gap={6} p={4}>
       <HStack justifyContent="space-between" alignItems="start" flexWrap="wrap" gap={3}>
         <Stack gap={1}>
-          <Text fontSize="sm" color="gray.500">
-            Administración / RR.HH. / Nómina
-          </Text>
           <Heading size="xl">{sectionConfig.title}</Heading>
-          <Text fontSize="sm" color="gray.500">
-            {sectionConfig.description}
-          </Text>
         </Stack>
         <Button variant="ghost" size="sm" onClick={() => navigate("/dash") }>
           <LuArrowLeft /> Volver
@@ -665,9 +656,6 @@ export default function NovedadesPage() {
                 <HStack justifyContent="space-between" flexWrap="wrap" gap={3}>
                   <Stack gap={1}>
                     <Heading size="md">{conceptIsEditing ? `Editar concepto #${selectedUpdate?.id}` : "Crear concepto de nómina"}</Heading>
-                    <Text fontSize="sm" color="gray.500">
-                      Usa Haberes / Descuentos y Fijo / Calculado para controlar la validación automática del formulario.
-                    </Text>
                   </Stack>
                   {conceptIsEditing ? (
                     <Button variant="outline" onClick={resetPayrollUpdateForm}>
@@ -724,7 +712,7 @@ export default function NovedadesPage() {
                 </Field.Root>
 
                 <Field.Root gridColumn={{ base: "1 / -1", md: "span 2" }} invalid={!!payrollUpdateForm.formState.errors.ipsDeductible} required={payrollTypeId !== PayrollTypeId.Deductions}>
-                  <Field.Label>IPS Deducible {payrollTypeId === PayrollTypeId.Deductions ? <Text as="span" color="gray.500">(forzado en No)</Text> : <Text as="span" color="red.500">*</Text>}</Field.Label>
+                  <Field.Label>IPS Deducible <Text as="span" color="red.500">*</Text></Field.Label>
                   <Controller
                     name="ipsDeductible"
                     control={payrollControl}
@@ -801,46 +789,48 @@ export default function NovedadesPage() {
                   <Field.ErrorText>{payrollUpdateForm.formState.errors.formulaTypeId?.message}</Field.ErrorText>
                 </Field.Root>
 
-                <Field.Root gridColumn={{ base: "1 / -1", md: "span 6" }} invalid={!!payrollUpdateForm.formState.errors.formula} required>
-                  <Field.Label>Fórmula <Text as="span" color="red.500">*</Text></Field.Label>
-                  <Textarea
-                    {...payrollRegister("formula")}
-                    placeholder={formulaTypeLabel === "FIJO" ? "Ej. 50000" : "Ej. DiasTrabajados * JornalMinimo"}
-                    rows={5}
-                    disabled={payrollUpdatePending}
-                  />
-                  <Field.ErrorText>{payrollUpdateForm.formState.errors.formula?.message}</Field.ErrorText>
-                </Field.Root>
+                {formulaTypeId === FormulaTypeId.Calculated && (
+                  <>
+                    <Field.Root gridColumn={{ base: "1 / -1", md: "span 6" }} invalid={!!payrollUpdateForm.formState.errors.formula} required>
+                      <Field.Label>Fórmula <Text as="span" color="red.500">*</Text></Field.Label>
+                      <Textarea
+                        {...payrollRegister("formula")}
+                        placeholder="Ej. DiasTrabajados * JornalMinimo"
+                        rows={5}
+                        disabled={payrollUpdatePending}
+                      />
+                      <Field.ErrorText>{payrollUpdateForm.formState.errors.formula?.message}</Field.ErrorText>
+                    </Field.Root>
 
-                <Field.Root gridColumn={{ base: "1 / -1", md: "span 6" }}>
-                  <Field.Label>Variables Disponibles</Field.Label>
-                  <Box
-                    borderWidth="1px"
-                    borderColor="gray.200"
-                    rounded="md"
-                    p={3}
-                    opacity={variablesDisabled ? 0.45 : 1}
-                    pointerEvents={variablesDisabled ? "none" : "auto"}
-                    bg={variablesDisabled ? "gray.50" : "white"}
-                  >
-                    <Text fontSize="sm" color="gray.500" mb={3}>
-                      Haz clic en una variable para añadirla al final de la fórmula.
-                    </Text>
-                    <HStack wrap="wrap" gap={2} alignItems="start">
-                      {payrollVariables.map((variable) => (
-                        <Button
-                          key={variable}
-                          size="xs"
-                          variant="outline"
-                          onClick={() => handleFormulaVariableClick(variable)}
-                          disabled={variablesDisabled || payrollUpdatePending}
-                        >
-                          {variable}
-                        </Button>
-                      ))}
-                    </HStack>
-                  </Box>
-                </Field.Root>
+                    <Field.Root gridColumn={{ base: "1 / -1", md: "span 6" }}>
+                      <Field.Label>Variables Disponibles</Field.Label>
+                      <Box borderWidth="1px" borderColor="gray.200" rounded="md" p={3}>
+                        <Text fontSize="sm" color="gray.500" mb={3}>
+                          Haz clic en una variable para añadirla al final de la fórmula.
+                        </Text>
+                        <HStack wrap="wrap" gap={2} alignItems="start">
+                          {payrollVariables.map((variable) => (
+                            <Tooltip
+                              key={variable.code}
+                              content={variable.description}
+                              showArrow
+                              positioning={{ placement: "top" }}
+                            >
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                onClick={() => handleFormulaVariableClick(variable.code)}
+                                disabled={payrollUpdatePending}
+                              >
+                                {variable.code}
+                              </Button>
+                            </Tooltip>
+                          ))}
+                        </HStack>
+                      </Box>
+                    </Field.Root>
+                  </>
+                )}
               </Grid>
 
               <HStack justifyContent="space-between" flexWrap="wrap" gap={3}>
@@ -1119,7 +1109,7 @@ export default function NovedadesPage() {
                                     setSelectedManualDetail(manualDetail);
                                     manualDetailForm.reset({
                                       employeeId: manualDetail.employeeId,
-                                      payrollUpdateId: manualDetail.payrollUpdateId ?? 0,
+                                      payrollUpdateId: 0,
                                       amount: String(manualDetail.amount),
                                     });
                                   }}

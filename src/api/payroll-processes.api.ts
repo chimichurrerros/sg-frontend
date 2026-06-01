@@ -2,60 +2,87 @@ import { apiClient } from "./client";
 
 export interface PayrollProcessResponseDto {
   id: number;
-  name?: string | null;
-  status?: string | null;
-  statusName?: string | null;
-  state?: string | null;
-  stateName?: string | null;
-  isOpen?: boolean | null;
+  name: string;
+  processTypeId: number;
+  processTypeName: string;
+  year: number;
+  month: number;
+  startDate: string;
+  payDate?: string | null;
+  payrollStatusId: number;
+  payrollStatusName: string;
 }
 
-export interface PayrollProcessManualDetailResponseDto {
-  id: number;
-  employeeId: number;
-  employeeFullName: string;
-  payrollUpdateId?: number | null;
-  conceptName: string;
-  payrollTypeName: string;
-  amount: number;
+export interface PayrollProcessCreateDto {
+  name: string;
+  processTypeId: number;
+  year: number;
+  month: number;
+  startDate: string;
+  payDate?: string | null;
+  payrollStatusId?: number | null;
 }
 
-export interface UpsertPayrollProcessManualDetailRequestDto {
+export type PayrollProcessUpdateDto = PayrollProcessCreateDto;
+
+export interface PayrollManualInputDto {
   employeeId: number;
   payrollUpdateId: number;
   amount: number;
 }
 
-export interface PayrollProcessCalculationSummaryDto {
-  message?: string | null;
-  summary?: string | null;
-  totalEmployees?: number | null;
-  totalManualDetails?: number | null;
-  totalConcepts?: number | null;
-  details?: Array<{
-    employeeId?: number | null;
-    employeeFullName?: string | null;
-    message?: string | null;
-    [key: string]: unknown;
-  }> | null;
-  [key: string]: unknown;
+export interface PayrollManualDetailResponseDto {
+  id: number;
+  employeeId: number;
+  employeeFullName: string;
+  conceptName: string;
+  payrollTypeName: string;
+  amount: number;
+}
+
+export interface UpdatePayrollProcessStatusRequestDto {
+  payrollStatusId: number;
+}
+
+export interface PayrollProcessCalculationResponseDto {
+  payrollProcessId: number;
+  payrollProcessName: string;
+  employeesProcessed: number;
+  totalHaberes: number;
+  totalDescuentos: number;
+  totalNeto: number;
+  employees: Array<any>;
 }
 
 export const payrollProcessesApi = {
+  getPayrollProcesses: () =>
+    apiClient.get<PayrollProcessResponseDto[]>(`/api/payroll-processes`).then((response) => response.data),
   getPayrollProcess: (id: number) =>
     apiClient.get<PayrollProcessResponseDto>(`/api/payroll-processes/${id}`).then((response) => response.data),
+  createPayrollProcess: (body: PayrollProcessCreateDto) =>
+    apiClient.post<PayrollProcessResponseDto>(`/api/payroll-processes`, body).then((response) => response.data),
+  updatePayrollProcess: (id: number, body: PayrollProcessUpdateDto) =>
+    apiClient.put(`/api/payroll-processes/${id}`, body).then((response) => response.data),
+  deletePayrollProcess: (id: number) =>
+    apiClient.delete(`/api/payroll-processes/${id}`).then((response) => response.data),
+  updatePayrollProcessStatus: (processId: number, body: UpdatePayrollProcessStatusRequestDto) =>
+    apiClient.patch(`/api/payroll-processes/${processId}/status`, body).then((response) => response.data),
   getManualDetails: (processId: number) =>
-    apiClient
-      .get<PayrollProcessManualDetailResponseDto[]>(`/api/payroll-processes/${processId}/manual-details`)
-      .then((response) => response.data),
-  upsertManualDetail: (processId: number, body: UpsertPayrollProcessManualDetailRequestDto) =>
-    apiClient
-      .post<PayrollProcessManualDetailResponseDto>(`/api/payroll-processes/${processId}/manual-details`, body)
-      .then((response) => response.data),
+    apiClient.get<PayrollManualDetailResponseDto[]>(`/api/payroll-processes/${processId}/manual-details`).then((response) => response.data),
+  upsertManualDetail: (processId: number, body: PayrollManualInputDto) =>
+    apiClient.post<PayrollManualDetailResponseDto>(`/api/payroll-processes/${processId}/manual-details`, body).then((response) => response.data),
   deleteManualDetail: (id: number) =>
     apiClient.delete(`/api/payroll-processes/manual-details/${id}`).then((response) => response.data),
   calculateProcess: (id: number) =>
-    apiClient
-      .post<PayrollProcessCalculationSummaryDto>(`/api/payroll-processes/${id}/calculate`)
-      .then((response) => response.data),
+    apiClient.post<PayrollProcessCalculationResponseDto>(`/api/payroll-processes/${id}/calculate`).then((response) => response.data),
+  closeAndPayProcess: (id: number) =>
+    apiClient.post<any>(`/api/payroll-processes/${id}/close-and-pay`).then((response) => response.data),
+  getPayrollUpdates: () =>
+    apiClient.get(`/api/payroll-updates`).then((response) => response.data),
+  createPayrollUpdate: (body: any) =>
+    apiClient.post(`/api/payroll-updates`, body).then((response) => response.data),
+  createManualConceptIncident: (body: any) =>
+    apiClient.post(`/api/manual-concepts`, body).then((response) => response.data),
+  getPendingManualConcepts: () =>
+    apiClient.get(`/api/manual-concepts/pending`).then((response) => response.data),
 };
