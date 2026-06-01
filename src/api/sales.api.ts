@@ -89,5 +89,5 @@ export const salesApi ={
     createSale:(body: NewSaleRequest) => apiClient.post<Sale>("/api/sales-orders/pos",body).then(r=>r.data),
     getSales: (params:PaginationParams) => apiClient.get<{ salesOrders: FullSaleOrder[], pagination: PaginationType }>("/api/sales-orders", {params}).then(r=>r.data),
     getSaleById: (id:number) => apiClient.get<{ salesOrder: FullSaleOrder }>(`/api/sales-orders/${id}`).then(r=>r.data.salesOrder),
-    getAll: () => apiClient.get<{ sales: Sale[] }>("/api/sales-orders/all").then(r=>r.data)
+    getAll: () => apiClient.get<{ salesOrders: FullSaleOrder[] }>("/api/sales-orders/all").then(r=>r.data)
 }

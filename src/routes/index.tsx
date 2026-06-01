@@ -40,6 +40,7 @@ import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrde
 import SaleListPage from "@/pages/Sales/SaleListPage";
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
+import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
             element: <BudgetSheetPage mode="create" />,
           },
           {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
+
+          {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
+
+          {path: "/ventas/devoluciones/:billId", element: <ReturnSheetPage mode="create" /> },
           /* ===== COMPRAS ===== */
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },

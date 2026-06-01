@@ -208,7 +208,7 @@ export default function TableEditable<T extends { id: number }>({
         setFinalData(sortedData);
     };
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "full"} minHeight={minHeight} maxHeight={maxHeight || "60vh"} width="100%">
+        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "100%"} minHeight={minHeight} maxHeight={maxHeight || "60vh"} width="100%">
             <Table.Root size="sm" stickyHeader>
                 <Table.Header>
                     <Table.Row bg="bg.subtle" hidden={loading} userSelect="none">
@@ -241,7 +241,7 @@ export default function TableEditable<T extends { id: number }>({
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body height={height || "full"} minHeight={minHeight} >
+                <Table.Body >
                     {loading && (
                         <Table.Row>
                             <Table.Cell
@@ -288,7 +288,6 @@ export default function TableEditable<T extends { id: number }>({
                             <Table.Cell colSpan={labels.length} border="hidden" alignContent="center" textAlign="center" verticalAlign="middle">
                                 <Box
                                     height={height || "200px"}
-                                    bg="red"
                                     w="full"
                                 >
                                     <Box
