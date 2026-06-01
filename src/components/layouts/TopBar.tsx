@@ -9,6 +9,9 @@ interface Props { onToggle: () => void; }
 
 function useBreadcrumb() {
   const { pathname } = useLocation();
+  if (pathname === "/dash/contabilidad/libro-diario") {
+    return "Contabilidad / Libro Diario";
+  }
   for (const item of NAV_CONFIG) {
     if (item.path === pathname) return item.label;
     const child = item.children?.find(c => c.path === pathname);

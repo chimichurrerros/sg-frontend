@@ -6,6 +6,12 @@ import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
+import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
+import LibroDiarioPage from "@/pages/Accounting/LibroDiarioPage";
+import LibroMayorPage from "@/pages/Accounting/LibroMayorPage";
+import BalanceGeneralPage from "@/pages/Accounting/BalanceGeneralPage";
+import BalanceSumasSaldosPage from "@/pages/Accounting/BalanceSumasSaldosPage";
+import BalanceResultadosPage from "@/pages/Accounting/BalanceResultadosPage";
 import BudgetsPage from "@/pages/Sales/Budgets/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import { AddService } from "@/pages/Catalog/AddService";
@@ -54,6 +60,12 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
+          { path: "/dash/contabilidad", element: <AccountingDashboardPage /> },
+          { path: "/dash/contabilidad/libro-diario", element: <LibroDiarioPage /> },
+          { path: "/dash/contabilidad/libro-mayor", element: <LibroMayorPage /> },
+          { path: "/dash/contabilidad/balance-general", element: <BalanceGeneralPage /> },
+          { path: "/dash/contabilidad/balance-sumas-saldos", element: <BalanceSumasSaldosPage /> },
+          { path: "/dash/contabilidad/balance-resultados", element: <BalanceResultadosPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */
