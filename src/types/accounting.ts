@@ -42,3 +42,21 @@ export interface LibroMayorResponse {
   accounts: LibroMayorAccount[];
 }
 
+export interface BalanceGeneralItem {
+  accountId: number;
+  accountCode: string;
+  accountName: string;
+  balance: number;
+  isAcceptor: boolean;
+}
+
+export interface BalanceGeneralResponse {
+  assets: BalanceGeneralItem[];
+  liabilities: BalanceGeneralItem[];
+  equity: BalanceGeneralItem[];
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  totalLiabilitiesAndEquity: number;
+}
+

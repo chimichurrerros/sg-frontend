@@ -135,6 +135,8 @@ export default function AccountingDashboardPage() {
       navigate(`/dash/contabilidad/libro-diario?process=${selectedPeriod}`);
     } else if (reportName === "Libro Mayor") {
       navigate(`/dash/contabilidad/libro-mayor?process=${selectedPeriod}`);
+    } else if (reportName === "Balance General") {
+      navigate(`/dash/contabilidad/balance-general?process=${selectedPeriod}`);
     } else {
       console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
     }
@@ -188,7 +190,7 @@ export default function AccountingDashboardPage() {
         />
         <ReportCard
           title="Balance General"
-          description="Estado de situación financiera de la empresa (Activos, Pasivos, Patrimonio)."
+          description="Estado de situación financiera de la empresa (Activos y Pasivos)."
           icon={Scale}
           onViewReport={() => handleViewReport("Balance General")}
         />
@@ -200,7 +202,7 @@ export default function AccountingDashboardPage() {
         />
         <ReportCard
           title="Balance de Resultados"
-          description="Estado de rentabilidad: ingresos por ventas y servicios vs. costos."
+          description="Estado de rentabilidad: ingresos por ventas y servicios vs costos."
           icon={TrendingUp}
           onViewReport={() => handleViewReport("Balance de Resultados")}
         />

@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { LibroDiarioResponse, LibroMayorResponse } from "@/types/accounting";
+import type { LibroDiarioResponse, LibroMayorResponse, BalanceGeneralResponse } from "@/types/accounting";
 
 export interface GetLibroDiarioParams {
   accountantProcessId: number;
@@ -14,6 +14,11 @@ export interface GetLibroMayorParams {
   endDate: string;
 }
 
+export interface GetBalanceGeneralParams {
+  accountantProcessId: number;
+  endDate: string;
+}
+
 export const accountingApi = {
   getLibroDiario: (params: GetLibroDiarioParams) =>
     apiClient
@@ -22,6 +27,10 @@ export const accountingApi = {
   getLibroMayor: (params: GetLibroMayorParams) =>
     apiClient
       .get<LibroMayorResponse>("/api/accounting/reports/libro-mayor", { params })
+      .then((r) => r.data),
+  getBalanceGeneral: (params: GetBalanceGeneralParams) =>
+    apiClient
+      .get<BalanceGeneralResponse>("/api/accounting/reports/balance-general", { params })
       .then((r) => r.data),
 };
 

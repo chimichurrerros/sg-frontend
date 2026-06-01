@@ -1,11 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { accountingApi, type GetLibroDiarioParams, type GetLibroMayorParams } from "@/api/accounting.api";
+import {
+  accountingApi,
+  type GetLibroDiarioParams,
+  type GetLibroMayorParams,
+  type GetBalanceGeneralParams,
+} from "@/api/accounting.api";
 
 export const accountingKeys = {
   libroDiario: (params: GetLibroDiarioParams) =>
     ["accounting", "libroDiario", params] as const,
   libroMayor: (params: GetLibroMayorParams) =>
     ["accounting", "libroMayor", params] as const,
+  balanceGeneral: (params: GetBalanceGeneralParams) =>
+    ["accounting", "balanceGeneral", params] as const,
 };
 
 const RETRIES = 2;
@@ -25,6 +32,15 @@ export const useLibroMayor = (params: GetLibroMayorParams, enabled = true) => {
     queryFn: () => accountingApi.getLibroMayor(params),
     retry: RETRIES,
     enabled: enabled && !!params.accountantProcessId && !!params.accountPlanId && !!params.startDate && !!params.endDate,
+  });
+};
+
+export const useBalanceGeneral = (params: GetBalanceGeneralParams, enabled = true) => {
+  return useQuery({
+    queryKey: accountingKeys.balanceGeneral(params),
+    queryFn: () => accountingApi.getBalanceGeneral(params),
+    retry: RETRIES,
+    enabled: enabled && !!params.accountantProcessId && !!params.endDate,
   });
 };
 
