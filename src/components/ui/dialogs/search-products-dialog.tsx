@@ -90,7 +90,8 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                 labels={labels}
                                 data={products
                                     .filter((p:ProductSelect)=>!selectedProductsIds.includes(p.id))
-                                    .filter((p:ProductSelect)=>p.name?.toLowerCase().includes(searchParam.toLowerCase()) )
+                                    .filter((p:ProductSelect)=>p.name?.toLowerCase().includes(searchParam.toLowerCase()))
+                                    .filter((p:ProductSelect)=>p.quantity > 0 || !careStock)
                                 }
                                 onSelect={setSelectedProduct}
                                 onDoubleClick={(product) => {

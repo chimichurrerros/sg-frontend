@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { LoadingScreen } from "./screens/loading-screen";
 import { getSorticon } from "./table-select";
 import EmptyDataScreen from "./screens/empty-data-screen";
-import { BeanOff } from "lucide-react";
+import { BeanOff, PackageOpenIcon } from "lucide-react";
 
 /**
  * validate => validate function when you press intro to modify a field
@@ -40,6 +40,7 @@ export interface TableEditableProps<T extends { id: number }> {
     loading?: boolean;
     readOnly?: boolean;
     maxHeight?: string;
+    width?: string;
 }
 
 export default function TableEditable<T extends { id: number }>({
@@ -47,12 +48,13 @@ export default function TableEditable<T extends { id: number }>({
     data,
     onDataChange,
     noItemsComponent,
-    height = "40vh",
+    height,
     minHeight = "auto",
     loadingMessage = "Cargando datos...",
     loading = false,
     readOnly = false,
-    maxHeight
+    maxHeight,
+    width
 }: TableEditableProps<T>) {
     const [editingCell, setEditingCell] = useState<{ rowId: number; propName: string } | null>(null);
     const [editValue, setEditValue] = useState<any>("");
@@ -91,6 +93,7 @@ export default function TableEditable<T extends { id: number }>({
     };
 
     const saveEdit = (item?: T) => {
+    
         if (!editingCell) return;
 
         const label = labels.find(l => l.propName === editingCell.propName);
@@ -115,7 +118,6 @@ export default function TableEditable<T extends { id: number }>({
             }
             return item;
         });
-
         onDataChange(newData);
         setEditingCell(null);
         setEditValue("");
@@ -181,7 +183,7 @@ export default function TableEditable<T extends { id: number }>({
                 </Box>
             );
         }
-        const finalVal = displayValue === null || displayValue === undefined ? label.textIfNull : String(displayValue)
+        const finalVal = displayValue === null || displayValue === undefined  || displayValue === "" ? label.textIfNull : String(displayValue)
         return (
             <HStack
                 justify="space-between"
@@ -207,11 +209,54 @@ export default function TableEditable<T extends { id: number }>({
         });
         setFinalData(sortedData);
     };
+
+    if (loading) {
+        return (
+            <Box 
+                borderWidth="1px" 
+                rounded="md" 
+                height={height || "100%"} 
+                minHeight={minHeight} 
+                maxHeight={maxHeight || "60vh"} 
+                width="100%"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <LoadingScreen message={loadingMessage} />
+            </Box>
+        );
+    }
+
+    if (!loading && finalData.length === 0) {
+        return (
+            <Box 
+                borderWidth="1px" 
+                rounded="md" 
+                height={height || "100%"} 
+                minHeight={minHeight} 
+                maxHeight={maxHeight || "60vh"} 
+                width="100%"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+            >
+                {noItemsComponent ? noItemsComponent : (
+                    <EmptyDataScreen
+                        title={"Sin productos"}
+                        icon={<PackageOpenIcon />}
+                        message={"Selecciona una venta para agregar productos a devolver"}
+                    />
+                )}
+            </Box>
+        );
+    }
+
     return (
-        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "100%"} minHeight={minHeight} maxHeight={maxHeight || "60vh"} width="100%">
+        <Table.ScrollArea borderWidth="1px" rounded="md" tableLayout="fixed" height={height || "100%"} minHeight={minHeight} maxHeight={maxHeight || "60vh"} width={width || "100%"}>
             <Table.Root size="sm" stickyHeader>
                 <Table.Header>
-                    <Table.Row bg="bg.subtle" hidden={loading} userSelect="none">
+                    <Table.Row bg="bg.subtle" userSelect="none">
                         {labels.map((label, index) => (
                             <Table.ColumnHeader key={index} paddingX={5} textAlign="left"
                                 _hover={{
@@ -241,20 +286,8 @@ export default function TableEditable<T extends { id: number }>({
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body >
-                    {loading && (
-                        <Table.Row>
-                            <Table.Cell
-                                colSpan={labels.length}
-                                height={`calc(${height} - 1vh)`}
-                                textAlign="center"
-                            >
-                                <LoadingScreen message={loadingMessage} />
-                            </Table.Cell>
-                        </Table.Row>
-                    )}
-
-                    {finalData && !loading && finalData.length > 0 && finalData.map((item) => (
+                <Table.Body>
+                    {finalData.map((item) => (
                         <Table.Row
                             key={item.id}
                             _hover={{ bg: "gray.50" }}
@@ -263,15 +296,12 @@ export default function TableEditable<T extends { id: number }>({
                             h="40px"
                         >
                             {labels.map((label, idx) => (
-
                                 <Table.Cell
                                     key={idx}
                                     paddingY={1}
                                     paddingX={5}
-                                    // width={label.isComponent ? "32px" :`calc(100% / ${labels.length})`}
                                     height="40px"
                                     verticalAlign="middle"
-
                                 >
                                     <Tooltip showArrow={true} content={label.propName && label.labelName + ":" + String(item[label.propName])} disabled={!label.propName || !item[label.propName]}>
                                         <Box w="full" h="full">
@@ -282,33 +312,6 @@ export default function TableEditable<T extends { id: number }>({
                             ))}
                         </Table.Row>
                     ))}
-
-                    {!loading && finalData.length === 0 && (
-                        <Table.Row border="hidden">
-                            <Table.Cell colSpan={labels.length} border="hidden" alignContent="center" textAlign="center" verticalAlign="middle">
-                                <Box
-                                    height={height || "200px"}
-                                    w="full"
-                                >
-                                    <Box
-                                        position="absolute"
-                                        top="50%"
-                                        left="50%"
-                                        transform="translate(-50%, -50%)"
-                                        textAlign="center"
-                                        ml={20}
-                                    >
-                                        {noItemsComponent ? noItemsComponent : (
-                                            <EmptyDataScreen
-                                                title="No hay datos para mostrar"
-                                                message="Intenta con otros criterios de búsqueda o agregando un dato nuevo"
-                                                icon={<BeanOff />}
-                                            />
-                                        )}
-                                    </Box></Box>
-                            </Table.Cell>
-                        </Table.Row>
-                    )}
                 </Table.Body>
             </Table.Root>
         </Table.ScrollArea>
