@@ -92,7 +92,8 @@ export const router = createBrowserRouter([
 
           {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
 
-          {path: "/ventas/devoluciones/:billId", element: <ReturnSheetPage mode="create" /> },
+          {path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
+
           /* ===== COMPRAS ===== */
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },

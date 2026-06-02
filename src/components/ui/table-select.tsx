@@ -258,11 +258,23 @@ export default function TableSelect<T extends { id: number }>(
 
                                 >
                                     {labels && labels.map((label: label<T>, index: number) =>
-                                        <Table.Cell key={index} onDoubleClick={() => onDoubleClick && onDoubleClick(item)} pl={5}>
-                                            {label.isComponent && label.render ?
-                                                label.render(item) :
-                                                String(label.propName && (item[label.propName] !== undefined && item[label.propName] !== null ? label.transformFunction ? label.transformFunction(item[label.propName]) : String(item[label.propName] !== "" ? item[label.propName] : "-") : label.textIfNull || "-"))
-                                            }</Table.Cell>)}
+                                        <Table.Cell
+                                            key={index}
+                                            onDoubleClick={() => onDoubleClick && onDoubleClick(item)}
+                                            pl={5}
+                                        >
+                                            {label.isComponent && label.render ? (
+                                                label.render(item)
+                                            ) : (
+                                                (() => {
+                                                    if (!label.propName) return label.textIfNull || "-";
+                                                    const value = item[label.propName];
+                                                    if (value === undefined || value === null) return label.textIfNull || "-";
+                                                    if (label.transformFunction) return label.transformFunction(value || "-");
+                                                    return String(value !== ""  || !value ? value : "-");
+                                                })()
+                                            )}
+                                        </Table.Cell>)}
                                 </Table.Row>
                             )}
                             {!loading && !isError && finalData && finalData.length === 0 &&
