@@ -1,7 +1,6 @@
 export const translatePayrollStatus = (statusName?: string | null): string => {
   const text = (statusName ?? "").toLowerCase();
   if (text.includes("open")) return "Abierto";
-  if (text.includes("processed")) return "Procesado";
   if (text.includes("closed")) return "Cerrado";
   if (text.includes("paid")) return "Pagado";
   return text || "Sin estado";
@@ -10,7 +9,6 @@ export const translatePayrollStatus = (statusName?: string | null): string => {
 export const formatStatusColor = (statusName?: string | null): string => {
   const text = (statusName ?? "").toLowerCase();
   if (text.includes("open")) return "green";
-  if (text.includes("processed")) return "blue";
   if (text.includes("closed")) return "orange";
   if (text.includes("paid")) return "purple";
   return "gray";
@@ -30,9 +28,8 @@ export const processTypeNameMap: Record<number, string> = {
 
 export const PayrollStatusId = {
   Open: 1,
-  Processed: 2,
-  Closed: 3,
-  Paid: 4,
+  Closed: 2,
+  Paid: 3,
 } as const;
 
 export const monthNameMap: Record<number, string> = {

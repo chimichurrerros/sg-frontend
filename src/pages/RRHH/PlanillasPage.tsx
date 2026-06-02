@@ -4,7 +4,7 @@ import { LuPlus, LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { parseDate } from "@/constants/date";
 import { useGetPayrollProcesses } from "@/queries/payroll-processes.queries";
-import { formatStatusColor, translatePayrollStatus } from "@/constants/payroll";
+import { formatStatusColor, translatePayrollStatus, processTypeNameMap } from "@/constants/payroll";
 
 export default function PlanillasPage() {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ export default function PlanillasPage() {
                       onDoubleClick={() => navigate(`/rrhh/planillas/${process.id}`)}
                     >
                       <Table.Cell>{process.name}</Table.Cell>
-                      <Table.Cell>{process.processTypeName}</Table.Cell>
+                      <Table.Cell>{processTypeNameMap[process.processTypeId] ?? process.processTypeName}</Table.Cell>
                       <Table.Cell>{parseDate(process.startDate)}</Table.Cell>
                       <Table.Cell>{process.payDate ? parseDate(process.payDate) : "-"}</Table.Cell>
                       <Table.Cell>

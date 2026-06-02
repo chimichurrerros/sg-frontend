@@ -22,7 +22,7 @@ const createPlanillaSchema = z.object({
   processTypeId: z.coerce.number().min(1, "El tipo es requerido"),
   year: z.coerce.number().int().min(2000, "Año inválido").max(2100, "Año inválido"),
   month: z.coerce.number().int().min(1).max(12, "Mes inválido"),
-  startDate: z.string().min(1, "La fecha de inicio es requerida"),
+  startDate: z.string().min(1, "La fecha de alta es requerida"),
   payDate: z.string().optional().or(z.literal("")),
 });
 
@@ -203,7 +203,7 @@ export default function CrearPlanillaPage() {
               </Field.Root>
 
               <Field.Root invalid={!!form.formState.errors.startDate} required>
-                <Field.Label>Fecha de Inicio <Text as="span" color="red.500">*</Text></Field.Label>
+                <Field.Label>Fecha de Alta <Text as="span" color="red.500">*</Text></Field.Label>
                 <Input
                   type="date"
                   {...form.register("startDate")}

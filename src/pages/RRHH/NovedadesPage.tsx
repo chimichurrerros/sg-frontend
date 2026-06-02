@@ -543,7 +543,7 @@ export default function NovedadesPage() {
     }
 
     if (!processOpen) {
-      toaster.create({ title: "El proceso no está abierto", description: "No se puede ejecutar el cálculo masivo en un proceso cerrado o procesado.", type: "error" });
+      toaster.create({ title: "El proceso no está abierto", description: "No se puede ejecutar el cálculo masivo en un proceso cerrado.", type: "error" });
       return;
     }
 
@@ -907,7 +907,7 @@ export default function NovedadesPage() {
                 {selectedProcessId
                   ? processOpen
                     ? "El proceso está habilitado para cargar manuales y ejecutar el cálculo."
-                    : "El proceso está cerrado o procesado; la carga, edición y borrado de manuales quedan deshabilitados."
+                    : "El proceso está cerrado; la carga, edición y borrado de manuales quedan deshabilitados."
                   : "Selecciona un proceso para ver manuales, cargar novedades y ejecutar el cálculo."}
               </Text>
             </Stack>

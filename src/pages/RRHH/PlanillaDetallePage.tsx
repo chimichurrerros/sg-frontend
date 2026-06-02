@@ -1,14 +1,15 @@
 import { useMemo, useRef, useState } from "react";
-import { Badge, Box, Button, Card, createListCollection, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
-import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch } from "react-icons/lu";
+import { Badge, Box, Button, Card, CloseButton, createListCollection, Dialog, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
+import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
-import { useAddEmployees, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess } from "@/queries/payroll-processes.queries";
-import type { EligibleEmployeeResponseDto } from "@/api/payroll-processes.api";
+import { processTypeNameMap, formatStatusColor, translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
+import { useAddEmployees, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
+import type { EligibleEmployeeResponseDto, PayrollDetailSummaryResponseDto } from "@/api/payroll-processes.api";
 import { parseApiError } from "@/utils/api-error";
 import { toaster } from "@/components/ui/toaster";
-import { formatStatusColor, translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
+import EmployeePayrollDetailModal from "./EmployeePayrollDetailModal";
 
 const formatDate = (value?: string | null) => (value ? parseDate(value) : "-");
 
@@ -22,6 +23,8 @@ export default function PlanillaDetallePage() {
   const summariesQuery = useGetPayrollDetailSummaries(Number.isFinite(processId) ? processId : undefined);
   const addEmployeesMutation = useAddEmployees(Number.isFinite(processId) ? processId : undefined);
   const closeAndPayMutation = useCloseAndPayPayrollProcess(Number.isFinite(processId) ? processId : undefined);
+  const removeEmployeeMutation = useRemoveEmployeeFromProcess(Number.isFinite(processId) ? processId : undefined);
+  const closeProcessMutation = useClosePayrollProcess(Number.isFinite(processId) ? processId : undefined);
 
   const summaryRef = useRef<HTMLDivElement>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -30,13 +33,18 @@ export default function PlanillaDetallePage() {
   const [areaFilter, setAreaFilter] = useState("");
   const [positionFilter, setPositionFilter] = useState("");
 
+  const [modalEmployee, setModalEmployee] = useState<{ id: number; name: string } | null>(null);
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
+  const [payConfirmOpen, setPayConfirmOpen] = useState(false);
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [removeTargetId, setRemoveTargetId] = useState<number | null>(null);
+
   const process = processQuery.data ?? null;
   const eligibleEmployees = eligibleQuery.data ?? [];
   const summaries = summariesQuery.data ?? [];
-  const isProcessFinal = process
-    ? process.payrollStatusId === PayrollStatusId.Closed || process.payrollStatusId === PayrollStatusId.Paid
-    : false;
   const isProcessOpen = process?.payrollStatusId === PayrollStatusId.Open;
+  const isClosed = process?.payrollStatusId === PayrollStatusId.Closed;
+  const isPaid = process?.payrollStatusId === PayrollStatusId.Paid;
 
   const branchOptions = useMemo(
     () =>
@@ -147,17 +155,6 @@ export default function PlanillaDetallePage() {
     }
   };
 
-  const handleCloseProcess = async () => {
-    if (!process) return;
-    try {
-      const result = await closeAndPayMutation.mutateAsync();
-      await processQuery.refetch();
-    } catch (error) {
-      const parsed = parseApiError(error as unknown);
-      toaster.create({ title: "No se pudo cerrar la planilla", description: parsed.message, type: "error" });
-    }
-  };
-
   const selectedCount = selectedIds.length;
 
   return (
@@ -168,9 +165,6 @@ export default function PlanillaDetallePage() {
             <LuArrowLeft /> Volver
           </Button>
           <Heading size="xl">{process?.name ?? "Detalle de planilla"}</Heading>
-          <Text color="fg.muted">
-            RR.HH. &gt; Planillas &gt; {process?.name ?? "Planilla"}
-          </Text>
         </Stack>
 
         <HStack flexWrap="wrap" justify="flex-end" gap={2}>
@@ -187,7 +181,7 @@ export default function PlanillaDetallePage() {
           <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap={4}>
             <Box>
               <Text fontSize="sm" color="fg.muted">Tipo</Text>
-              <Text fontWeight="semibold">{process?.processTypeName ?? "-"}</Text>
+              <Text fontWeight="semibold">{process ? processTypeNameMap[process.processTypeId] ?? process.processTypeName : "-"}</Text>
             </Box>
             <Box>
               <Text fontSize="sm" color="fg.muted">Período</Text>
@@ -342,7 +336,7 @@ export default function PlanillaDetallePage() {
                           type="checkbox"
                           checked={allFilteredSelected}
                           onChange={toggleAll}
-                          disabled={isProcessFinal || !isProcessOpen}
+                          disabled={!isProcessOpen}
                         />
                       </Table.ColumnHeader>
                       <Table.ColumnHeader>Legajo</Table.ColumnHeader>
@@ -394,7 +388,7 @@ export default function PlanillaDetallePage() {
                 colorPalette="brand"
                 onClick={handleAddEmployees}
                 loading={addEmployeesMutation.isPending}
-                disabled={selectedIds.length === 0 || isProcessFinal || !isProcessOpen}
+                disabled={selectedIds.length === 0 || !isProcessOpen}
               >
                 <LuCheck /> Añadir
               </Button>
@@ -423,8 +417,8 @@ export default function PlanillaDetallePage() {
             <Stack gap={4}>
               <HStack wrap="wrap" gap={3}>
                 <Badge colorPalette="green">Empleados: {summaries.length}</Badge>
-                <Badge colorPalette="blue">Haberes: {parsePrice(summaries.reduce((sum, s) => sum + s.sueldoBruto, 0))}</Badge>
-                <Badge colorPalette="orange">Descuentos: {parsePrice(summaries.reduce((sum, s) => sum + s.descuentos, 0))}</Badge>
+                <Badge colorPalette="blue">Ingresos: {parsePrice(summaries.reduce((sum, s) => sum + s.sueldoBruto, 0))}</Badge>
+                <Badge colorPalette="orange">Egresos: {parsePrice(summaries.reduce((sum, s) => sum + s.descuentos, 0))}</Badge>
                 <Badge colorPalette="purple">Neto: {parsePrice(summaries.reduce((sum, s) => sum + s.sueldoNeto, 0))}</Badge>
               </HStack>
 
@@ -437,14 +431,20 @@ export default function PlanillaDetallePage() {
                       <Table.ColumnHeader>Sucursal</Table.ColumnHeader>
                       <Table.ColumnHeader>Área</Table.ColumnHeader>
                       <Table.ColumnHeader>Cargo</Table.ColumnHeader>
-                      <Table.ColumnHeader textAlign="end">Sueldo Bruto</Table.ColumnHeader>
-                      <Table.ColumnHeader textAlign="end">Descuentos</Table.ColumnHeader>
-                      <Table.ColumnHeader textAlign="end">Sueldo Neto</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="end">Ingresos</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="end">Egresos</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="end">Salario Neto</Table.ColumnHeader>
+                      <Table.ColumnHeader w="50px">Acciones</Table.ColumnHeader>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
                     {summaries.map((row) => (
-                      <Table.Row key={row.employeeId}>
+                      <Table.Row
+                        key={row.employeeId}
+                        cursor="pointer"
+                        _hover={{ bg: "gray.50" }}
+                        onDoubleClick={() => setModalEmployee({ id: row.employeeId, name: row.fullName })}
+                      >
                         <Table.Cell>{row.fileNumber}</Table.Cell>
                         <Table.Cell>{row.fullName}</Table.Cell>
                         <Table.Cell>{row.branchName ?? "-"}</Table.Cell>
@@ -453,6 +453,18 @@ export default function PlanillaDetallePage() {
                         <Table.Cell textAlign="end">{parsePrice(row.sueldoBruto)}</Table.Cell>
                         <Table.Cell textAlign="end">{parsePrice(row.descuentos)}</Table.Cell>
                         <Table.Cell textAlign="end" fontWeight="semibold">{parsePrice(row.sueldoNeto)}</Table.Cell>
+                        <Table.Cell>
+                          {isProcessOpen && (
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              colorPalette="red"
+                              onClick={(e) => { e.stopPropagation(); setRemoveTargetId(row.employeeId); setRemoveConfirmOpen(true); }}
+                            >
+                              <LuTrash2 />
+                            </Button>
+                          )}
+                        </Table.Cell>
                       </Table.Row>
                     ))}
                   </Table.Body>
@@ -471,16 +483,133 @@ export default function PlanillaDetallePage() {
           >
             Resumen
           </Button>
-          <Button
-            colorPalette="brand"
-            onClick={handleCloseProcess}
-            loading={closeAndPayMutation.isPending}
-            disabled={isProcessFinal || !isProcessOpen || summaries.length === 0}
-          >
-            <LuRefreshCw /> Cerrar Planilla
-          </Button>
+          {isProcessOpen && (
+            <Button
+              colorPalette="brand"
+              onClick={() => setCloseConfirmOpen(true)}
+              loading={closeProcessMutation.isPending}
+            >
+              <LuRefreshCw /> Cerrar Planilla
+            </Button>
+          )}
+          {isClosed && (
+            <Button
+              colorPalette="brand"
+              onClick={() => setPayConfirmOpen(true)}
+              loading={closeAndPayMutation.isPending}
+            >
+              <LuBanknote /> Proceder al pago
+            </Button>
+          )}
         </HStack>
       )}
+
+      <EmployeePayrollDetailModal
+        processId={processId}
+        employeeId={modalEmployee?.id ?? 0}
+        employeeName={modalEmployee?.name ?? ""}
+        open={modalEmployee !== null}
+        onClose={() => setModalEmployee(null)}
+      />
+
+      <Dialog.Root open={closeConfirmOpen} onOpenChange={(e) => { if (!e.open) setCloseConfirmOpen(false); }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner display="flex" alignItems="center" justifyContent="center">
+            <Dialog.Content>
+              <Dialog.Header display="flex" alignItems="center" gap={2}>
+                <Dialog.Title fontSize="lg" fontWeight="semibold">Cerrar Planilla</Dialog.Title>
+                <Dialog.CloseTrigger asChild><CloseButton size="sm" /></Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body pb={4}>
+                <Text fontSize="sm">¿Estás seguro de cerrar esta planilla? Una vez cerrada, deberás proceder al pago para finalizar el proceso.</Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button variant="surface" colorPalette="gray" onClick={() => setCloseConfirmOpen(false)}>Cancelar</Button>
+                <Button colorPalette="brand" loading={closeProcessMutation.isPending} onClick={async () => {
+                  try {
+                    await closeProcessMutation.mutateAsync();
+                    await processQuery.refetch();
+                    await summariesQuery.refetch();
+                  } catch (error) {
+                    const parsed = parseApiError(error as unknown);
+                    toaster.create({ title: "No se pudo cerrar la planilla", description: parsed.message, type: "error" });
+                  } finally {
+                    setCloseConfirmOpen(false);
+                  }
+                }}>Cerrar</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      <Dialog.Root open={payConfirmOpen} onOpenChange={(e) => { if (!e.open) setPayConfirmOpen(false); }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner display="flex" alignItems="center" justifyContent="center">
+            <Dialog.Content>
+              <Dialog.Header display="flex" alignItems="center" gap={2}>
+                <Dialog.Title fontSize="lg" fontWeight="semibold">Proceder al pago</Dialog.Title>
+                <Dialog.CloseTrigger asChild><CloseButton size="sm" /></Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body pb={4}>
+                <Text fontSize="sm">¿Estás seguro de proceder al pago de esta planilla? Se generará el asiento contable correspondiente.</Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button variant="surface" colorPalette="gray" onClick={() => setPayConfirmOpen(false)}>Cancelar</Button>
+                <Button colorPalette="brand" loading={closeAndPayMutation.isPending} onClick={async () => {
+                  try {
+                    await closeAndPayMutation.mutateAsync();
+                    await processQuery.refetch();
+                    await summariesQuery.refetch();
+                  } catch (error) {
+                    const parsed = parseApiError(error as unknown);
+                    toaster.create({ title: "No se pudo procesar el pago", description: parsed.message, type: "error" });
+                  } finally {
+                    setPayConfirmOpen(false);
+                  }
+                }}>Pagar</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      <Dialog.Root open={removeConfirmOpen} onOpenChange={(e) => { if (!e.open) { setRemoveConfirmOpen(false); setRemoveTargetId(null); } }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner display="flex" alignItems="center" justifyContent="center">
+            <Dialog.Content>
+              <Dialog.Header display="flex" alignItems="center" gap={2}>
+                <Dialog.Title fontSize="lg" fontWeight="semibold">Eliminar empleado de planilla</Dialog.Title>
+                <Dialog.CloseTrigger asChild><CloseButton size="sm" /></Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body pb={4}>
+                <Text fontSize="sm">¿Estás seguro de eliminar este empleado de la planilla? Se borrarán todos sus detalles.</Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button variant="surface" colorPalette="gray" onClick={() => { setRemoveConfirmOpen(false); setRemoveTargetId(null); }}>Cancelar</Button>
+                <Button colorPalette="red" loading={removeEmployeeMutation.isPending} onClick={async () => {
+                  if (removeTargetId === null) return;
+                  try {
+                    await removeEmployeeMutation.mutateAsync(removeTargetId);
+                    await summariesQuery.refetch();
+                    await eligibleQuery.refetch();
+                    toaster.create({ title: "Empleado eliminado de la planilla", type: "success" });
+                  } catch (error) {
+                    const parsed = parseApiError(error as unknown);
+                    toaster.create({ title: "No se pudo eliminar el empleado", description: parsed.message, type: "error" });
+                  } finally {
+                    setRemoveConfirmOpen(false);
+                    setRemoveTargetId(null);
+                  }
+                }}>Eliminar</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Stack>
   );
 }

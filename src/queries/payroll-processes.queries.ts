@@ -204,6 +204,41 @@ export const useGetEmployeeReceipt = (processId?: number, employeeId?: number) =
   });
 };
 
+export const useRemoveEmployeeFromProcess = (processId?: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, number>({
+    mutationFn: (employeeId: number) => payrollProcessesApi.removeEmployeeFromProcess(processId ?? 0, employeeId),
+    retry: RETRIES,
+    onSuccess: () => {
+      if (processId) {
+        queryClient.invalidateQueries({ queryKey: ["payroll-processes", processId, "detail-summaries"] });
+        queryClient.invalidateQueries({ queryKey: ["payroll-processes", processId, "eligible-employees"] });
+      }
+    },
+  });
+};
+
+export const useClosePayrollProcess = (processId?: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any>({
+    mutationFn: () => payrollProcessesApi.closeProcess(processId ?? 0),
+    retry: RETRIES,
+    onSuccess: (data) => {
+      toaster.create({
+        title: "Planilla cerrada",
+        description: data?.statusMessage ?? "Planilla cerrada exitosamente.",
+        type: "success",
+      });
+      if (processId) {
+        queryClient.invalidateQueries({ queryKey: payrollProcessKeys.all });
+        queryClient.invalidateQueries({ queryKey: payrollProcessKeys.detail(processId) });
+      }
+    },
+  });
+};
+
 export const useCloseAndPayPayrollProcess = (processId?: number) => {
   const queryClient = useQueryClient();
 
