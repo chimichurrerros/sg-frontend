@@ -271,7 +271,7 @@ export default function TableSelect<T extends { id: number }>(
                                                     const value = item[label.propName];
                                                     if (value === undefined || value === null) return label.textIfNull || "-";
                                                     if (label.transformFunction) return label.transformFunction(value || "-");
-                                                    return String(value !== ""  || !value ? value : "-");
+                                                    return String(value ? value : "-");
                                                 })()
                                             )}
                                         </Table.Cell>)}
