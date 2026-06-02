@@ -6,6 +6,14 @@ import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
+import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
+import LibroDiarioPage from "@/pages/Accounting/LibroDiarioPage";
+import LibroMayorPage from "@/pages/Accounting/LibroMayorPage";
+import BalanceGeneralPage from "@/pages/Accounting/BalanceGeneralPage";
+import BalanceSumasSaldosPage from "@/pages/Accounting/BalanceSumasSaldosPage";
+import BalanceResultadosPage from "@/pages/Accounting/BalanceResultadosPage";
+import PlanCuentasPage from "@/pages/Accounting/PlanCuentasPage";
+import NuevoAsientoPage from "@/pages/Accounting/NuevoAsientoPage";
 import BudgetsPage from "@/pages/Sales/Budgets/BudgetsPage";
 import { AddProducts } from "@/pages/Catalog/AddProduct";
 import { AddService } from "@/pages/Catalog/AddService";
@@ -28,7 +36,11 @@ import MovementCreate from "@/pages/Treasury/Movements/MovementCreate";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
+import RequestForQuotationList from "@/pages/Purchases/RequestForQuotation/RequestForQuotationList";
+import RequestForQuotationView from "@/pages/Purchases/RequestForQuotation/RequestForQuotationView";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
+import PurchaseOrdersForSupplierList from "@/pages/Purchases/PurchaseOrdersForSupplier/PurchaseOrdersForSupplierList";
+import PurchaseOrdersForSupplierView from "@/pages/Purchases/PurchaseOrdersForSupplier/PurchaseOrdersForSupplierView";
 import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
@@ -54,6 +66,14 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
+          { path: "/dash/contabilidad", element: <AccountingDashboardPage /> },
+          { path: "/dash/contabilidad/libro-diario", element: <LibroDiarioPage /> },
+          { path: "/dash/contabilidad/libro-mayor", element: <LibroMayorPage /> },
+          { path: "/dash/contabilidad/balance-general", element: <BalanceGeneralPage /> },
+          { path: "/dash/contabilidad/balance-sumas-saldos", element: <BalanceSumasSaldosPage /> },
+          { path: "/dash/contabilidad/balance-resultados", element: <BalanceResultadosPage /> },
+          { path: "/dash/contabilidad/plan-cuentas", element: <PlanCuentasPage /> },
+          { path: "/dash/contabilidad/nuevo-asiento", element: <NuevoAsientoPage /> },
           { path: "/configuraciones", element: <ConfigurationsPage /> },
 
           /* ===== VENTAS ===== */
@@ -81,6 +101,8 @@ export const router = createBrowserRouter([
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },
           { path: "/compras/pedidos/:id", element: <PurchaseRequestView /> },
+          { path: "/compras/solicitudes-cotizacion", element: <RequestForQuotationList /> },
+          { path: "/compras/solicitudes-cotizacion/:id", element: <RequestForQuotationView /> },
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
           { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
@@ -88,6 +110,8 @@ export const router = createBrowserRouter([
           { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
           { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
           { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
+          { path: "/compras/ordenes-por-proveedor", element: <PurchaseOrdersForSupplierList /> },
+          { path: "/compras/ordenes-por-proveedor/:id", element: <PurchaseOrdersForSupplierView /> },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },

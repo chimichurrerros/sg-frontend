@@ -21,6 +21,7 @@ import {
   ListOrdered,
   Contact,
   HandHelping,
+  FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -90,6 +91,12 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/compras/pedidos"
       },
       {
+        id: "solicitudes-cotizacion",
+        label: "Solicitudes de Cot.",
+        icon: FileText,
+        path: "/compras/solicitudes-cotizacion"
+      },
+      {
         id: "cotizaciones-proveedores",
         label: "Cotizaciones",
         icon:   TableProperties,
@@ -100,6 +107,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Órdenes de Compra",
         icon: ClipboardCheck,
         path: "/compras/ordenes-de-compra"
+      },
+      {
+        id: "ordenes-por-proveedor",
+        label: "OC por Proveedor",
+        icon: Truck,
+        path: "/compras/ordenes-por-proveedor"
       },
       {
         id: "recepcion-ordenes-compra",
@@ -173,12 +186,12 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // {
-  //   id: "contabilidad",
-  //   label: "Contabilidad",
-  //   icon: FileText,
-  //   path: "/dash/contabilidad",
-  // },
+  {
+    id: "contabilidad",
+    label: "Contabilidad",
+    icon: FileText,
+    path: "/dash/contabilidad",
+  },
   {
     id: "configuraciones",
     label: "Configuraciones",

@@ -14,6 +14,7 @@ export function DatePickerWrapper(
 ) {
     return (
         <DatePicker.Root
+            locale="es-PY"
             width={width || "100%"}
             value={value ? [parseDate(value)] : []}
             onValueChange={(e) => onChange(e.value[0]?.toString() ? [e.value[0].toString()] : [])}

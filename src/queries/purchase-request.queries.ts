@@ -48,4 +48,12 @@ export const useCreatePurchaseRequest = () => {
     });
 };
 
+export const useEligibleSuppliers = (productIds: number[], enabled: boolean) =>
+    useQuery({
+        queryKey: ["eligibleSuppliers", productIds],
+        queryFn: () => purchaseRequestApi.getEligibleSuppliers(productIds),
+        enabled: enabled && productIds.length > 0,
+        retry: RETRIES,
+    });
+
 

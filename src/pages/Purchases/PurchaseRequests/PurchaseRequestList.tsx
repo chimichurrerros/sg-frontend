@@ -54,8 +54,8 @@ const purchaseRequestLabels: label<PurchaseRequest>[] = [
     propName: "purchaseRequestState",
     isSortable: true,
     sortFunction: (a, b) => a.purchaseRequestState - b.purchaseRequestState,
-    transformFunction: (value: number) =>
-      purchaseRequestStateMap[value] || "Desconocido",
+    transformFunction: (value: number) =>{
+      return purchaseRequestStateMap[value] || "Desconocido"},
   },
   {
     labelName: "Observación",
