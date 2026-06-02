@@ -54,6 +54,33 @@ export interface PayrollProcessCalculationResponseDto {
   employees: Array<any>;
 }
 
+export interface ReceiptConceptDto {
+  conceptName: string;
+  amount: number;
+  isIpsDeductible: boolean;
+}
+
+export interface PayrollEmployeeReceiptDto {
+  companyBusinessName: string;
+  companyCuit: string;
+  companyAddress: string;
+  companyPhone: string;
+  branchName: string;
+  branchAddress: string;
+  employeeName: string;
+  employeeDocument: string;
+  employeeLegajo: string;
+  positionName: string;
+  period: string;
+  payDate: string;
+  earnings: ReceiptConceptDto[];
+  deductions: ReceiptConceptDto[];
+  totalEarnings: number;
+  totalDeductions: number;
+  totalIpsDeductible: number;
+  netSalary: number;
+}
+
 export const payrollProcessesApi = {
   getPayrollProcesses: () =>
     apiClient.get<PayrollProcessResponseDto[]>(`/api/payroll-processes`).then((response) => response.data),
@@ -77,6 +104,8 @@ export const payrollProcessesApi = {
     apiClient.post<PayrollProcessCalculationResponseDto>(`/api/payroll-processes/${id}/calculate`).then((response) => response.data),
   closeAndPayProcess: (id: number) =>
     apiClient.post<any>(`/api/payroll-processes/${id}/close-and-pay`).then((response) => response.data),
+  getEmployeeReceipt: (processId: number, employeeId: number) =>
+    apiClient.get<PayrollEmployeeReceiptDto>(`/api/payroll-processes/${processId}/receipt/${employeeId}`).then((response) => response.data),
   getPayrollUpdates: () =>
     apiClient.get(`/api/payroll-updates`).then((response) => response.data),
   createPayrollUpdate: (body: any) =>

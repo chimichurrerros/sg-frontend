@@ -144,8 +144,8 @@ export const NAV_CONFIG: NavItem[] = [
     children: [
       { id: "rrhh-novedades", label: "Novedades", icon: Megaphone, path: "/rrhh/novedades" },
       { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ListChecks, path: "/rrhh/conceptos-manuales" },
-      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
       { id: "rrhh-asistencia", label: "Asistencia", icon: UserCheck, path: "/rrhh/asistencia" },
+      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
     ],
   },
   {

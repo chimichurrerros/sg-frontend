@@ -38,6 +38,7 @@ import type { PayrollUpdateResponseDto } from "@/api/payroll-updates.api";
 import type { PayrollProcessCalculationResponseDto, PayrollManualDetailResponseDto } from "@/api/payroll-processes.api";
 import type { PayrollVariableResponseDto } from "@/api/payroll-variables.api";
 import { parseApiError } from "@/utils/api-error";
+import { translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
 
 const payrollTypeCollection = createListCollection({
   items: [
@@ -171,22 +172,12 @@ const appendVariableToFormula = (currentFormula: string, variable: string) => {
   return trimmed ? `${trimmed} ${variable}` : variable;
 };
 
-const normalizeProcessStatus = (value?: string | null) => (value ?? "").toLowerCase();
-
-const isProcessOpen = (process?: { payrollStatusName?: string | null; payrollStatusId?: number | null } | null) => {
-  if (!process) {
-    return false;
-  }
-  const text = normalizeProcessStatus(process.payrollStatusName);
-  if (!text) {
-    return true;
-  }
-  return text.includes("abierto");
+const isProcessOpen = (process?: { payrollStatusId?: number | null } | null) => {
+  return process?.payrollStatusId === PayrollStatusId.Open;
 };
 
 const statusLabelFromProcess = (process?: { payrollStatusName?: string | null } | null) => {
-  const text = process?.payrollStatusName;
-  return text && text.trim().length > 0 ? text : "Sin estado";
+  return translatePayrollStatus(process?.payrollStatusName);
 };
 
 const formatApiMessage = (error: unknown, fallback: string) => {

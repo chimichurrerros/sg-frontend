@@ -40,6 +40,8 @@ import EmployeeFamilyPage from "@/pages/RRHH/Employees/EmployeeFamilyPage";
 import NovedadesPage from "@/pages/RRHH/NovedadesPage";
 import ConceptosManualesPage from "@/pages/RRHH/ConceptosManualesPage";
 import PlanillasPage from "@/pages/RRHH/PlanillasPage";
+import PlanillaDetallePage from "@/pages/RRHH/PlanillaDetallePage";
+import CrearPlanillaPage from "@/pages/RRHH/CrearPlanillaPage";
 import AttendancePage from "@/pages/RRHH/AttendancePage";
 import OrganizationPage from "@/pages/Organization/OrganizationPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
@@ -118,6 +120,8 @@ export const router = createBrowserRouter([
           { path: "/rrhh/novedades", element: <NovedadesPage /> },
           { path: "/rrhh/conceptos-manuales", element: <ConceptosManualesPage /> },
           { path: "/rrhh/planillas", element: <PlanillasPage /> },
+          { path: "/rrhh/planillas/nuevo", element: <CrearPlanillaPage /> },
+          { path: "/rrhh/planillas/:id", element: <PlanillaDetallePage /> },
           { path: "/rrhh/asistencia", element: <AttendancePage /> },
           { path: "/gestiones/organizacion", element: <OrganizationPage /> },
           {

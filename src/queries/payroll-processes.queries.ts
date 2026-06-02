@@ -3,6 +3,7 @@ import { RETRIES } from "@/constants/queryConstants";
 import { toaster } from "@/components/ui/toaster";
 import {
   payrollProcessesApi,
+  type PayrollEmployeeReceiptDto,
   type PayrollProcessCalculationResponseDto,
   type PayrollManualDetailResponseDto,
   type PayrollProcessResponseDto,
@@ -148,6 +149,19 @@ export const useCalculatePayrollProcess = (processId?: number) => {
         queryClient.invalidateQueries({ queryKey: payrollProcessKeys.manualDetails(processId) });
       }
     },
+  });
+};
+
+export const payrollProcessReceiptKeys = {
+  receipt: (processId: number, employeeId: number) => ["payroll-processes", processId, "receipt", employeeId] as const,
+};
+
+export const useGetEmployeeReceipt = (processId?: number, employeeId?: number) => {
+  return useQuery<PayrollEmployeeReceiptDto>({
+    queryKey: processId && employeeId ? payrollProcessReceiptKeys.receipt(processId, employeeId) : ["payroll-processes", "receipt", "none"] as const,
+    queryFn: () => payrollProcessesApi.getEmployeeReceipt(processId ?? 0, employeeId ?? 0),
+    enabled: Boolean(processId) && Boolean(employeeId),
+    retry: RETRIES,
   });
 };
 

@@ -7,25 +7,20 @@ import {
   type AttendanceResponseDto,
 } from "@/api/attendance.api";
 
-export const attendanceKeys = {
-  list: (employeeId?: number, year?: number, month?: number) =>
-    ["attendance", "list", employeeId, year, month] as const,
-};
-
 export const useGetAttendanceList = (
   employeeId?: number,
-  year?: number,
-  month?: number,
+  fromDate?: string,
+  toDate?: string,
 ) => {
   return useQuery<AttendanceResponseDto[]>({
-    queryKey: attendanceKeys.list(employeeId, year, month),
+    queryKey: ["attendance", "list", employeeId, fromDate, toDate],
     queryFn: () =>
       attendanceApi.getList({
+        fromDate,
+        toDate,
         employeeId,
-        year: year ?? new Date().getFullYear(),
-        month: month ?? new Date().getMonth() + 1,
       }),
-    enabled: Boolean(year && month),
+    enabled: Boolean(fromDate && toDate),
     retry: RETRIES,
   });
 };
@@ -37,11 +32,7 @@ export const useCreateAttendance = () => {
     mutationFn: (body: CreateAttendanceRequestDto) => attendanceApi.create(body),
     retry: RETRIES,
     onSuccess: () => {
-      toaster.create({ title: "Asistencia registrada con éxito", type: "success" });
       queryClient.invalidateQueries({ queryKey: ["attendance"] });
-    },
-    onError: () => {
-      toaster.create({ title: "No se pudo registrar la asistencia", type: "error" });
     },
   });
 };

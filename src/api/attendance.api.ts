@@ -18,7 +18,7 @@ export interface AttendanceResponseDto {
 export const attendanceApi = {
   create: (body: CreateAttendanceRequestDto) =>
     apiClient.post<AttendanceResponseDto>("/api/attendance", body).then((res) => res.data),
-  getList: (params: { employeeId?: number; year: number; month: number }) =>
+  getList: (params: { fromDate?: string; toDate?: string; employeeId?: number; year?: number; month?: number }) =>
     apiClient
       .get<AttendanceResponseDto[]>("/api/attendance", { params })
       .then((res) => res.data),
