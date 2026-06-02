@@ -91,6 +91,12 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/compras/pedidos"
       },
       {
+        id: "solicitudes-cotizacion",
+        label: "Solicitudes de Cot.",
+        icon: FileText,
+        path: "/compras/solicitudes-cotizacion"
+      },
+      {
         id: "cotizaciones-proveedores",
         label: "Cotizaciones",
         icon:   TableProperties,

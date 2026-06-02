@@ -36,6 +36,8 @@ import MovementCreate from "@/pages/Treasury/Movements/MovementCreate";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
+import RequestForQuotationList from "@/pages/Purchases/RequestForQuotation/RequestForQuotationList";
+import RequestForQuotationView from "@/pages/Purchases/RequestForQuotation/RequestForQuotationView";
 import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSheet";
 import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
@@ -95,6 +97,8 @@ export const router = createBrowserRouter([
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },
           { path: "/compras/pedidos/:id", element: <PurchaseRequestView /> },
+          { path: "/compras/solicitudes-cotizacion", element: <RequestForQuotationList /> },
+          { path: "/compras/solicitudes-cotizacion/:id", element: <RequestForQuotationView /> },
           { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
           { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
           { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
