@@ -1,7 +1,7 @@
-import { Box, Collapsible, Spinner, Pagination, ButtonGroup, IconButton } from "@chakra-ui/react";
-import { Input, InputGroup, Text, Button, VStack, HStack, NativeSelect, Field } from "@chakra-ui/react";
+import { Box, Collapsible, Spinner, Button, VStack, HStack, NativeSelect, Field } from "@chakra-ui/react";
+import { Input, InputGroup, Text } from "@chakra-ui/react";
 import { Pencil, Trash2Icon, Plus, Save } from "lucide-react";
-import { LuChevronLeft, LuChevronRight, LuSearch } from "react-icons/lu";
+import { LuSearch } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import type { StockItem } from "@/types/inventory";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -11,18 +11,20 @@ import { toaster } from "@/components/ui/toaster";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { useAllBranches } from "@/queries/branches.queries";
 import { useAllProducts } from "@/queries/catalog.queries";
+import PaginationControl from "@/components/ui/pagination-control";
+import PageSizeControl from "@/components/ui/page-size-control";
+import type { PaginationParams } from "@/types/types";
+import { IconButton } from "@chakra-ui/react";
 
 export default function StockListPage() {
+    const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
     const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
     const [formProductId, setFormProductId] = useState<number>(0);
     const [formBranchId, setFormBranchId] = useState<number>(0);
     const [formQuantity, setFormQuantity] = useState("");
-    const [page, setPage] = useState(1);
-    const pageSize = 10;
 
     const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useAllStock();
     const { data: branchesData } = useAllBranches();
@@ -169,51 +171,49 @@ export default function StockListPage() {
     const isPending = createItem.isPending || editItem.isPending || deleteItem.isPending;
 
     const stocks = allStock?.stocks ?? [];
-    const filteredStocks = stocks.filter((item) =>
-        item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.branchName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const paginatedStocks = stocks.slice((params.page - 1) * params.pageSize, params.page * params.pageSize);
 
-    const paginatedStocks = filteredStocks.slice((page - 1) * pageSize, page * pageSize);
+    const pagination = {
+        currentPage: params.page,
+        pageSize: params.pageSize,
+        totalElements: stocks.length,
+    };
 
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
             <Text fontWeight="bold" fontSize="3xl">Listado de Productos en Inventario</Text>
 
-            <Box display="flex" flexDirection="row" gap={3} alignItems="center" justifyContent="space-between">
-                <InputGroup flex="1" maxW="400px" startElement={<LuSearch />}>
-                    <Input
-                        placeholder="Buscar por nombre del producto o sucursal"
-                        value={searchTerm}
-                        variant="subtle"
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setPage(1);
-                        }}
-                    />
+            <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
+                <InputGroup flex="1" startElement={<LuSearch />}>
+                    <Input placeholder="Buscar en inventario..." />
                 </InputGroup>
-
-                <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-                    <DestructiveActionDialog
-                        title="Eliminar Producto"
-                        description="Una vez eliminado el producto, la acción es irreversible"
-                        onAccept={handleDeleteItem}
-                        trigger={
-                            <Button variant="outline" disabled={!selectedItem || isPending}>
-                                {deleteItem.isPending ? <Spinner /> : <Trash2Icon size={16} />}
-                                Eliminar
-                            </Button>
-                        }
-                    />
-                    <Button variant="outline" disabled={!selectedItem} onClick={handleEditItem}>
-                        <Pencil size={16} />
-                        Editar
-                    </Button>
-                    <Button bgColor="brand.primary" onClick={handleNewItem}>
-                        <Plus size={16} />
-                        Nuevo
-                    </Button>
+                <Box display="flex" flexDirection="row" gap={2}>
+                    <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
                 </Box>
+                <DestructiveActionDialog
+                    title="Eliminar Producto"
+                    description="Una vez eliminado el producto, la acción es irreversible"
+                    onAccept={handleDeleteItem}
+                    trigger={
+                        <IconButton padding={2} variant="outline" colorPalette="brand" disabled={!selectedItem || isPending}>
+                            {deleteItem.isPending ? <Spinner /> : <Trash2Icon size={16} />}
+                            Eliminar
+                        </IconButton>
+                    }
+                />
+                <IconButton padding={2} variant="outline" colorPalette="brand" disabled={!selectedItem} onClick={handleEditItem}>
+                    <Pencil size={16} />
+                    Editar
+                </IconButton>
+                <IconButton
+                    padding={2}
+                    colorPalette="brand"
+                    onClick={handleNewItem}
+                >
+                    <Plus size={16} />
+                    Nuevo
+                </IconButton>
             </Box>
 
             <Collapsible.Root open={showForm} onOpenChange={(e) => setShowForm(e.open)}>
@@ -285,9 +285,8 @@ export default function StockListPage() {
             </Collapsible.Root>
 
             <TableSelect
-                key={String(searchTerm + page)} 
+                key={String(params.page)} 
                 data={paginatedStocks}
-                height="400px"
                 loading={loadingAllStock}
                 labels={labels}
                 loadingMessage="Cargando inventario..."
@@ -301,40 +300,10 @@ export default function StockListPage() {
                 onDoubleClick={(item: StockItem) => console.log("doble clic en", item)}
             />
 
-            <Pagination.Root
-                count={filteredStocks.length ?? 0}
-                pageSize={pageSize}
-                page={page}
-                onPageChange={(e) => setPage(e.page)}
-                display="flex"
-                justifyContent="center"
-            >
-                <ButtonGroup attached variant="outline" size="sm">
-                    <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                            <LuChevronLeft />
-                        </IconButton>
-                    </Pagination.PrevTrigger>
-
-                    <Pagination.Items
-                        render={(page) => (
-                            <IconButton
-                                variant={{ base: "outline", _selected: "solid" }}
-                                zIndex={{ _selected: "1" }}
-                                _selected={{ bg: "brand.primary", color: "white" }}
-                            >
-                                {page.value}
-                            </IconButton>
-                        )}
-                    />
-
-                    <Pagination.NextTrigger asChild>
-                        <IconButton>
-                            <LuChevronRight />
-                        </IconButton>
-                    </Pagination.NextTrigger>
-                </ButtonGroup>
-            </Pagination.Root>
+            <PaginationControl
+                pagination={pagination}
+                onPageChange={(page: number) => { setParams({ ...params, page }) }}
+            />
         </Box>
     );
 }

@@ -20,6 +20,8 @@ import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder }
 import { useMe } from "@/queries/auth.queries";
 import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
+import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
 
 export default function PurchaseOrderFormPage() {
     const navigate = useNavigate();
@@ -38,6 +40,22 @@ export default function PurchaseOrderFormPage() {
 
     const draft = draftData?.purchaseOrder;
     const today = parseDate(new Date());
+    const details = isViewMode ? orderData?.purchaseOrder.details : draft?.details;
+    const detailLabels: EditableLabel<any>[] = [
+    { labelName: "Producto", propName: "productName" },
+    { labelName: "Proveedor", propName: "supplierName" },
+    { labelName: "Cantidad", propName: "quantityOrdered" },
+    {
+        labelName: "Precio Unitario",
+        isComponent: true,
+        render: (item) => parsePrice(item.price),
+    },
+    {
+        labelName: "Precio Subtotal",
+        isComponent: true,
+        render: (item) => parsePrice(item.price * item.quantityOrdered),
+    },
+];
 
     const requestCollection = createListCollection({
         items: (requestsData?.purchaseRequests ?? []).map((r) => ({
@@ -71,7 +89,7 @@ export default function PurchaseOrderFormPage() {
         <Button
             variant="ghost"
             size="sm"
-            alignSelf="start"
+            alignSelf="end"
             onClick={() => navigate("/compras/ordenes-de-compra")}
         >
             <LuArrowLeft /> Volver a órdenes de compra
@@ -141,10 +159,11 @@ export default function PurchaseOrderFormPage() {
                 <Input
                     value={(() => {
                         const purchaseOrderStates: Record<number, string> = {
-                            0: "Pendiente",
-                            1: "Aprobado",
-                            2: "Rechazado",
-                            3: "Completado",
+                             1: "Pendiente",
+                             2: "Confirmado",
+                             3: "Parcialmente Recibido",
+                             4: "Recibido",
+                             5: "Cancelado",
                         };
                         const state = isViewMode
                             ? orderData?.purchaseOrder.state
@@ -156,33 +175,14 @@ export default function PurchaseOrderFormPage() {
             </Field.Root>
         </Grid>
 
-        {(isViewMode ? orderData?.purchaseOrder : draft) && (
-            <Table.Root borderWidth="1px" borderRadius="md" overflow="hidden">
-                <Table.Header>
-                    <Table.Row>
-                        <Table.ColumnHeader>Secuencia</Table.ColumnHeader>
-                        <Table.ColumnHeader>Producto</Table.ColumnHeader>
-                        <Table.ColumnHeader>Proveedor</Table.ColumnHeader>
-                        <Table.ColumnHeader>Cantidad</Table.ColumnHeader>
-                        <Table.ColumnHeader>Precio Unitario</Table.ColumnHeader>
-                        <Table.ColumnHeader textAlign="end">Precio Subtotal</Table.ColumnHeader>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {(isViewMode ? orderData?.purchaseOrder.details : draft?.details)?.map((detail, index) => (
-                        <Table.Row key={detail.id}>
-                            <Table.Cell>{index + 1}</Table.Cell>
-                            <Table.Cell>{detail.productName}</Table.Cell>
-                            <Table.Cell>{detail.supplierName}</Table.Cell>
-                            <Table.Cell>{detail.quantityOrdered}</Table.Cell>
-                            <Table.Cell>{detail.price}</Table.Cell>
-                            <Table.Cell textAlign="end">
-                                {(detail.price * detail.quantityOrdered).toFixed(2)}
-                            </Table.Cell>
-                        </Table.Row>
-                    ))}
-                </Table.Body>
-            </Table.Root>
+        {details && (
+             <TableEditable
+                data={details}
+                labels={detailLabels}
+                onDataChange={() => {}}
+                readOnly={true}
+                height="auto"
+             />
         )}
 
         {!draft && selectedRequestId > 0 && !loadingDraft && !isViewMode && (

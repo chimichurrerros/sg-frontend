@@ -1,41 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import TableSelect, { type label } from "@/components/ui/table-select";
-import { ButtonGroup, IconButton, Pagination, Stack, Text, Flex, InputGroup, Input, Spacer, Button } from "@chakra-ui/react";
+import { Box, IconButton, Stack, Text, InputGroup, Input } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuChevronLeft, LuChevronRight, LuPlus, LuSearch } from "react-icons/lu";
+import { LuPlus, LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries.ts";
 import { parseDate } from "@/constants/date";
+import { parsePrice } from "@/constants/price";
 import type { PurchaseOrderDTO } from "@/api/purchase-orders.ts";
+import PaginationControl from "@/components/ui/pagination-control";
+import PageSizeControl from "@/components/ui/page-size-control";
+import type { PaginationParams } from "@/types/types";
 
 export default function PurchaseOrderListPage() {
     const navigate = useNavigate();
+    const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
     const { data, isLoading } = useAllPurchaseOrders();
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
 
     const orders = data?.purchaseOrders ?? [];
-    const stateLabels: Record<number, string> = {
-        0: "Pendiente",
-        1: "Aprobado",
-        2: "Rechazado",
-        3: "Completado",
+
+    const pagination = {
+        currentPage: params.page,
+        pageSize: params.pageSize,
+        totalElements: orders.length,
     };
-    const filteredOrders = orders.filter((order) => {
-        if (!search.trim()) return true;
-        const term = search.toLowerCase();
-        const date = parseDate(order.date);
-        const values = [
-            order.number,
-            order.supplierName,
-            String(order.total),
-            date,
-            stateLabels[order.state] ?? String(order.state),
-        ];
-        return values.some((value) => value.toLowerCase().includes(term));
-    });
-    const pageSize = 10;
-    const currentOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
 
     const labels: label<PurchaseOrderDTO>[] = [
         {
@@ -47,6 +35,8 @@ export default function PurchaseOrderListPage() {
         {
             labelName: "Total",
             propName: "total",
+            isComponent: true,
+            render: (item) => parsePrice(item.total),
             isSortable: true,
             sortFunction: (a, b) => a.total - b.total,
         },
@@ -64,10 +54,11 @@ export default function PurchaseOrderListPage() {
             isComponent: true,
             render: (item) => {
                 const states: Record<number, string> = {
-                    0: "Pendiente",
-                    1: "Aprobado",
-                    2: "Rechazado",
-                    3: "Completado",
+                    1: "Pendiente",
+                    2: "Confirmado",
+                    3: "Parcialmente Recibido",
+                    4: "Recibido",
+                    5: "Cancelado",
                 };
                 return states[item.state] ?? item.state;
             },
@@ -87,27 +78,26 @@ export default function PurchaseOrderListPage() {
                 Lista de Órdenes de Compra
             </Text>
 
-            <Flex gap="0.8rem">
-                <InputGroup startElement={<LuSearch />} maxW="32rem">
-                    <Input
-                        placeholder="Buscar"
-                        variant="subtle"
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                    />
+            <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
+                <InputGroup flex="1" startElement={<LuSearch />}>
+                    <Input placeholder="Buscar Órdenes..." />
                 </InputGroup>
-                <Spacer />
-                <Button size="sm" colorPalette="brand" onClick={handleCreate}>
-                    <LuPlus /> Nuevo
-                </Button>
-            </Flex>
-                
+                <Box display="flex" flexDirection="row" gap={2}>
+                    <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
+                </Box>
+                <IconButton
+                    padding={2}
+                    colorPalette="brand"
+                    onClick={handleCreate}
+                >
+                    <LuPlus />
+                    Nuevo
+                </IconButton>
+            </Box>
 
             <TableSelect
-                data={currentOrders}
+                data={orders.slice((params.page - 1) * params.pageSize, params.page * params.pageSize)}
                 labels={labels}
                 loading={isLoading}
                 noItemsComponent={
@@ -120,38 +110,10 @@ export default function PurchaseOrderListPage() {
                 onDoubleClick={(item) => navigate(`/compras/ordenes-de-compra/${item.id}`)}
             />
 
-            <Pagination.Root
-                count={filteredOrders.length}
-                pageSize={pageSize}
-                page={page}
-                onPageChange={(e) => setPage(e.page)}
-                display="flex"
-                justifyContent="center"
-            >
-                <ButtonGroup attached variant="outline" size="sm">
-                    <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                            <LuChevronLeft />
-                        </IconButton>
-                    </Pagination.PrevTrigger>
-                    <Pagination.Items
-                        render={(pageItem) => (
-                            <IconButton
-                                variant={{ base: "outline", _selected: "solid" }}
-                                zIndex={{ _selected: "1" }}
-                                _selected={{ bg: "brand.primary", color: "white" }}
-                            >
-                                {pageItem.value}
-                            </IconButton>
-                        )}
-                    />
-                    <Pagination.NextTrigger asChild>
-                        <IconButton>
-                            <LuChevronRight />
-                        </IconButton>
-                    </Pagination.NextTrigger>
-                </ButtonGroup>
-            </Pagination.Root>
+            <PaginationControl
+                pagination={pagination}
+                onPageChange={(page: number) => { setParams({ ...params, page }) }}
+            />
         </Stack>
     );
 }
