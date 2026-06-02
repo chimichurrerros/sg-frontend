@@ -30,6 +30,7 @@ export default function SupplierListPage() {
         currentPage: params.page,
         pageSize: params.pageSize,
         totalElements: suppliers.length,
+        totalPages: Math.ceil(suppliers.length / params.pageSize),
     };
 
     const labels: label<Supplier>[] = [

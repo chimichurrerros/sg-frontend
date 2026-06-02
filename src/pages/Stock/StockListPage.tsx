@@ -177,6 +177,7 @@ export default function StockListPage() {
         currentPage: params.page,
         pageSize: params.pageSize,
         totalElements: stocks.length,
+        totalPages: Math.ceil(stocks.length / params.pageSize),
     };
 
     return (
