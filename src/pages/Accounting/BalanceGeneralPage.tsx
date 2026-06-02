@@ -85,6 +85,7 @@ export default function BalanceGeneralPage() {
   const STANDARD_NAMES: Record<string, string> = {
     "1": "ACTIVO",
     "2": "PASIVO",
+    "5": "PATRIMONIO NETO",
   };
 
   // Build tree data structures from backend arrays
@@ -190,17 +191,23 @@ export default function BalanceGeneralPage() {
 
     const activoRows = buildTreeRows(reportData?.assets, "1");
     const pasivoRows = buildTreeRows(reportData?.liabilities, "2");
+    const patrimonioRows = buildTreeRows(reportData?.equity, "5");
 
     // Read totals directly calculated by the backend
     const totalAssets = reportData?.totalAssets || 0;
     const totalLiabilities = reportData?.totalLiabilities || 0;
+    const totalEquity = reportData?.totalEquity || 0;
+    const totalLiabilitiesAndEquity = reportData?.totalLiabilitiesAndEquity || 0;
 
     return {
       activoRows,
       pasivoRows,
+      patrimonioRows,
       totals: {
         totalAssets,
         totalLiabilities,
+        totalEquity,
+        totalLiabilitiesAndEquity,
       },
     };
   }, [reportData]);
@@ -398,7 +405,7 @@ export default function BalanceGeneralPage() {
             </Flex> */}
 
             {/* Quick Metrics Cards */}
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} className="no-print">
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} className="no-print">
               <Box bg="white" p={5} borderRadius="xl" borderWidth="1px" borderColor="gray.200" shadow="xs">
                 <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase">
                   Total Activos
@@ -422,7 +429,63 @@ export default function BalanceGeneralPage() {
                   Obligaciones y deudas vigentes
                 </Text>
               </Box>
+
+              <Box bg="white" p={5} borderRadius="xl" borderWidth="1px" borderColor="gray.200" shadow="xs">
+                <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase">
+                  Total Patrimonio Neto
+                </Text>
+                <Text fontSize="2xl" fontWeight="extrabold" color="orange.600" mt={2}>
+                  {parsePrice(trees.totals.totalEquity)}
+                </Text>
+                <Text fontSize="xs" color="gray.400" mt={1}>
+                  Capital social, reservas y resultados
+                </Text>
+              </Box>
             </SimpleGrid>
+
+            {/* Balance Status Banner */}
+            {(() => {
+              const diff = Math.abs(trees.totals.totalAssets - trees.totals.totalLiabilitiesAndEquity);
+              const isBalanced = diff < 0.01;
+              return (
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  p={4}
+                  bg={isBalanced ? "green.50" : "red.50"}
+                  borderWidth="1px"
+                  borderColor={isBalanced ? "green.200" : "red.200"}
+                  borderRadius="xl"
+                  color={isBalanced ? "green.800" : "red.800"}
+                  shadow="xs"
+                  wrap="wrap"
+                  gap={3}
+                >
+                  <HStack gap={2}>
+                    <Text fontSize="md" fontWeight="bold">
+                      {isBalanced 
+                        ? "✓ Balance Cuadrado" 
+                        : "⚠ Balance Descuadrado"}
+                    </Text>
+                    <Text fontSize="xs">
+                      {isBalanced 
+                        ? "(Activo = Pasivo + Patrimonio Neto)" 
+                        : `(Descalce de ${parsePrice(diff)})`}
+                    </Text>
+                  </HStack>
+                  <HStack gap={6}>
+                    <Box textAlign="right">
+                      <Text fontSize="xs" opacity={0.8} fontWeight="semibold">TOTAL ACTIVO</Text>
+                      <Text fontSize="md" fontWeight="extrabold">{parsePrice(trees.totals.totalAssets)}</Text>
+                    </Box>
+                    <Box textAlign="right">
+                      <Text fontSize="xs" opacity={0.8} fontWeight="semibold">TOTAL PASIVO + PATRIMONIO</Text>
+                      <Text fontSize="md" fontWeight="extrabold">{parsePrice(trees.totals.totalLiabilitiesAndEquity)}</Text>
+                    </Box>
+                  </HStack>
+                </Flex>
+              );
+            })()}
 
             {/* Tree Tables Section */}
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6} className="print-grid">
@@ -447,25 +510,66 @@ export default function BalanceGeneralPage() {
                 />
               </Stack>
 
-              {/* Right Column: Liabilities */}
-              <Stack gap={3} className="print-col">
-                <Heading size="md" color="gray.700" pl={1} borderLeft="4px solid" borderColor="red.500" py={1} display="flex">
-                  <Text>2. Pasivos</Text>
-                  <Badge variant="subtle" colorPalette="red" size="md">
-                    Total: {parsePrice(trees.totals.totalLiabilities)}
-                  </Badge>
-                </Heading>
-                <TableTree
-                  codeHeader="Código"
-                  conceptHeader="Cuenta de Pasivos"
-                  notesHeader="Tipo"
-                  valueHeaders={["Saldo Final"]}
-                  data={trees.pasivoRows}
-                  valueRenderers={valueRenderers}
-                  showToggleButtons={false}
-                  showDecimals={false}
-                  minheight="350px"
-                />
+              {/* Right Column: Liabilities & Equity */}
+              <Stack gap={6} className="print-col">
+                {/* 2. Liabilities */}
+                <Stack gap={3}>
+                  <Heading size="md" color="gray.700" pl={1} borderLeft="4px solid" borderColor="red.500" py={1} display="flex">
+                    <Text>2. Pasivos</Text>
+                    <Badge variant="subtle" colorPalette="red" size="md">
+                      Total: {parsePrice(trees.totals.totalLiabilities)}
+                    </Badge>
+                  </Heading>
+                  <TableTree
+                    codeHeader="Código"
+                    conceptHeader="Cuenta de Pasivos"
+                    notesHeader="Tipo"
+                    valueHeaders={["Saldo Final"]}
+                    data={trees.pasivoRows}
+                    valueRenderers={valueRenderers}
+                    showToggleButtons={false}
+                    showDecimals={false}
+                    minheight="200px"
+                  />
+                </Stack>
+
+                {/* 3. Equity */}
+                <Stack gap={3}>
+                  <Heading size="md" color="gray.700" pl={1} borderLeft="4px solid" borderColor="orange.500" py={1} display="flex">
+                    <Text>3. Patrimonio Neto</Text>
+                    <Badge variant="subtle" colorPalette="orange" size="md">
+                      Total: {parsePrice(trees.totals.totalEquity)}
+                    </Badge>
+                  </Heading>
+                  <TableTree
+                    codeHeader="Código"
+                    conceptHeader="Cuenta de Patrimonio"
+                    notesHeader="Tipo"
+                    valueHeaders={["Saldo Final"]}
+                    data={trees.patrimonioRows}
+                    valueRenderers={valueRenderers}
+                    showToggleButtons={false}
+                    showDecimals={false}
+                    minheight="200px"
+                  />
+                </Stack>
+
+                {/* Total Liabilities + Equity Summary */}
+                <Box 
+                  p={4} 
+                  bg="gray.50" 
+                  borderWidth="1px" 
+                  borderColor="gray.200" 
+                  borderRadius="xl"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Text fontWeight="bold" color="gray.700">Total Pasivo + Patrimonio Neto</Text>
+                  <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
+                    {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
+                  </Text>
+                </Box>
               </Stack>
             </Grid>
           </Stack>
