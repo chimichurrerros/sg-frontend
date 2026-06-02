@@ -2,17 +2,13 @@ import type { ServiceResponseDto } from "@/api/service.api";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
 import {
   catalogKeys,
   useAllServices,
   useDeleteService,
 } from "@/queries/catalog.queries";
-import {
-  ButtonGroup,
-  IconButton,
-  Pagination,
-  Stack,
-} from "@chakra-ui/react";
+import { ButtonGroup, IconButton, Pagination, Stack } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
@@ -21,15 +17,20 @@ import { useNavigate } from "react-router-dom";
 export const Services = () => {
   const navigate = useNavigate();
 
-  const { data, isLoading, error, isError } = useAllServices();
+  const { data, isLoading, error } = useAllServices();
   const { mutate: deleteService } = useDeleteService();
   const queryClient = useQueryClient();
 
   const servicesLabels: label<ServiceResponseDto>[] = [
     { labelName: "ID", propName: "id" },
+    { labelName: "Cód.", propName: "barcode" },
     { labelName: "Nombre", propName: "name" },
     { labelName: "Descripción", propName: "description" },
-    { labelName: "Precio", propName: "price" },
+    {
+      labelName: "Precio",
+      propName: "price",
+      transformFunction: (value) => parsePrice(value),
+    },
     { labelName: "Costo", propName: "cost" },
   ];
   const [page, setPage] = useState(1);
@@ -76,7 +77,9 @@ export const Services = () => {
         data={services}
         labels={servicesLabels}
         onSelect={(item) => setSelected(item)}
-        onDoubleClick={(item) => navigate(`/dash/catalogo/servicios/${item.id}`)}
+        onDoubleClick={(item) =>
+          navigate(`/dash/catalogo/servicios/${item.id}`)
+        }
         loading={isLoading}
       />
 
