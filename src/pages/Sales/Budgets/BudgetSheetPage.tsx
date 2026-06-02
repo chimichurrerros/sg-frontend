@@ -273,18 +273,28 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                     <Text fontSize="2xl" fontWeight="bold">
                         {mode === "create" && "Nuevo"} Presupuesto {budget?.number ? budget.number : ""}
                     </Text>
-                    {mode === "edit" && budget?.date && (
-                        <><Text fontSize="2xl" fontWeight="bold" color="gray.500">
-                            | Creado el:  {parseDate(new Date(budget.date))}
-                        </Text>
-                            {budget.status !== 2 ? <Text fontSize="2xl" fontWeight="bold" color="red.400">
-                                | {budget.status === 1 ? "Expiró" : "Expira"} el:  {parseDate(new Date(budget.expirationDate))} {budget.status === 0 && ` (${Math.ceil((new Date(budget.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días)`}
-                            </Text> : <Text fontSize="2xl" fontWeight="bold" color="green.500">
-                                | Presupuesto Aprobado, ver Venta N° {budget.associatedSalesOrderId}
-                            </Text>}
-                        </>
-
-                    )}
+                   {mode === "edit" && budget?.date && (
+    <>
+        <Text fontSize="2xl" fontWeight="bold" color="gray.500">
+            | Creado el: {parseDate(new Date(budget.date))}
+        </Text>
+        
+        {budget.status === 3 ? (
+            <Text fontSize="2xl" fontWeight="bold" color="red.500">
+                | Rechazado
+            </Text>
+        ) : budget.status !== 2 ? (
+            <Text fontSize="2xl" fontWeight="bold" color="red.400">
+                | {budget.status === 1 ? "Expiró" : "Expira"} el: {parseDate(new Date(budget.expirationDate))} 
+                {budget.status === 0 && ` (${Math.ceil((new Date(budget.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días)`}
+            </Text>
+        ) : (
+            <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                | Presupuesto Aprobado, ver Venta N° {budget.associatedSalesOrderId}
+            </Text>
+        )}
+    </>
+)}
                     {mode === "create" && <Text fontSize="2xl" fontWeight="bold" color="gray.400"> Los presupuestos tienen una vigencia de 10 dias hábiles antes de expirarse.</Text>}
                 </Box>
 
@@ -436,7 +446,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                 <Box gap={2} display="flex" alignItems="center">
                     {editable && mode === "edit" && <>
                         <DestructiveActionDialog
-                            trigger={<IconButton size="md" padding={4} variant="outline" color="brand.secondary" disabled = {sell.isPending || reject.isPending}>
+                            trigger={<IconButton size="lg" padding={4} variant="outline" color="brand.secondary" disabled = {sell.isPending || reject.isPending}>
                                 {reject.isPending ? <Spinner /> : <X />} Rechazar Presupuesto
                             </IconButton>}
                             title="Rechazar Presupuesto"

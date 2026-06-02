@@ -25,7 +25,6 @@ export default function ReturnsPage() {
 
     const labels: label<SaleReturn>[] = [
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
-        { labelName: "Nº Nota Crédito", propName: "creditNoteId", isSortable: true, sortFunction: (a, b) => a.creditNoteId - b.creditNoteId },
         { labelName: "Nº Pedido", propName: "salesOrderNumber", isSortable: true, sortFunction: (a, b) => a.salesOrderNumber.localeCompare(b.salesOrderNumber) },
         { labelName: "Cliente", propName: "customerName", isSortable: true, sortFunction: (a, b) => a.customerName.localeCompare(b.customerName) },
         { labelName: "RUC", propName: "customerRuc", isSortable: true, sortFunction: (a, b) => a.customerRuc.localeCompare(b.customerRuc) },
@@ -47,7 +46,6 @@ export default function ReturnsPage() {
         max: params.maxDate || ""
     });
 
-    // Convertir params iniciales a DateValue[]
     const getInitialDateRange = (): DateValue[] => {
         const dates: DateValue[] = [];
         if (params.minDate) dates.push(parseDateChakra(params.minDate));

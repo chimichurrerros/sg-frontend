@@ -270,7 +270,7 @@ export default function TableSelect<T extends { id: number }>(
                                                     if (!label.propName) return label.textIfNull || "-";
                                                     const value = item[label.propName];
                                                     if (value === undefined || value === null) return label.textIfNull || "-";
-                                                    if (label.transformFunction) return label.transformFunction(value || "-");
+                                                    if (label.transformFunction) return label.transformFunction(value);
                                                     return String(value ? value : "-");
                                                 })()
                                             )}

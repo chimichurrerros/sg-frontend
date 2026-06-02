@@ -10,7 +10,7 @@ import {
   Spinner,
   InputGroup
 } from "@chakra-ui/react";
-import { ArrowLeft, CircleDollarSign, ExternalLink, Printer, X } from "lucide-react";
+import { ArrowLeft, CircleDollarSign, ExternalLink, HandHelpingIcon, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
@@ -293,11 +293,14 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         <Flex align="center" gap={3}>
           <Flex align="flex-end" gap={3}>
-           
+
+              
               <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
-            
+            {mode === "view" && <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} onClick={() => navigate("/ventas/devoluciones/desde/"+sale.id)}>
+                <HandHelpingIcon /> Registrar Devolución
+              </IconButton>}
 
             {mode === "view" && (
               <Box display="flex" flexDirection="column" alignItems="flex-start">
