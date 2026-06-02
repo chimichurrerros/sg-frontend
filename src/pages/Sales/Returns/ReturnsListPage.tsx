@@ -30,7 +30,9 @@ export default function ReturnsPage() {
         { labelName: "RUC", propName: "customerRuc", isSortable: true, sortFunction: (a, b) => a.customerRuc.localeCompare(b.customerRuc) },
         { labelName: "Sucursal", propName: "branchName", isSortable: true, sortFunction: (a, b) => a.branchName.localeCompare(b.branchName) },
         { labelName: "Fecha", propName: "date", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime() },
-        { labelName: "Motivo", propName: "reason", isSortable: true, transformFunction: (value: string) => value.length > 50 ? `${value.substring(0, 50)}...` : value, sortFunction: (a, b) => a.reason.localeCompare(b.reason) },
+        { labelName: "Motivo", propName: "reason", isSortable: true, transformFunction: (value: string) => {
+            return value ? value.length > 50 ? `${value.substring(0, 50)}...`:value: "-"
+        } , sortFunction: (a, b) => a.reason.localeCompare(b.reason) },
         { labelName: "Total", propName: "total", transformFunction: (value) => parsePrice(value), isSortable: true, sortFunction: (a, b) => a.total - b.total },
     ];
 
