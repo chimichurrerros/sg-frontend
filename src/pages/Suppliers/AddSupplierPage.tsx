@@ -1,8 +1,8 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import {
     Button,
     Field,
+    Flex,
     Grid,
     Heading,
     Input,
@@ -83,9 +83,10 @@ export const AddSupplierPage = () => {
     useEffect(() => {
         if (supplierData?.supplier) {
             const supplier = supplierData.supplier;
+            console.log("categorias del supplier:", supplier.productCategoryIds);
 
             reset({
-                ruc: supplier.documentNumber,
+                ruc: supplier.ruc,
                 businessName: supplier.businessName,
                 fantasyName: supplier.fantasyName ?? "",
                 email: supplier.email ?? "",
@@ -147,8 +148,11 @@ export const AddSupplierPage = () => {
     };
 
     return (
-        <Stack gap={4} maxW="700px" p={4}>
-            <Stack gap={1}>
+        <Stack gap={4} paddingInline="15%">
+            <Flex alignItems="center" justifyContent="space-between">
+                <Heading size="xl">
+                    {isEditMode ? "Editar proveedor" : "Nuevo proveedor"}
+                </Heading>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -157,11 +161,7 @@ export const AddSupplierPage = () => {
                 >
                     <LuArrowLeft /> Volver a proveedores
                 </Button>
-
-                <Heading size="md">
-                    {isEditMode ? "Editar proveedor" : "Nuevo proveedor"}
-                </Heading>
-            </Stack>
+            </Flex>
 
             <Stack as="form" onSubmit={handleSubmit(handleSaveSupplier)} gap={4}>
                 <Grid templateColumns="1fr 1fr" gap={4}>
@@ -173,6 +173,10 @@ export const AddSupplierPage = () => {
                         <Input
                             {...register("ruc", {
                                 required: "El RUC es requerido",
+                                 pattern: {
+                                    value: /^\d{6,8}-\d$/,
+                                     message: "El RUC debe tener el formato correcto",
+                                 },
                             })}
                             placeholder="RUC del proveedor"
                             disabled={createSupplier.isPending || editSupplier.isPending}
@@ -299,7 +303,7 @@ export const AddSupplierPage = () => {
                     type="submit"
                     bgColor="brand.primary"
                     color="white"
-                    size="md"
+                    size="sm"
                     disabled={createSupplier.isPending || editSupplier.isPending}
                 >
                     {createSupplier.isPending || editSupplier.isPending

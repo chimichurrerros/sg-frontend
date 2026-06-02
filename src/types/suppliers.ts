@@ -1,6 +1,7 @@
 export interface Supplier {
   id: number;
   entityId?: number;
+  ruc: string;
   documentNumber: string;
   businessName: string;
   fantasyName?: string | null;

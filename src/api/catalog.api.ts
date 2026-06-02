@@ -59,15 +59,27 @@ export interface ProductBrandRequestDTO {
   name: string;
 }
 
+export interface ProductWrapperDTO {
+  product: ProductDTO;
+}
+
 export const catalogApi = {
   // Products
   getAllProducts: () =>
     apiClient
       .get<ListProductsWrapperDTO>("/api/products/all")
       .then((r) => r.data),
+  getProduct: (id: number) =>
+    apiClient
+      .get<ProductWrapperDTO>(`/api/products/${id}`)
+      .then((r) => r.data),
   createProduct: (data: ProductRequestDTO) =>
     apiClient
       .post<ProductRequestDTO>("/api/products", data)
+      .then((r) => r.data),
+  updateProduct: (id: number, data: ProductRequestDTO) =>
+    apiClient
+      .put<ProductRequestDTO>(`/api/products/${id}`, data)
       .then((r) => r.data),
   deleteProduct: (id: number) =>
     apiClient.delete(`/api/products/${id}`).then((r) => r.data),
@@ -86,6 +98,10 @@ export const catalogApi = {
     apiClient
       .post<ProductCategoryRequestDTO>("/api/product-categories", data)
       .then((r) => r.data),
+  updateCategory: (id: number, data: ProductCategoryRequestDTO) =>
+    apiClient
+      .put<ProductCategoryRequestDTO>(`/api/product-categories/${id}`, data)
+      .then((r) => r.data),
   deleteCategory: (id: number) =>
     apiClient.delete(`/api/product-categories/${id}`).then((r) => r.data),
 
@@ -97,6 +113,10 @@ export const catalogApi = {
   getAllBrands: () =>
     apiClient
       .get<ListProductBrandsWrapperDTO>("/api/product-brands/all")
+      .then((r) => r.data),
+  updateBrand: (id: number, data: ProductBrandRequestDTO) =>
+    apiClient
+      .put<ProductBrandRequestDTO>(`/api/product-brands/${id}`, data)
       .then((r) => r.data),
   deleteBrand: (id: number) =>
     apiClient.delete(`/api/product-brands/${id}`).then((r) => r.data),

@@ -1,6 +1,7 @@
-import type { CustomerDTO,  Sale,  SaleData, SaleTotals } from "@/types/sales";
+import type {  Sale,  SaleData, SaleTotals } from "@/types/sales";
 import { apiClient } from "./client";
 import type { PaginationParams, PaginationType } from "@/types/types";
+import type { Customer } from "./customers.api";
 
 export interface SendProductDTO{
     productId:number
@@ -8,7 +9,7 @@ export interface SendProductDTO{
     quantity:number
 }
 export interface NewSaleRequest {
-    customer: CustomerDTO;
+    customer: Partial<Customer>;
     sale:     SaleData;
     pay:      {method: number,condition:number};
     products: SendProductDTO[];
@@ -18,7 +19,7 @@ export interface SaleOrderDetail {
     id:                 number;
     productId:          number;
     barcode:            string;
-    productDescription: string;
+    description: string;
     productName:        string;
     quantityOrdered:    number;
     quantityInvoiced:   number;
@@ -30,6 +31,8 @@ export interface FullSaleOrder {
     id:              number;
     customerId:      number;
     customerName:    string;
+    customerEmail:   string;
+    customerBirthDate: string;
     customerRuc:     string;
     branchId:        number;
     userId:          number;
@@ -45,6 +48,22 @@ export interface FullSaleOrder {
     bills:           Bill[];
 }
 
+// export interface Bill {
+//   id: number;
+//   billType: number;
+//   billState: number;
+//   customerId: number;
+//   salesOrderId?: number;
+//   purchaseOrderId?: number;
+//   stamp?: string;
+//   number: string;
+//   date: string;
+//   dueDate?: string;
+//   paymentTerms?: string;
+//   total: number;
+//   taxTotal: number;
+//   isCredit: boolean;
+// }
 export interface Bill {
     id:              number;
     billType:        number;
@@ -54,8 +73,8 @@ export interface Bill {
     purchaseOrderId: number;
     stamp:           string;
     number:          string;
-    date:            Date;
-    dueDate:         Date;
+    date:            string;
+    dueDate:         string;
     paymentTerms:    string;
     total:           number;
     taxTotal:        number;
@@ -70,5 +89,5 @@ export const salesApi ={
     createSale:(body: NewSaleRequest) => apiClient.post<Sale>("/api/sales-orders/pos",body).then(r=>r.data),
     getSales: (params:PaginationParams) => apiClient.get<{ salesOrders: FullSaleOrder[], pagination: PaginationType }>("/api/sales-orders", {params}).then(r=>r.data),
     getSaleById: (id:number) => apiClient.get<{ salesOrder: FullSaleOrder }>(`/api/sales-orders/${id}`).then(r=>r.data.salesOrder),
-    getAll: () => apiClient.get<{ sales: Sale[] }>("/api/sales-orders/all").then(r=>r.data)
+    getAll: () => apiClient.get<{ salesOrders: FullSaleOrder[] }>("/api/sales-orders/all").then(r=>r.data)
 }

@@ -16,13 +16,14 @@ import type { ProductDTO } from "@/api/catalog.api";
 //This component is a table where you put product to sell or to make a budget
 interface productsTableProps {
   products: ProductDTO[];
-  onDataChange: (newData: ProductSaleDTO[]) => void
-  labels: EditableLabel<ProductSaleDTO>[]
-  readOnly: boolean
-  branchId: number | null
+  onDataChange: (newData: ProductSaleDTO[]) => void;
+  labels: EditableLabel<ProductSaleDTO>[];
+  readOnly?: boolean;
+  branchId: number | null;
+  careStock?:boolean
 }
 
-export default function ProductsTable({ products, onDataChange, labels, readOnly, branchId }: productsTableProps) {
+export default function ProductsTable({ products, onDataChange, labels, readOnly = false, branchId, careStock = true }: productsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("")
   const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useProductByBranch(branchId, !readOnly)
@@ -58,7 +59,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
 
   return (<Box flex={1} display="flex" flexDirection="column" minHeight="0" height="100%">
     {!readOnly && <Box display="flex" flexDirection="row" gap={3} flexShrink={0}>
-      <Input placeholder="Insertar código de producto" mb={3} size="sm" value={productCode} onChange={(e) => setProductCode(e.target.value)} />
+      <Input placeholder="Insertar código de producto" mb={3} size="sm" value={productCode} disabled={readOnly} onChange={(e) => setProductCode(e.target.value)} />
       {<SearchProductsDialog
         products={aviableProducts?.productsStock || []}
         onSelect={(product: ProductSelect, quantity: number) => { onDataChange([...products, generateProductSaleDTO(product, quantity,product.quantity)]) }}
@@ -66,6 +67,7 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
         loading={loadingProducts}
         error={errorProducts}
         isError={isErrorProducts}
+        careStock={careStock}
         trigger={<IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts || !branchId}
           ref={addProdRef}
         >  {aviableProducts || !branchId ? <Plus /> : <Spinner />} Item </IconButton>} />}

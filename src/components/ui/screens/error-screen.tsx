@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react/box";
 import { Heading } from "@chakra-ui/react/heading";
-import { Text, Button, Icon, HStack, Flex } from "@chakra-ui/react";
+import { Text, Button, Icon, HStack } from "@chakra-ui/react";
 import { TriangleAlert } from "lucide-react";
 
 interface errorProps {

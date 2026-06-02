@@ -1,11 +1,12 @@
-import type { ProductDTO } from "@/api/catalog.api";
+import type { ServiceResponseDto } from "@/api/service.api";
 import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
 import {
   catalogKeys,
-  useAllProducts,
-  useDeleteProduct,
+  useAllServices,
+  useDeleteService,
 } from "@/queries/catalog.queries";
 import { ButtonGroup, IconButton, Pagination, Stack } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,33 +15,36 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
 export const Services = () => {
-  const navigation = useNavigate();
+  const navigate = useNavigate();
 
-  const { data, isLoading, error } = useAllProducts();
-  const { mutate: deleteProduct } = useDeleteProduct();
+  const { data, isLoading, error } = useAllServices();
+  const { mutate: deleteService } = useDeleteService();
   const queryClient = useQueryClient();
 
-  const productsLabels: label<ProductDTO>[] = [
+  const servicesLabels: label<ServiceResponseDto>[] = [
     { labelName: "ID", propName: "id" },
     { labelName: "Cód.", propName: "barcode" },
     { labelName: "Nombre", propName: "name" },
-    { labelName: "Categoría", propName: "productCategoryName" },
-    { labelName: "Marca", propName: "productBrandName" },
-    { labelName: "Precio", propName: "price" },
-    { labelName: "Stock mínimo", propName: "minimumStock" },
+    { labelName: "Descripción", propName: "description" },
+    {
+      labelName: "Precio",
+      propName: "price",
+      transformFunction: (value) => parsePrice(value),
+    },
+    { labelName: "Costo", propName: "cost" },
   ];
   const [page, setPage] = useState(1);
-  const [selected, setSelecteed] = useState<ProductDTO | null>(null);
+  const [selected, setSelected] = useState<ServiceResponseDto | null>(null);
   const pageSize = 6;
-  const allProducts: ProductDTO[] = data ? data.products : [];
-  const products = allProducts.slice((page - 1) * pageSize, page * pageSize);
+  const allServices: ServiceResponseDto[] = data ? data.services : [];
+  const services = allServices.slice((page - 1) * pageSize, page * pageSize);
 
   const handleDelete = () => {
     if (!selected) return;
-    deleteProduct(selected.id, {
+    deleteService(selected.id, {
       onSuccess: () => {
         toaster.create({ title: `Se ha eliminado ${selected.name} con éxito` });
-        queryClient.invalidateQueries({ queryKey: catalogKeys.products });
+        queryClient.invalidateQueries({ queryKey: catalogKeys.services });
       },
       onError: (error) => {
         toaster.create({
@@ -49,6 +53,11 @@ export const Services = () => {
         });
       },
     });
+  };
+
+  const handleEdit = () => {
+    if (!selected) return;
+    navigate(`/dash/catalogo/servicios/${selected.id}`);
   };
 
   if (error) {
@@ -60,20 +69,22 @@ export const Services = () => {
     <Stack>
       <TableBar
         onDelete={handleDelete}
-        onCreate={() => navigation("/dash/catalogo/nuevo-producto")}
+        onEdit={selected ? handleEdit : undefined}
+        onCreate={() => navigate("/dash/catalogo/nuevo-servicio")}
         selected={selected}
       />
       <TableSelect
-        data={products}
-        labels={productsLabels}
-        onSelect={(item) => {
-          setSelecteed(item);
-        }}
+        data={services}
+        labels={servicesLabels}
+        onSelect={(item) => setSelected(item)}
+        onDoubleClick={(item) =>
+          navigate(`/dash/catalogo/servicios/${item.id}`)
+        }
         loading={isLoading}
       />
 
       <Pagination.Root
-        count={allProducts.length ?? 0}
+        count={allServices.length ?? 0}
         pageSize={pageSize}
         page={page}
         onPageChange={(e) => setPage(e.page)}
@@ -88,13 +99,13 @@ export const Services = () => {
           </Pagination.PrevTrigger>
 
           <Pagination.Items
-            render={(page) => (
+            render={(pageItem) => (
               <IconButton
                 variant={{ base: "outline", _selected: "solid" }}
                 zIndex={{ _selected: "1" }}
                 _selected={{ bg: "brand.primary", color: "white" }}
               >
-                {page.value}
+                {pageItem.value}
               </IconButton>
             )}
           />

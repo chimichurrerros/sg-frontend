@@ -1,4 +1,3 @@
-import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
 import { useCreatePurchaseRequest } from "@/queries/purchase-request.queries";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -18,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
+import AvailableSuppliersTable from "./AvailableSuppliersTable";
 
 export default function PurchaseRequestCreate() {
   const navigate = useNavigate();
@@ -27,13 +27,19 @@ export default function PurchaseRequestCreate() {
   const [observation, setObservation] = useState("");
   const [products, setProducts] = useState<PurchaseProductRow[]>([]);
 
-  const handleCreate = () => {
+  const handleCreate = (supplierIds: number[]) => {
     if (products.length === 0) {
       toaster.create({
         title: "Debe agregar al menos un producto",
         type: "error",
       });
       return;
+    }
+    if (supplierIds.length === 0) {
+      toaster.create({
+        title: "Debe agregar al menos un proveedor",
+        type: "error",
+      });
     }
 
     createPurchaseRequest(
@@ -43,6 +49,7 @@ export default function PurchaseRequestCreate() {
           productId: p.productId,
           quantityRequested: p.quantityRequested,
         })),
+        supplierIds,
       },
       {
         onSuccess: () => {
@@ -57,7 +64,7 @@ export default function PurchaseRequestCreate() {
             type: "error",
           });
         },
-      }
+      },
     );
   };
 
@@ -104,11 +111,9 @@ export default function PurchaseRequestCreate() {
           </Text>
         )}
 
-        <ConfirmActionDialog
-          title="Confirmar Pedido de Compra"
-          description="¿Estás seguro de que deseas registrar este pedido de compra?"
-          acceptText="Solicitar"
-          onAccept={handleCreate}
+        <AvailableSuppliersTable
+          productIds={products.map((p) => p.productId)}
+          onConfirm={handleCreate}
           trigger={
             <Button
               colorPalette="brand"

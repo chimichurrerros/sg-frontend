@@ -21,11 +21,12 @@ export const useAllBills = (params?: PaginationParams) => {
   });
 };
 
-export const useBillById = (id: number) => {
+export const useBillById = (id: number, enabled?: boolean) => {
   return useQuery({
     queryKey: billsKeys.bill(id),
     queryFn: () => billsApi.getById(id),
     retry: RETRIES,
+    enabled,
   });
 };
 

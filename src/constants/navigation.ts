@@ -24,7 +24,10 @@ import {
   NotebookPen,
   ScrollText,
   ClipboardCheck,
+  HandHelping,
+  FileText,
   UserCheck,
+  Contact,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -77,6 +80,12 @@ export const NAV_CONFIG: NavItem[] = [
         icon: Receipt,
         path: "/ventas/facturas",
       },
+      {
+        id: "devoluciones",
+        label: "Devoluciones",
+        icon: HandHelping,
+        path: "/ventas/devoluciones",
+      },
     ],
   },
   {
@@ -89,6 +98,12 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/compras/pedidos"
       },
       {
+        id: "solicitudes-cotizacion",
+        label: "Solicitudes de Cot.",
+        icon: FileText,
+        path: "/compras/solicitudes-cotizacion"
+      },
+      {
         id: "cotizaciones-proveedores",
         label: "Cotizaciones",
         icon:   TableProperties,
@@ -99,6 +114,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Órdenes de Compra",
         icon: ClipboardCheck,
         path: "/compras/ordenes-de-compra"
+      },
+      {
+        id: "ordenes-por-proveedor",
+        label: "OC por Proveedor",
+        icon: Truck,
+        path: "/compras/ordenes-por-proveedor"
       },
       {
         id: "recepcion-ordenes-compra",
@@ -155,6 +176,8 @@ export const NAV_CONFIG: NavItem[] = [
     section: "Administración",
     children: [
       { id: "usuarios", label: "Usuarios", icon: User, path: "/register" },
+      { id: "clientes", label: "Clientes", icon: Contact, path: "/customers" },
+
       {
         id: "sucursales",
         label: "Sucursales",
@@ -187,12 +210,12 @@ export const NAV_CONFIG: NavItem[] = [
       },
     ],
   },
-  // {
-  //   id: "contabilidad",
-  //   label: "Contabilidad",
-  //   icon: FileText,
-  //   path: "/dash/contabilidad",
-  // },
+  {
+    id: "contabilidad",
+    label: "Contabilidad",
+    icon: FileText,
+    path: "/dash/contabilidad",
+  },
   {
     id: "configuraciones",
     label: "Configuraciones",

@@ -10,7 +10,7 @@ import {
   Spinner,
   InputGroup
 } from "@chakra-ui/react";
-import { ArrowLeft, CircleDollarSign, ExternalLink, Printer, X } from "lucide-react";
+import { ArrowLeft, CircleDollarSign, ExternalLink, HandHelpingIcon, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
@@ -29,6 +29,8 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
 import { useAllBranches } from "@/queries/branches.queries";
+import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { useAuthStore } from "@/stores/auth.store";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -57,6 +59,10 @@ const getSaleTemplate = (): Sale => ({
 interface saleSheetProps {
   mode: "view" | "create"
 }
+  export function isValidRuc(ruc: string) {
+const rucRegex = /^\d{6,8}-\d$/;
+    return rucRegex.test(ruc) || ruc === "";
+  }
 
 export default function SaleSheetPage({ mode }: saleSheetProps) {
   const [selectedClient, setSelectedClient] = useState("Ninguno");
@@ -67,7 +73,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   const { data: sale, isPending: loadingSale, isError: isErrorSale, error: saleError } = useGetSaleById(Number(id), mode === "view");
   // const [saveCustomer, setSaveCustomer] = useState(false);
   const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
-  const [branchId, setBranchId] = useState<number | null>(null);
+  const user = useAuthStore((s) => s.user);
+  const branchId = user?.branchId ?? null;
   const { data: branches, isPending: loadingBranches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
@@ -79,6 +86,12 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     }
 
   }, [isErrorBranches, errorBranches])
+
+  useEffect(() => {
+    if (mode === "create" && branchId) {
+      setSaleForm(prev => ({ ...prev, sale: { ...prev.sale, branchId } }));
+    }
+  }, [branchId]);
 
   useEffect(() => {
     if (mode === "view") return;
@@ -99,9 +112,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }, [saleForm.products, dialogAmount]);
 
   useEffect(() => {
-    setSaleForm({ ...saleForm, products: [] })
-  }, [branchId])
-  useEffect(() => {
     if (isErrorCustomers) {
       toaster.create({ title: "Error al cargar los clientes", description: errorCustomers.message || "Error desconocido", type: "error" })
     }
@@ -109,19 +119,21 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   useEffect(() => {
     if (!sale || mode !== "view") return;
 
-    //Editar customer, que los campos sean opcionales
+  
 
     setSaleForm({
-      branchId: sale.branchId,
       customer: {
         name: sale.customerName || "",
-        ruc: sale.customerRuc || ""
+        ruc: sale.customerRuc || "",
+        email: sale.customerEmail || "",
+        birthDate: sale.customerBirthDate || ""
       },
       sale: {
         date: parseDate(sale.date),
         cashierNumber: 0,
         saleNumber: sale.id,
-        bill: sale.bills[0]
+        bill: sale.bills[0],
+        branchId: sale.branchId
       },
       pay: {
         method: paymentMethods[sale.paymentMethod],
@@ -131,7 +143,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         id: d.productId,
         name: d.productName,
         barcode: d.barcode,
-        description: d.productDescription,
+        description: d.description,
         price: d.price,
         quantity: d.quantityOrdered,
         total: d.price * d.quantityOrdered,
@@ -154,7 +166,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     {
       labelName: "Descripción", propName: "description",
       textIfNull: "Sin Descripción",
-      transform: (d: string) => d && d.length > 35 ? d.slice(0, 35) + "..." : d
+      formatFunction: (d: string) => d && d.length > 35 ? d.slice(0, 35) + "..." : d
     },
 
     {
@@ -188,10 +200,12 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
         customer: {
           name: "",
           ruc: "",
+          email: "",
+          birthDate: ""
         },
       });
     } else {
-      const customer = customers?.customers.find(c => c.id === Number(value));
+      const customer = customers?.find(c => c.id === Number(value));
       if (customer) {
         setSaleForm({
           ...saleForm,
@@ -210,7 +224,24 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       },
     });
   };
-
+  const updateCustomerEmail = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      customer: {
+        ...saleForm.customer,
+        email: value,
+      },
+    });
+  };
+    const updateCustomerBirthdate = (value: string) => {
+    setSaleForm({
+      ...saleForm,
+      customer: {
+        ...saleForm.customer,
+        birthDate: value,
+      },
+    });
+  };
   const updatePaymentMethod = (value: PaymentMethod) => {
     setSaleForm({
       ...saleForm,
@@ -244,10 +275,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   //   });
   // };
 
-  function isValidRuc(ruc: string) {
-    const rucRegex = /^\d{6,7}-\d$/;
-    return rucRegex.test(ruc) || ruc === "";
-  }
+
   const isAmountValid = dialogAmount >= saleForm.totals.total;
   if (loadingSale && mode !== "create") {
     return <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
@@ -260,23 +288,24 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }
   return (
     <Box height="89vh" display="flex" flexDirection="column">
-      {/* <p>{JSON.stringify(saleForm)}</p> */}
       <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
-
         <Box display="flex" gap={3}>
           <Text fontSize="2xl" fontWeight="bold">
-            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N° ${saleForm.sale.saleNumber}` : ""}
+            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}
           </Text>
-          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | {parseDate(sale?.date)}</Text>}
+          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
         </Box>
 
         <Flex align="center" gap={3}>
           <Flex align="flex-end" gap={3}>
-            {mode === "view" && (
+
+              
               <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
-            )}
+            {mode === "view" && <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} onClick={() => navigate("/ventas/devoluciones/desde/"+sale.id)}>
+                <HandHelpingIcon /> Registrar Devolución
+              </IconButton>}
 
             {mode === "view" && (
               <Box display="flex" flexDirection="column" alignItems="flex-start">
@@ -296,15 +325,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 </InputGroup>
               </Box>
             )}
-            {mode === "create" && <>
-              <SelectWrapper
-                placeholder="Sucursal actual"
-                onValueChange={(value) => { setBranchId(Number(value)) }}
-                options={branches?.branches.map((b) => ({ label: b.name, value: b.id.toString() })) || []} />
-            </>}
             <Box display="flex" flexDirection="column" alignItems="flex-start">
               {mode === "view" && <Text fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" mb={1}>
-                Sucursal: {branches?.branches.find(b => b.id == saleForm.branchId)?.name || " "}
+                Sucursal: {branches?.branches.find(b => b.id == saleForm.sale.branchId)?.name || " "}
                 {loadingBranches && <Spinner size="sm" />}
               </Text>}
               <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
@@ -315,7 +338,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         </Flex>
       </Flex>
-      {/* <p>{JSON.stringify(saleForm.products)}</p> */}
 
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
         {mode === "create" && (
@@ -328,13 +350,13 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               value={selectedClient}
               onValueChange={handleClientSelect}
               options={
-                customers ? customers.customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
+                customers ? customers.map(c => ({ label: c.name, value: c.id.toString() })) : []
               }
               disabled={loadingCustomers}
               width="100%"
               clearable={true}
               onClear={() => {
-                setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "" } });
+                setSaleForm({ ...saleForm, customer: { ...saleForm.customer, name: "", ruc: "", email: "", birthDate: "" } });
                 setSelectedClient("Ninguno");
               }}
             />
@@ -362,10 +384,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             size="md"
             value={saleForm.customer.name}
             onChange={(e) => updateCustomerName(e.target.value)}
-            readOnly={!isClientEditable}
+            readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
             placeholder="Nombre del cliente"
-            disabled={mode === "view"}
           />
         </Box>
 
@@ -375,9 +396,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             size="md"
             placeholder="RUC del cliente"
             value={saleForm.customer.ruc}
-            readOnly={!isClientEditable}
+            readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
-            disabled={mode === "view"}
             maxLength={8}
             onChange={(e) => {
               const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7);
@@ -388,6 +408,33 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             }}
           />
         </Box>
+            
+        <Box flex={2} minW="180px">
+          <Flex align="center" justify="space-between" mb={1}>
+            <Text fontSize="xs" fontWeight="medium" color="gray.600">Correo Electrónico</Text>
+          </Flex>
+          <Input
+            size="md"
+            value={saleForm.customer.email}
+            onChange={(e) => updateCustomerEmail(e.target.value)}
+            readOnly={!isClientEditable || mode === "view"}
+            bg={!isClientEditable ? "gray.100" : "white"}
+            placeholder="Email del cliente (opcional)"
+          />
+        </Box>
+        <Box flex={2} minW="180px">
+          <Flex align="center" justify="space-between" mb={1}>
+            <Text fontSize="xs" fontWeight="medium" color="gray.600">Fecha de Nacimiento</Text>
+          </Flex>
+         <DatePickerWrapper
+            value={saleForm.customer.birthDate}
+            onChange={(dates: string[]) => updateCustomerBirthdate(dates[0])}
+            readOnly= {!isClientEditable || mode === "view"}
+            placeholder="Fecha de nacimiento (opcional)"
+
+            />
+        </Box>
+        
 
         <Box minW="130px">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">Método de Pago</Text>
@@ -396,7 +443,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             onValueChange={updatePaymentMethod}
             options={paymentOptions}
             width="100%"
-            disabled={mode === "view"}
+            readOnly={mode === "view"}
+
           />
         </Box>
 
@@ -483,7 +531,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
           {mode === "view" && (
             <Box display="flex" alignItems="center" gap={8} justifyContent="space-between">
               <Text color="gray.300" fontSize="3xl">|</Text>
-              <Text fontSize="3xl" fontWeight="bold">
+              {saleForm.totals.importValue > saleForm.totals.total && <><Text fontSize="3xl" fontWeight="bold">
                 Importe:&nbsp;
                 <Text as="span" color="brand.primary">{parsePrice(saleForm.totals.importValue)}</Text>
               </Text>
@@ -492,7 +540,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
               <Text fontSize="3xl" fontWeight="bold">
                 Vuelto:&nbsp;
                 <Text as="span" color="gray.500">{parsePrice(saleForm.totals.change)}</Text>
-              </Text>
+              </Text></>}
             </Box>
           )}
         </Flex>
@@ -521,7 +569,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 toaster.create({ title: "Monto del importe es menor que el precio a pagar", type: "error" })
                 return;
               }
-              createSale.mutate(saleForm)
+              createSale.mutate(saleForm,{onSuccess:()=>{setSelectedClient("Ninguno");
+                setSaleForm(getSaleTemplate());
+                setDialogAmount(0);}})
             }}
             trigger={
               <IconButton

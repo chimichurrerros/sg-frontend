@@ -3,9 +3,14 @@ import { PasswordInput } from "@/components/ui/password-input";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 
+import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
 import { toaster } from "@/components/ui/toaster";
 import { useRegister } from "@/queries/auth.queries";
-import { useAllUsers } from "@/queries/users.queries";
+import {
+  useAllUsers,
+  useToggleUserActiveStatus,
+} from "@/queries/users.queries";
+import { useAllBranches } from "@/queries/branches.queries";
 import { registerSchema, type RegisterFormData } from "@/schemas/auth.schema";
 import { useAuthStore } from "@/stores/auth.store";
 import {
@@ -30,7 +35,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { RefreshCcw, Search, UserPlus } from "lucide-react";
+import { Power, RefreshCcw, Search, UserPlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuChevronLeft, LuChevronRight, LuMail } from "react-icons/lu";
@@ -44,6 +49,11 @@ export const RegisterPage = () => {
       { label: "Usuario", value: "user", selected: true },
       { label: "Administrador", value: "admin" },
     ],
+  });
+  const { data: branchesData } = useAllBranches();
+  const branches = branchesData?.branches ?? [];
+  const branchCollection: ListCollection = createListCollection({
+    items: branches.map((b) => ({ label: b.name, value: b.id })),
   });
   const queryClient = useQueryClient();
   // Register new user
@@ -64,13 +74,16 @@ export const RegisterPage = () => {
   ) : undefined;
   // Select user from the table
   const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
-  useEffect(() => {
-    const handler = () => setSelectedUser(null);
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, [selectedUser]);
+  // Toggle user active status
+  const { mutate: toggleActive, isPending: isToggling } =
+    useToggleUserActiveStatus();
   // List all users
-  const { data, isLoading: usersLoading, isError, error: usersError } = useAllUsers(); // TODO: implement pagination
+  const {
+    data,
+    isLoading: usersLoading,
+    isError,
+    error: usersError,
+  } = useAllUsers(); // TODO: implement pagination
   // Pagination
   const [page, setPage] = useState(1);
   const pageSize = 6;
@@ -80,14 +93,12 @@ export const RegisterPage = () => {
     reset,
     control,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { rol: "user" },
+    defaultValues: { rol: "user", branchId: 0 },
   });
-
-  // Double-check even if the link is hidden
-  if (!isAdmin) return <Navigate to="/dash" replace />;
 
   const onSubmit = (data: RegisterFormData) => {
     setAuthError(null);
@@ -95,6 +106,7 @@ export const RegisterPage = () => {
     registerUser(data, {
       onSuccess: () => {
         reset();
+        clearErrors();
         toaster.create({ title: "Usuario creado con éxito" });
         queryClient.invalidateQueries({ queryKey: ["users"] });
       },
@@ -110,32 +122,45 @@ export const RegisterPage = () => {
 
   useEffect(() => {
     if (isError) {
-      toaster.create({ title: "Ocurrió un error al cargar usuarios", description: usersError?.message || "Error desconocido", type: "error" })
+      toaster.create({
+        title: "Ocurrió un error al cargar usuarios",
+        description: usersError?.message || "Error desconocido",
+        type: "error",
+      });
     }
-  }, [usersError, isError])
+  }, [usersError, isError]);
 
   const usersLabels: label<UserDto>[] = [
     { labelName: "ID", propName: "id" },
     { labelName: "Correo", propName: "email" },
+    { labelName: "Sucursal", propName: "branchName" },
     { labelName: "Rol", propName: "roleName" },
-    { labelName: "Estado", propName: "isActive" },
+    {
+      labelName: "Estado",
+      propName: "isActive",
+      transformFunction: (isActive: boolean) =>
+        isActive ? "Activo" : "Inactivo",
+    },
   ];
 
   const users = data
     ? data.users
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      .filter((u) =>
-        searchEmail !== "" ? u.email.includes(searchEmail) : true,
-      )
-      .filter((u) =>
-        searchRole.length > 0
-          ? searchRole.includes(u.roleName.toLowerCase())
-          : true,
-      )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .filter((u) =>
+          searchEmail !== "" ? u.email.includes(searchEmail) : true,
+        )
+        .filter((u) =>
+          searchRole.length > 0
+            ? searchRole.includes(u.roleName.toLowerCase())
+            : true,
+        )
     : [];
+
+  // Double-check even if the link is hidden
+  if (!isAdmin) return <Navigate to="/dash" replace />;
 
   return (
     <Stack padding={"1rem 3.75rem"}>
@@ -236,6 +261,44 @@ export const RegisterPage = () => {
           />
           <Field.ErrorText>{errors.rol?.message}</Field.ErrorText>
         </Field.Root>
+
+        <Field.Root invalid={!!errors.branchId}>
+          <Field.Label>Sucursal</Field.Label>
+          <Controller
+            name="branchId"
+            control={control}
+            render={({ field }) => (
+              <Select.Root
+                collection={branchCollection}
+                value={field.value ? [String(field.value)] : []}
+                onValueChange={(e) => field.onChange(Number(e.value[0]))}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Seleccionar sucursal" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {branches.map((b) => (
+                        <Select.Item item={{ label: b.name, value: b.id }} key={b.id}>
+                          {b.name}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+            )}
+          />
+          <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
+        </Field.Root>
       </SimpleGrid>
 
       {/* ===== Users list ===== */}
@@ -294,21 +357,29 @@ export const RegisterPage = () => {
             <RefreshCcw />
             Resetear contraseña
           </Button>
-          <Button
-            color="brand.primary"
-            borderColor="brand.primary"
-            variant="outline"
-            disabled={selectedUser === null}
-          >
-            <Search />
-            Activar / Desactivar
-          </Button>
+          <ConfirmActionDialog
+            title={
+              selectedUser?.isActive ? "Desactivar usuario" : "Activar usuario"
+            }
+            description={
+              selectedUser?.isActive
+                ? `¿Estás seguro de que deseas desactivar al usuario ${selectedUser?.email}?`
+                : `¿Estás seguro de que deseas activar al usuario ${selectedUser?.email}?`
+            }
+            acceptText="Confirmar"
+            onAccept={() => toggleActive(selectedUser!.id)}
+            trigger={
+              <Button
+                colorPalette="red"
+                variant="outline"
+                disabled={selectedUser === null || isToggling}
+              >
+                <Power />
+                Activar / Desactivar
+              </Button>
+            }
+          />
         </Flex>
-
-        {/* <Table.Column htmlWidth="20%" />
-        <Table.Column htmlWidth="30%" />
-        <Table.Column htmlWidth="30%" />
-        <Table.Column htmlWidth="20%" /> */}
 
         <Stack>
           <TableSelect
@@ -316,7 +387,12 @@ export const RegisterPage = () => {
             data={users}
             loading={usersLoading}
             onSelect={onSelectUser}
-            noItemsComponent={<EmptyDataScreen title={"Sin usuarios"} message={"Ocurrió algún error al cargar usuarios"} />}
+            noItemsComponent={
+              <EmptyDataScreen
+                title={"Sin usuarios"}
+                message={"Ocurrió algún error al cargar usuarios"}
+              />
+            }
           ></TableSelect>
 
           <Pagination.Root

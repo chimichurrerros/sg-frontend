@@ -10,9 +10,18 @@ export const paymentMethods : Record<number,PaymentMethod> = {
     2: "Tarjeta",
     3: "Transferencia"
 }
+export const paymentMethodIds : Record<PaymentMethod,number> = {
+    "Efectivo": 1,
+    "Tarjeta": 2,
+    "Transferencia": 3
+}
 export const saleConditions : Record<number,SaleCondition> = {
     1: "Contado",
     2: "Credito"
+}
+export const saleConditionIds : Record<SaleCondition,number> = {
+    "Contado": 1,
+    "Credito": 2
 }
 const payments = { "Efectivo": 1, "Tarjeta": 2, "Transferencia": 3 }
 const conditions = { "Contado": 1, "Credito": 2 }

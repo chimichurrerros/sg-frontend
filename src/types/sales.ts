@@ -1,3 +1,4 @@
+import type { Customer } from "@/api/customers.api";
 import type { Bill } from "@/api/sales.api";
 
 export interface ProductSaleDTO {
@@ -41,20 +42,16 @@ export interface CustomerForSales {
   name: string;
   ruc: string;
 }
-export interface CustomerDTO {
-  name: string;
-  ruc: string;
-}
 export interface SaleData{
     bill?: Bill;
     saleNumber?: number;
     date: string;
+    branchId?: number | null;
     cashierNumber?: number;
   };
 export interface Sale {
-  customer:CustomerDTO;
+  customer: Partial<Customer>;
   sale: SaleData
-  branchId?: number | null;
 
   pay: {
     method: PaymentMethod;

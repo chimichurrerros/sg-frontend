@@ -1,8 +1,11 @@
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { toaster } from "@/components/ui/toaster";
 import {
   useAllBrands,
   useAllCategories,
   useCreateProduct,
+  useGetProduct,
+  useUpdateProduct,
 } from "@/queries/catalog.queries";
 import {
   createProductSchema,
@@ -26,19 +29,27 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const AddProducts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { id } = useParams<{ id?: string }>();
+  const productId = id ? Number(id) : undefined;
+  const isEditMode = Boolean(productId);
+
   const [createError, setCreateError] = useState<string | null>(null);
 
-  const { mutate: createProduct, isPending } = useCreateProduct();
+  const { mutate: createProduct, isPending: isCreatePending } = useCreateProduct();
+  const { mutate: updateProduct, isPending: isUpdatePending } = useUpdateProduct();
+  const { data: productData } = useGetProduct(productId);
   const { data: categoriesData } = useAllCategories();
   const { data: brandsData } = useAllBrands();
+
+  const isPending = isCreatePending || isUpdatePending;
 
   const categoryCollection = createListCollection({
     items: (categoriesData?.productCategories ?? []).map((c) => ({
@@ -57,6 +68,7 @@ export const AddProducts = () => {
   const {
     register,
     control,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<CreateProductFormData>({
@@ -73,8 +85,44 @@ export const AddProducts = () => {
     },
   });
 
+  useEffect(() => {
+    if (productData?.product) {
+      const p = productData.product;
+      reset({
+        name: p.name ?? "",
+        description: p.description ?? "",
+        barcode: p.barcode ?? "",
+        productCategoryId: p.productCategoryId ?? 0,
+        productBrandId: p.productBrandId ?? 0,
+        price: p.price,
+        cost: p.cost ?? 0,
+        minimumStock: p.minimumStock ?? 0,
+      });
+    }
+  }, [productData, reset]);
+
   const handleCreate = (formData: CreateProductFormData) => {
     setCreateError(null);
+
+    if (isEditMode && productId) {
+      updateProduct(
+        { id: productId, data: formData },
+        {
+          onSuccess: () => {
+            toaster.create({ title: "Producto actualizado con éxito" });
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+            navigate("/dash/catalogo");
+          },
+          onError: (error) => {
+            setCreateError(
+              "Ha ocurrido un error al actualizar el producto: " + error.message,
+            );
+          },
+        },
+      );
+      return;
+    }
+
     createProduct(formData, {
       onSuccess: () => {
         toaster.create({ title: "Producto creado con éxito" });
@@ -92,7 +140,9 @@ export const AddProducts = () => {
   return (
     <Stack gap={4} paddingInline="15%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nuevo producto</Heading>
+        <Heading size="xl">
+          {isEditMode ? "Editar producto" : "Nuevo producto"}
+        </Heading>
         <Button
           variant="ghost"
           size="sm"
@@ -229,26 +279,36 @@ export const AddProducts = () => {
 
           <Field.Root invalid={!!errors.price} required>
             <Field.Label>Precio</Field.Label>
-            <Input
-              {...register("price", { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              min={0}
-              placeholder="0.00"
-              disabled={isPending}
+            <Controller
+              name="price"
+              control={control}
+              render={({ field }) => (
+                <CurrencyInput
+                  value={field.value}
+                  onValueChange={(v) => field.onChange(isNaN(v) ? 0 : v)}
+                  disabled={isPending}
+                  invalid={!!errors.price}
+                  min={0}
+                />
+              )}
             />
             <Field.ErrorText>{errors.price?.message}</Field.ErrorText>
           </Field.Root>
 
           <Field.Root invalid={!!errors.cost} required>
             <Field.Label>Costo</Field.Label>
-            <Input
-              {...register("cost", { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              min={0}
-              placeholder="0.00"
-              disabled={isPending}
+            <Controller
+              name="cost"
+              control={control}
+              render={({ field }) => (
+                <CurrencyInput
+                  value={field.value}
+                  onValueChange={(v) => field.onChange(isNaN(v) ? 0 : v)}
+                  disabled={isPending}
+                  invalid={!!errors.cost}
+                  min={0}
+                />
+              )}
             />
             <Field.ErrorText>{errors.cost?.message}</Field.ErrorText>
           </Field.Root>

@@ -3,7 +3,7 @@ import {
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { X } from "lucide-react";
 
 interface ComboboxWrapperProps<T extends string = string> {
@@ -34,6 +34,15 @@ export function ComboboxWrapper<T extends string>({
   onValueChange,
 }: ComboboxWrapperProps<T>) {
   const [inputValue, setInputValue] = useState("");
+  
+  const [selectedValue, setSelectedValue] = useState<T | undefined>(value || defaultValue);
+
+  useEffect(() => {
+    setSelectedValue(value);
+    if (!value) {
+      setInputValue("");
+    }
+  }, [value]);
 
   const filteredOptions = useMemo(() => {
     if (!inputValue) return options;
@@ -46,25 +55,29 @@ export function ComboboxWrapper<T extends string>({
 
   const collection = createListCollection({ items: filteredOptions });
 
-  const initialValue = value ? [value] : defaultValue ? [defaultValue] : undefined;
+  const currentValue = selectedValue ? [selectedValue] : [];
 
   const handleValueChange = (e: { value: string[] }) => {
-    onValueChange?.(e.value[0] as T);
+    const newValue = e.value[0] as T;
+    setSelectedValue(newValue);
+    onValueChange?.(newValue);
     setInputValue("");
   };
 
   const handleClear = () => {
+    setSelectedValue(undefined);
     onValueChange?.("" as T);
     setInputValue("");
+    onClear?.();
   };
 
-  const hasValue = !!value && value !== "";
+  const hasValue = !!selectedValue && selectedValue !== "";
 
   return (
     <Combobox.Root
       collection={collection}
       onValueChange={handleValueChange}
-      value={initialValue}
+      value={currentValue}
       width={width}
       inputValue={inputValue}
       onInputValueChange={(e) => setInputValue(e.inputValue)}
@@ -82,7 +95,6 @@ export function ComboboxWrapper<T extends string>({
               onClick={(e) => {
                 e.stopPropagation();
                 handleClear();
-                onClear?.();
               }}
             />
           )}

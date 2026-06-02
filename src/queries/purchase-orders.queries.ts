@@ -2,6 +2,7 @@ import {
     purchaseOrdersApi,
     type CreatePurchaseOrderDTO,
     type EditPurchaseOrderDTO,
+    type PurchaseOrderFilterParams,
 } from "@/api/purchase-orders.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -14,6 +15,13 @@ export const useAllPurchaseOrders = () => {
     return useQuery({
         queryKey: purchaseOrdersKeys.purchaseOrders,
         queryFn: purchaseOrdersApi.getAll,
+    });
+};
+
+export const useGetPurchaseOrders = (params: PurchaseOrderFilterParams) => {
+    return useQuery({
+        queryKey: [...purchaseOrdersKeys.purchaseOrders, params],
+        queryFn: () => purchaseOrdersApi.get(params),
     });
 };
 

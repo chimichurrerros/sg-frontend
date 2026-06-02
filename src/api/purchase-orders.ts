@@ -15,6 +15,42 @@ export interface PurchaseOrderDetailDTO {
     supplierName: string;
 }
 
+export interface PurchaseOrderForSupplierSupplierDTO {
+    id: number;
+    ruc: string;
+    phone: string | null;
+    address: string | null;
+    email: string | null;
+    isActive: boolean;
+    businessName: string;
+    fantasyName: string | null;
+}
+
+export interface PurchaseOrderForSupplierDetailDTO {
+    id: number;
+    productId: number;
+    productName: string;
+    quantityOrdered: number;
+    quantityReceived: number;
+    price: number;
+    taxRate: number;
+    supplierQuoteDetailId: number;
+}
+
+export interface PurchaseOrderForSupplierItemDTO {
+    id: number;
+    purchaseOrderId: number;
+    supplierId: number;
+    supplier: PurchaseOrderForSupplierSupplierDTO;
+    supplierName: string;
+    supplierQuoteId: number;
+    number: string;
+    date: string;
+    total: number;
+    state: number;
+    details: PurchaseOrderForSupplierDetailDTO[];
+}
+
 export interface PurchaseOrderDTO {
     id: number;
     purchaseRequestId: number;
@@ -26,6 +62,7 @@ export interface PurchaseOrderDTO {
     total: number;
     state: number;
     details: PurchaseOrderDetailDTO[];
+    purchaseOrdersForSupplier?: PurchaseOrderForSupplierItemDTO[];
 }
 
 export interface ListPurchaseOrdersWrapperDTO {
@@ -49,6 +86,18 @@ export interface CreatePurchaseOrderDTO {
     details: CreatePurchaseOrderDetailDTO[];
 }
 
+export interface PurchaseOrderFilterParams {
+  page?: number;
+  pageSize?: number;
+  purchaseRequestId?: number;
+  state?: number;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  minTotal?: number;
+  maxTotal?: number;
+}
+
 export interface EditPurchaseOrderDTO {
     purchaseRequestId?: number;
     supplierId?: number;
@@ -60,6 +109,21 @@ export const purchaseOrdersApi = {
         apiClient
             .get<ListPurchaseOrdersWrapperDTO>("/api/purchaseorders/all")
             .then((r) => r.data),
+    get: (params: PurchaseOrderFilterParams) => {
+      const queryParams: Record<string, string | number> = {};
+      if (params.page !== undefined) queryParams.Page = params.page;
+      if (params.pageSize !== undefined) queryParams.PageSize = params.pageSize;
+      if (params.purchaseRequestId !== undefined) queryParams.PurchaseRequestId = params.purchaseRequestId;
+      if (params.state !== undefined) queryParams.State = params.state;
+      if (params.date !== undefined) queryParams.Date = params.date;
+      if (params.startDate !== undefined) queryParams.StartDate = params.startDate;
+      if (params.endDate !== undefined) queryParams.EndDate = params.endDate;
+      if (params.minTotal !== undefined) queryParams.MinTotal = params.minTotal;
+      if (params.maxTotal !== undefined) queryParams.MaxTotal = params.maxTotal;
+      return apiClient
+        .get<ListPurchaseOrdersWrapperDTO>("/api/purchaseorders", { params: queryParams })
+        .then((r) => r.data);
+    },
     getById: (id: number) =>
         apiClient
             .get<PurchaseOrderResponseDTO>(`/api/purchaseorders/${id}`)

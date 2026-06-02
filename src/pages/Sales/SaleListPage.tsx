@@ -9,7 +9,7 @@ import { parsePrice } from "@/constants/price";
 import {  useGetSales } from "@/queries/sales.queries";
 import type { PaginationParams } from "@/types/types";
 import { Box, IconButton, Input, InputGroup, Text } from "@chakra-ui/react";
-import { CalendarOff, ExternalLink, Eye, Plus } from "lucide-react";
+import { CalendarOff, ExternalLink, Eye, FolderOpen, HandHelpingIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -44,11 +44,16 @@ export default function SaleListPage() {
                 <Input placeholder="Buscar Venta..." />
             </InputGroup>
             <Text>Cant.Registros</Text><PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
-            <IconButton padding={2} variant="outline" disabled={!selected} onClick={() => navigate(`/ventas/facturas/${selected?.bills[0]?.id}`)} >
+            
+             <IconButton padding={2} variant="outline" disabled={!selected} onClick={() => navigate(`/ventas/facturas/${selected?.bills[0]?.id}`)} >
                 <ExternalLink size={20} /> Ver Factura
             </IconButton>
+             <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} disabled= {!selected} onClick={() => navigate("/ventas/devoluciones/desde/"+selected.id)}>
+                            <HandHelpingIcon /> Registrar Devolución
+            </IconButton>
+           
             <IconButton padding={2} bgColor="brand.secondary"disabled={!selected} onClick={() => navigate(`/ventas/${selected?.id}`)} >
-                <Eye size={20} />
+                <FolderOpen size={20} /> Abrir Ficha de Venta
             </IconButton>
             <IconButton padding={2} bgColor="brand.primary" onClick={()=> navigate("/ventas/nueva")} >
                 <Plus size={20} />
