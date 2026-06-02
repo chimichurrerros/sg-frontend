@@ -406,7 +406,7 @@ export default function BalanceGeneralPage() {
 
             {/* Quick Metrics Cards */}
             <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} className="no-print">
-              <Box bg="white" p={5} borderRadius="xl" borderWidth="1px" borderColor="gray.200" shadow="xs">
+              {/* <Box bg="white" p={5} borderRadius="xl" borderWidth="1px" borderColor="gray.200" shadow="xs">
                 <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase">
                   Total Activos
                 </Text>
@@ -440,10 +440,10 @@ export default function BalanceGeneralPage() {
                 <Text fontSize="xs" color="gray.400" mt={1}>
                   Capital social, reservas y resultados
                 </Text>
-              </Box>
+              </Box> */}
             </SimpleGrid>
 
-            {/* Balance Status Banner */}
+            {/* Balance Status Banner
             {(() => {
               const diff = Math.abs(trees.totals.totalAssets - trees.totals.totalLiabilitiesAndEquity);
               const isBalanced = diff < 0.01;
@@ -485,7 +485,7 @@ export default function BalanceGeneralPage() {
                   </HStack>
                 </Flex>
               );
-            })()}
+            })()} */}
 
             {/* Tree Tables Section */}
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6} className="print-grid">
