@@ -109,6 +109,12 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/compras/ordenes-de-compra"
       },
       {
+        id: "ordenes-por-proveedor",
+        label: "OC por Proveedor",
+        icon: Truck,
+        path: "/compras/ordenes-por-proveedor"
+      },
+      {
         id: "recepcion-ordenes-compra",
         label: "Recepción de OC",
         icon:   Package,
