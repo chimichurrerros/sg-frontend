@@ -54,8 +54,8 @@ const purchaseRequestLabels: label<PurchaseRequest>[] = [
     propName: "purchaseRequestState",
     isSortable: true,
     sortFunction: (a, b) => a.purchaseRequestState - b.purchaseRequestState,
-    transformFunction: (value: number) =>
-      purchaseRequestStateMap[value] || "Desconocido",
+    transformFunction: (value: number) =>{
+      return purchaseRequestStateMap[value] || "Desconocido"},
   },
   {
     labelName: "Observación",
@@ -106,6 +106,7 @@ export default function PurchaseRequestList() {
       height="100%"
       minHeight="0"
     >
+      <p>{JSON.stringify(purchaseRequests)}</p>
       <Text fontSize="2xl" fontWeight="bold">
         Pedidos de Compra
       </Text>
