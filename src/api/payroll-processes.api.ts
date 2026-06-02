@@ -81,6 +81,32 @@ export interface PayrollEmployeeReceiptDto {
   netSalary: number;
 }
 
+export interface EligibleEmployeeResponseDto {
+  id: number;
+  fileNumber: string;
+  firstName: string;
+  lastName: string;
+  branchName: string | null;
+  areaName: string | null;
+  positionName: string | null;
+}
+
+export interface PayrollDetailSummaryResponseDto {
+  employeeId: number;
+  fileNumber: string;
+  fullName: string;
+  branchName: string | null;
+  areaName: string | null;
+  positionName: string | null;
+  sueldoBruto: number;
+  descuentos: number;
+  sueldoNeto: number;
+}
+
+export interface AddEmployeesRequestDto {
+  employeeIds: number[];
+}
+
 export const payrollProcessesApi = {
   getPayrollProcesses: () =>
     apiClient.get<PayrollProcessResponseDto[]>(`/api/payroll-processes`).then((response) => response.data),
@@ -106,6 +132,12 @@ export const payrollProcessesApi = {
     apiClient.post<any>(`/api/payroll-processes/${id}/close-and-pay`).then((response) => response.data),
   getEmployeeReceipt: (processId: number, employeeId: number) =>
     apiClient.get<PayrollEmployeeReceiptDto>(`/api/payroll-processes/${processId}/receipt/${employeeId}`).then((response) => response.data),
+  getEligibleEmployees: (id: number) =>
+    apiClient.get<EligibleEmployeeResponseDto[]>(`/api/payroll-processes/${id}/eligible-employees`).then((response) => response.data),
+  addEmployees: (id: number, body: AddEmployeesRequestDto) =>
+    apiClient.post<{ addedCount: number }>(`/api/payroll-processes/${id}/add-employees`, body).then((response) => response.data),
+  getDetailSummaries: (id: number) =>
+    apiClient.get<PayrollDetailSummaryResponseDto[]>(`/api/payroll-processes/${id}/detail-summaries`).then((response) => response.data),
   getPayrollUpdates: () =>
     apiClient.get(`/api/payroll-updates`).then((response) => response.data),
   createPayrollUpdate: (body: any) =>

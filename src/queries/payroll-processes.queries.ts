@@ -3,6 +3,9 @@ import { RETRIES } from "@/constants/queryConstants";
 import { toaster } from "@/components/ui/toaster";
 import {
   payrollProcessesApi,
+  type AddEmployeesRequestDto,
+  type EligibleEmployeeResponseDto,
+  type PayrollDetailSummaryResponseDto,
   type PayrollEmployeeReceiptDto,
   type PayrollProcessCalculationResponseDto,
   type PayrollManualDetailResponseDto,
@@ -149,6 +152,42 @@ export const useCalculatePayrollProcess = (processId?: number) => {
         queryClient.invalidateQueries({ queryKey: payrollProcessKeys.manualDetails(processId) });
       }
     },
+  });
+};
+
+export const useGetEligibleEmployees = (processId?: number) => {
+  return useQuery<EligibleEmployeeResponseDto[]>({
+    queryKey: processId ? ["payroll-processes", processId, "eligible-employees"] as const : ["payroll-processes", "eligible", "none"] as const,
+    queryFn: () => payrollProcessesApi.getEligibleEmployees(processId ?? 0),
+    enabled: Boolean(processId),
+    retry: RETRIES,
+  });
+};
+
+export const useAddEmployees = (processId?: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ addedCount: number }, Error, AddEmployeesRequestDto>({
+    mutationFn: (body) => payrollProcessesApi.addEmployees(processId ?? 0, body),
+    retry: RETRIES,
+    onSuccess: () => {
+      toaster.create({ title: "Empleados añadidos a la planilla", type: "success" });
+      if (processId) {
+        queryClient.invalidateQueries({ queryKey: ["payroll-processes", processId, "eligible-employees"] });
+        queryClient.invalidateQueries({ queryKey: ["payroll-processes", processId, "detail-summaries"] });
+        queryClient.invalidateQueries({ queryKey: payrollProcessKeys.detail(processId) });
+        queryClient.invalidateQueries({ queryKey: payrollProcessKeys.manualDetails(processId) });
+      }
+    },
+  });
+};
+
+export const useGetPayrollDetailSummaries = (processId?: number) => {
+  return useQuery<PayrollDetailSummaryResponseDto[]>({
+    queryKey: processId ? ["payroll-processes", processId, "detail-summaries"] as const : ["payroll-processes", "summaries", "none"] as const,
+    queryFn: () => payrollProcessesApi.getDetailSummaries(processId ?? 0),
+    enabled: Boolean(processId),
+    retry: RETRIES,
   });
 };
 
