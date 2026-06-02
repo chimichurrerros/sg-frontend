@@ -1,28 +1,119 @@
-import { AlertDialog } from "@/components/ui/dialogs/alert-dialog";
-import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
-import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
-import { ErrorDialog } from "@/components/ui/dialogs/error-dialog";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useMe } from "@/queries/auth.queries";
-import { useAuthStore }     from "@/stores/auth.store";
-import { Heading, Box,Button} from "@chakra-ui/react";
-import { Link }             from "react-router-dom";
+import {
+  useAllProducts,
+  useAllServices,
+} from "@/queries/catalog.queries";
+import { useGetAllCustomers } from "@/queries/customers.queries";
+import { useGetAllSales } from "@/queries/sales.queries";
+import { useAllStock } from "@/queries/stock.queries";
+import { useAllSuppliers } from "@/queries/suppliers.queries";
+import { Box, Heading, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import {
+  ClipboardList,
+  Layers,
+  Package,
+  ShoppingCart,
+  Truck,
+  Users,
+} from "lucide-react";
 
 export const HomePage = () => {
-  const { data: user, isLoading } = useMe();
-  const isAdmin  = useAuthStore((s) => s.isAdmin);
+  const { data: user, isLoading: userLoading } = useMe();
 
-  if (isLoading) return <LoadingScreen message="Cargando HomePage, espere un momento por favor..." height="full"/>;
+  const { data: productsData, isLoading: productsLoading } = useAllProducts();
+  const { data: servicesData, isLoading: servicesLoading } = useAllServices();
+  const { data: customersData, isLoading: customersLoading } = useGetAllCustomers();
+  const { data: suppliersData, isLoading: suppliersLoading } = useAllSuppliers();
+  const { data: salesData, isLoading: salesLoading } = useGetAllSales();
+  const { data: stockData, isLoading: stockLoading } = useAllStock();
+
+  if (userLoading) {
+    return <LoadingScreen message="Cargando..." height="full" />;
+  }
+
+  const productCount = productsData?.products?.length ?? 0;
+  const serviceCount = servicesData?.services?.length ?? 0;
+  const customerCount = customersData?.length ?? 0;
+  const supplierCount = suppliersData?.suppliers?.length ?? 0;
+  const saleCount = salesData?.sales?.length ?? 0;
+  const stockCount = stockData?.stocks?.length ?? 0;
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting =
+    hour < 12
+      ? "Buenos días"
+      : hour < 18
+        ? "Buenas tardes"
+        : "Buenas noches";
+
+  const dateStr = now.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <Box>
-      <Heading size="lg">Bienvenido, {user?.name} {user?.lastName}</Heading>
-      {/* <p>{user?.email} — {user?.roleName}</p> */}
-      {isAdmin && <Link to="/register">Register new user</Link>}
-      <ErrorDialog trigger={<Button mt={4}>Mostrar error</Button>}  />
-      <DestructiveActionDialog trigger={<Button mt={4} variant="outline" colorPalette="red">Mostrar dialog destructivo</Button>} title="ELIMINAR A FULANO DEL SISTEMA" description="Estas a punto de eliminar a FULANO del sistema, esta acción es irreversible"/>
-      <AlertDialog trigger={<Button mt={4}>Mostrar dialog de alerta</Button>} title="Este es un dialogo de alerta" description="No estas autorizado a realizar esa acción, no tienes los persmisos necesarios"/>
-      <ConfirmActionDialog trigger={<Button mt={4}>Mostrar dialog de confirmación</Button>} title="Confirmar acción" description="Estas a punto de realizar esta acción, ¿deseas continuar?"/>
-    </Box>
+    <Stack gap={6} paddingInline="5%">
+      <Box>
+        <Heading size="xl" textTransform="capitalize">
+          {greeting}, {user?.name} {user?.lastName}
+        </Heading>
+        <Text color="gray.500" fontSize="sm">
+          {dateStr}
+        </Text>
+      </Box>
+
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={4}>
+        <StatCard
+          icon={Package}
+          label="Productos"
+          value={productCount}
+          isLoading={productsLoading}
+          color="blue.500"
+        />
+        <StatCard
+          icon={ClipboardList}
+          label="Servicios"
+          value={serviceCount}
+          isLoading={servicesLoading}
+          color="teal.500"
+        />
+        <StatCard
+          icon={Users}
+          label="Clientes"
+          value={customerCount}
+          isLoading={customersLoading}
+          color="green.500"
+        />
+        <StatCard
+          icon={Truck}
+          label="Proveedores"
+          value={supplierCount}
+          isLoading={suppliersLoading}
+          color="orange.500"
+        />
+        <StatCard
+          icon={ShoppingCart}
+          label="Ventas"
+          value={saleCount}
+          isLoading={salesLoading}
+          color="purple.500"
+        />
+        <StatCard
+          icon={Layers}
+          label="Stock (items)"
+          value={stockCount}
+          isLoading={stockLoading}
+          color="cyan.500"
+        />
+      </SimpleGrid>
+
+      <QuickActions />
+    </Stack>
   );
 };
