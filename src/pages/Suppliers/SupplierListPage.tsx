@@ -6,34 +6,31 @@ import {
     useAllSuppliers,
     useEditSupplier,
 } from "@/queries/suppliers.queries";
-import TableBar from "@/components/ui/table-bar";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { Box, ButtonGroup, IconButton, Input, InputGroup, Pagination, Stack, Text } from "@chakra-ui/react";
+import PaginationControl from "@/components/ui/pagination-control";
+import PageSizeControl from "@/components/ui/page-size-control";
+import { Box, IconButton, Input, InputGroup, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuChevronLeft, LuChevronRight, LuSearch } from "react-icons/lu";
+import { LuSearch, LuPencil, LuTrash2, LuPlus } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
+import type { PaginationParams } from "@/types/types";
 
 export default function SupplierListPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
+    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
     const { data, isLoading } = useAllSuppliers();
     const editSupplier = useEditSupplier();
-    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-    const [page, setPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState("");
 
     const suppliers = (data?.suppliers ?? []).filter(s => s.isActive);
-    const filteredSuppliers = suppliers.filter((supplier) => {
-        const term = searchTerm.trim().toLowerCase();
-        if (!term) return true;
-        return (
-            supplier.businessName.toLowerCase().includes(term) ||
-            (supplier.phone ?? "").toLowerCase().includes(term)
-        );
-    });
-    const pageSize = 10;
-    const currentSuppliers = filteredSuppliers.slice((page - 1) * pageSize, page * pageSize);
+
+    const pagination = {
+        currentPage: params.page,
+        pageSize: params.pageSize,
+        totalElements: suppliers.length,
+    };
 
     const labels: label<Supplier>[] = [
         {
@@ -42,14 +39,8 @@ export default function SupplierListPage() {
             isSortable: true,
             sortFunction: (a, b) => a.businessName.localeCompare(b.businessName),
         },
+        { labelName: "RUC", propName: "ruc", textIfNull: "-" },
         { labelName: "Teléfono", propName: "phone", textIfNull: "-" },
-        {
-            labelName: "Activo",
-            isComponent: true,
-            render: (item) => (item.isActive ? "Sí" : "No"),
-            isSortable: true,
-            sortFunction: (a, b) => Number(b.isActive) - Number(a.isActive),
-        },
     ];
 
     const handleCreate = () => {
@@ -65,7 +56,11 @@ export default function SupplierListPage() {
         if (!selectedSupplier) return;
 
         editSupplier.mutate(
-            { id: selectedSupplier.id, data: { isActive: false } },
+            { id: selectedSupplier.id, data: {
+                 isActive: false,
+                 ruc: selectedSupplier.ruc,
+                 businessName: selectedSupplier.businessName, 
+                } },
             {
                 onSuccess: () => {
                     toaster.create({ title: "Proveedor eliminado con éxito" });
@@ -95,29 +90,46 @@ export default function SupplierListPage() {
                 Proveedores
             </Text>
 
-            <Box display="flex" flexDirection="row" gap={3} alignItems="center" justifyContent="space-between">
-                <InputGroup flex="1" maxW="400px" startElement={<LuSearch />}>
-                    <Input
-                        placeholder="Buscar por nombre"
-                        value={searchTerm}
-                        variant="subtle"
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setPage(1);
-                        }}
-                    />
+            <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
+                <InputGroup flex="1" startElement={<LuSearch />}>
+                    <Input placeholder="Buscar Proveedores..." />
                 </InputGroup>
-
-                <TableBar
-                    selected={selectedSupplier}
-                    onCreate={handleCreate}
-                    onEdit={selectedSupplier ? handleEdit : undefined}
-                    onDelete={handleDelete}
-                />
+                <Box display="flex" flexDirection="row" gap={2}>
+                    <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
+                    <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
+                </Box>
+                <IconButton
+                    padding={2}
+                    variant="outline"
+                    colorPalette="brand"
+                    disabled={!selectedSupplier}
+                    onClick={handleDelete}
+                >
+                    <LuTrash2 />
+                    Eliminar
+                </IconButton>
+                <IconButton
+                    padding={2}
+                    variant="outline"
+                    colorPalette="brand"
+                    disabled={!selectedSupplier}
+                    onClick={handleEdit}
+                >
+                    <LuPencil />
+                    Editar
+                </IconButton>
+                <IconButton
+                    padding={2}
+                    colorPalette="brand"
+                    onClick={handleCreate}
+                >
+                    <LuPlus />
+                    Nuevo
+                </IconButton>
             </Box>
 
             <TableSelect
-                data={currentSuppliers}
+                data={suppliers.slice((params.page - 1) * params.pageSize, params.page * params.pageSize)}
                 labels={labels}
                 loading={isLoading}
                 noItemsComponent={
@@ -130,38 +142,10 @@ export default function SupplierListPage() {
                 onDoubleClick={(item) => navigate(`/dash/proveedores/${item.id}`)}
             />
 
-            <Pagination.Root
-                count={filteredSuppliers.length ?? 0}
-                pageSize={pageSize}
-                page={page}
-                onPageChange={(e) => setPage(e.page)}
-                display="flex"
-                justifyContent="center"
-            >
-                <ButtonGroup attached variant="outline" size="sm">
-                    <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                            <LuChevronLeft />
-                        </IconButton>
-                    </Pagination.PrevTrigger>
-                    <Pagination.Items
-                        render={(pageItem) => (
-                            <IconButton
-                                variant={{ base: "outline", _selected: "solid" }}
-                                zIndex={{ _selected: "1" }}
-                                _selected={{ bg: "brand.primary", color: "white" }}
-                            >
-                                {pageItem.value}
-                            </IconButton>
-                        )}
-                    />
-                    <Pagination.NextTrigger asChild>
-                        <IconButton>
-                            <LuChevronRight />
-                        </IconButton>
-                    </Pagination.NextTrigger>
-                </ButtonGroup>
-            </Pagination.Root>
+            <PaginationControl
+                pagination={pagination}
+                onPageChange={(page: number) => { setParams({ ...params, page }) }}
+            />
         </Stack>
     );
 }
