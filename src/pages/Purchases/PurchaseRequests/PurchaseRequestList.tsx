@@ -106,7 +106,6 @@ export default function PurchaseRequestList() {
       height="100%"
       minHeight="0"
     >
-      <p>{JSON.stringify(purchaseRequests)}</p>
       <Text fontSize="2xl" fontWeight="bold">
         Pedidos de Compra
       </Text>
