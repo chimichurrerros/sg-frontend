@@ -63,4 +63,13 @@ export const requestForQuotationApi = {
     apiClient
       .get<RequestForQuotationWrapper>(`/api/request-for-quotations/${id}`)
       .then((r) => r.data.requestForQuotation),
+  getBySupplierAndPurchaseRequest: (supplierId: number, purchaseRequestId: number) => {
+    const queryParams: Record<string, string | number> = {
+      SupplierId: supplierId,
+      PurchaseRequestId: purchaseRequestId,
+    };
+    return apiClient
+      .get<RequestForQuotationGetResponse>(`/api/request-for-quotations`, { params: queryParams })
+      .then((r) => r.data.requestForQuotations?.[0]);
+  },
 };

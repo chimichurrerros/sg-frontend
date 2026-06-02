@@ -1,8 +1,7 @@
 
-import { supplierQuoteApi, type SupplierQuoteCreateRequest, type EditSupplierQuoteRequest } from "@/api/supplierQuote.api";
+import { supplierQuoteApi, type SupplierQuoteCreateRequest, type EditSupplierQuoteRequest, type SupplierQuoteFilterParams } from "@/api/supplierQuote.api";
 import { toaster } from "@/components/ui/toaster";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { PaginationParams } from "@/types/types";
 import { RETRIES } from "@/constants/queryConstants";
 
 
@@ -11,9 +10,9 @@ export const supplierQuoteKeys = {
     detail: (id: number) => ["supplierQuotes", id] as const,
 };
 
-export const useGetSupplierQuotes = (params: PaginationParams) => {
+export const useGetSupplierQuotes = (params: SupplierQuoteFilterParams) => {
     return useQuery({
-        queryKey: ["supplierQuotes", params.page, params.pageSize],
+        queryKey: ["supplierQuotes", params],
         queryFn: () => supplierQuoteApi.get(params),
         staleTime: 1000 * 60 * 2,
     });

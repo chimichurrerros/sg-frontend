@@ -23,6 +23,7 @@ export interface PurchaseRequest {
   date: Date;
   purchaseRequestState: number;
   observation: string;
+  supplierIds: number[];
   details: PurchaseRequestDetails[];
 }
 
