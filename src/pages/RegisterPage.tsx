@@ -10,6 +10,7 @@ import {
   useAllUsers,
   useToggleUserActiveStatus,
 } from "@/queries/users.queries";
+import { useAllBranches } from "@/queries/branches.queries";
 import { registerSchema, type RegisterFormData } from "@/schemas/auth.schema";
 import { useAuthStore } from "@/stores/auth.store";
 import {
@@ -49,6 +50,11 @@ export const RegisterPage = () => {
       { label: "Administrador", value: "admin" },
     ],
   });
+  const { data: branchesData } = useAllBranches();
+  const branches = branchesData?.branches ?? [];
+  const branchCollection: ListCollection = createListCollection({
+    items: branches.map((b) => ({ label: b.name, value: b.id })),
+  });
   const queryClient = useQueryClient();
   // Register new user
   const { mutate: registerUser, isPending } = useRegister();
@@ -87,10 +93,11 @@ export const RegisterPage = () => {
     reset,
     control,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { rol: "user" },
+    defaultValues: { rol: "user", branchId: 0 },
   });
 
   const onSubmit = (data: RegisterFormData) => {
@@ -99,6 +106,7 @@ export const RegisterPage = () => {
     registerUser(data, {
       onSuccess: () => {
         reset();
+        clearErrors();
         toaster.create({ title: "Usuario creado con éxito" });
         queryClient.invalidateQueries({ queryKey: ["users"] });
       },
@@ -125,6 +133,7 @@ export const RegisterPage = () => {
   const usersLabels: label<UserDto>[] = [
     { labelName: "ID", propName: "id" },
     { labelName: "Correo", propName: "email" },
+    { labelName: "Sucursal", propName: "branchName" },
     { labelName: "Rol", propName: "roleName" },
     {
       labelName: "Estado",
@@ -251,6 +260,44 @@ export const RegisterPage = () => {
             )}
           />
           <Field.ErrorText>{errors.rol?.message}</Field.ErrorText>
+        </Field.Root>
+
+        <Field.Root invalid={!!errors.branchId}>
+          <Field.Label>Sucursal</Field.Label>
+          <Controller
+            name="branchId"
+            control={control}
+            render={({ field }) => (
+              <Select.Root
+                collection={branchCollection}
+                value={field.value ? [String(field.value)] : []}
+                onValueChange={(e) => field.onChange(Number(e.value[0]))}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Seleccionar sucursal" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {branches.map((b) => (
+                        <Select.Item item={{ label: b.name, value: b.id }} key={b.id}>
+                          {b.name}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+            )}
+          />
+          <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
         </Field.Root>
       </SimpleGrid>
 

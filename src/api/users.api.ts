@@ -24,6 +24,8 @@ export interface UserDto {
   roleName: string; // ← "Admin" | "User"
   isActive: boolean;
   createdAt: string;
+  branchId: number;
+  branchName: string;
 }
 
 export interface ListUsersWrapperDto {
