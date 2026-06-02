@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 export const Products = () => {
   const navigation = useNavigate();
 
-  const { data, isLoading, error,isError } = useAllProducts();
+  const { data, isLoading, error, isError } = useAllProducts();
   const { mutate: deleteProduct } = useDeleteProduct();
   const queryClient = useQueryClient();
 
@@ -29,7 +29,11 @@ export const Products = () => {
     { labelName: "Nombre", propName: "name" },
     { labelName: "Categoría", propName: "productCategoryName" },
     { labelName: "Marca", propName: "productBrandName" },
-    { labelName: "Precio", propName: "price",transformFunction:(value)=>parsePrice(value) },
+    {
+      labelName: "Precio",
+      propName: "price",
+      transformFunction: (value) => parsePrice(value),
+    },
     { labelName: "Stock mínimo", propName: "minimumStock" },
   ];
   const [page, setPage] = useState(1);
@@ -59,9 +63,15 @@ export const Products = () => {
     navigation(`/dash/catalogo/productos/${selected.id}`);
   };
 
-  useEffect(()=> {
-    if(isError){toaster.create({title:"Error al cargar los productos",description: error?.message || "Error desconocido", type:"error"})}
-  },[error,isError])
+  useEffect(() => {
+    if (isError) {
+      toaster.create({
+        title: "Error al cargar los productos",
+        description: error?.message || "Error desconocido",
+        type: "error",
+      });
+    }
+  }, [error, isError]);
 
   return (
     <Stack>
@@ -78,9 +88,17 @@ export const Products = () => {
         onSelect={(item) => {
           setSelecteed(item);
         }}
-        onDoubleClick={(item) => navigation(`/dash/catalogo/productos/${item.id}`)}
+        onDoubleClick={(item) =>
+          navigation(`/dash/catalogo/productos/${item.id}`)
+        }
         loading={isLoading}
-        noItemsComponent={<EmptyDataScreen title="No se cargaron productos" message="Verificar errores de conexión o crear un producto nuevo" icon={<BeanOffIcon/>}/>}
+        noItemsComponent={
+          <EmptyDataScreen
+            title="No se cargaron productos"
+            message="Verificar errores de conexión o crear un producto nuevo"
+            icon={<BeanOffIcon />}
+          />
+        }
       />
 
       <Pagination.Root

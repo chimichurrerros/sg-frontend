@@ -56,6 +56,7 @@ export const AddService = () => {
     defaultValues: {
       name: "",
       description: "",
+      barcode: "",
       price: 0,
       cost: 0,
     },
@@ -67,6 +68,7 @@ export const AddService = () => {
       reset({
         name: svc.name,
         description: svc.description ?? "",
+        barcode: svc.barcode ?? "",
         price: svc.price,
         cost: svc.cost,
       });
@@ -150,6 +152,16 @@ export const AddService = () => {
               <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
             </Field.Root>
           </GridItem>
+
+          <Field.Root invalid={!!errors.barcode} required>
+            <Field.Label>Código de barras</Field.Label>
+            <Input
+              {...register("barcode")}
+              placeholder="5449000009067"
+              disabled={isPending}
+            />
+            <Field.ErrorText>{errors.barcode?.message}</Field.ErrorText>
+          </Field.Root>
 
           <Field.Root invalid={!!errors.price} required>
             <Field.Label>Precio</Field.Label>
