@@ -5,6 +5,7 @@ export interface ServiceResponseDto {
     id: number;
     name: string;
     description: string;
+    barcode: string | null;
     price: number;
     cost: number;
 }
@@ -17,6 +18,7 @@ export interface ServicesGetResponse {
 export interface ServiceRequestDto {
     name?: string | null;
     description?: string | null;
+    barcode?: string | null;
     price: number;
     cost: number;
 }

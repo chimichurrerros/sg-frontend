@@ -50,6 +50,9 @@ export const createServiceSchema = z.object({
     .min(1, "El nombre es requerido")
     .min(2, "El nombre debe tener al menos 2 caracteres"),
   description: z.string().optional(),
+  barcode: z
+    .string({ message: "El código de barras es requerido" })
+    .min(1, "El código de barras es requerido"),
   price: z
     .number({ message: "El precio es requerido" })
     .min(0, "El precio no puede ser negativo"),
