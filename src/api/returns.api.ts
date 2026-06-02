@@ -3,10 +3,10 @@ import { apiClient } from "./client";
 
 export interface SaleReturnRequest {
     billId:  number;
-    date:    Date;
+    date:    string;
     total:   number;
     reason:  string;
-    details: SaleReturnRequestDetail[];
+    details: Partial<SaleReturnRequestDetail>[];
 }
 
 export interface SaleReturnRequestDetail {
@@ -38,6 +38,7 @@ export interface SaleReturnDetail {
     productName: string;
     quantity:    number;
     price:       number;
+    maxQuantity?:number; //Auxiliar field used for return quantity control
 }
 
 export interface SaleReturnParams extends PaginationParams {

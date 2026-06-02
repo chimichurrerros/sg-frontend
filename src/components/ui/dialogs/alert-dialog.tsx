@@ -10,6 +10,7 @@ interface AlertDialogProps {
     description: string;
     onAccept?: () => void;
     trigger?: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 /**
@@ -21,6 +22,7 @@ export const AlertDialog = ({
     description,
     onAccept,
     trigger,
+    children
 }: AlertDialogProps) => {
     return (
         <Dialog.Root>
@@ -47,6 +49,7 @@ export const AlertDialog = ({
                             <Text fontSize="sm">
                                 {description}
                             </Text>
+                            {children}
                         </Dialog.Body>
                         <Dialog.Footer>
                             <Dialog.ActionTrigger asChild>

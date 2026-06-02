@@ -283,9 +283,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   }
   return (
     <Box height="89vh" display="flex" flexDirection="column">
-      {/* <p>{JSON.stringify(saleForm)}</p> */}
       <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
-
         <Box display="flex" gap={3}>
           <Text fontSize="2xl" fontWeight="bold">
             {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}
@@ -338,7 +336,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         </Flex>
       </Flex>
-      {/* <p>{JSON.stringify(saleForm.products)}</p> */}
 
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
         {mode === "create" && (
