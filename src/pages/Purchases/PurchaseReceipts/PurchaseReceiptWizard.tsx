@@ -54,7 +54,7 @@ export default function PurchaseReceiptWizard() {
     const poOptions = useMemo(() =>
         purchaseOrdersList.map((po) => ({
             value: po.id.toString(),
-            label: `#${po.number} - ${po.supplierName} - ${po.date.slice(0, 10)}`,
+            label: `#${po.number} - ${po.date.slice(0, 10)}`,
         })),
         [purchaseOrdersList],
     );

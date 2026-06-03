@@ -7,6 +7,7 @@ export interface RequestForQuotationProduct {
   quantityRequested: number;
   categoryId: number;
   categoryName: string;
+  productCost: number;
 }
 
 export interface RequestForQuotation {

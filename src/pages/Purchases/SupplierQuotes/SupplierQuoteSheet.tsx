@@ -121,7 +121,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
       productId: p.productId,
       productName: p.productName,
       quantityRequested: p.quantityRequested,
-      price: undefined,
+      price: p.productCost,
       taxRate: undefined,
     })));
   }, [rfq, mode]);
@@ -235,7 +235,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
           {mode === "create" && (
             <ConfirmActionDialog
               trigger={
-                <IconButton p={2} bgColor="brand.secondary" disabled={isSaveDisabled} size="lg">
+                <IconButton p={2} bgColor="brand.primary" disabled={isSaveDisabled} size="lg">
                   {createSupplierQuote.isPending ? <Spinner /> : <FileInput />}
                   Crear cotización
                 </IconButton>
