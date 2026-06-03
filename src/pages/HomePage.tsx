@@ -38,7 +38,7 @@ export const HomePage = () => {
   const serviceCount = servicesData?.services?.length ?? 0;
   const customerCount = customersData?.length ?? 0;
   const supplierCount = suppliersData?.suppliers?.length ?? 0;
-  const saleCount = salesData?.sales?.length ?? 0;
+  const saleCount = salesData?.salesOrders?.length ?? 0;
   const stockCount = stockData?.stocks?.length ?? 0;
 
   const now = new Date();
