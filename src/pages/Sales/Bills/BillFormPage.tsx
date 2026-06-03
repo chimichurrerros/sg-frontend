@@ -8,10 +8,12 @@ import { useBillById } from "@/queries/bills.queries";
 import { useBillDetailsByBillId } from "@/queries/bill-details.queries";
 import { useGetSaleById } from "@/queries/sales.queries";
 import { useAllProducts } from "@/queries/catalog.queries";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
 import { parsePrice } from "@/constants/price";
 import { parseDate } from "@/constants/date";
 import type { PaginationType } from "@/types/types";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+import { LoadingScreen } from "@/components/ui/screens/loading-screen";
+import PageTitle from "@/components/ui/title";
 
 export default function BillFormPage() {
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ export default function BillFormPage() {
   const getIva5 = (d: BillDetail) => (d.taxRate === 5 ? d.price * d.quantity : 0);
   const getIva10 = (d: BillDetail) => (d.taxRate === 10 ? d.price * d.quantity : 0);
 
-  const showIfNotZero = (value: number) => (value > 0 ? parsePrice(value) : "");
+  const showIfNotZero = (value: number) => (value > 0 ? parsePrice(value) : "-");
 
   const detailLabels: EditableLabel<BillDetail>[] = [
     { labelName: "Cód.", propName: "productId" },
@@ -112,8 +114,8 @@ export default function BillFormPage() {
 
   if (isLoading) {
     return (
-      <Box p={5}>
-        <Spinner />
+      <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
+        <LoadingScreen message="Cargando Factura..."/>
       </Box>
     );
   }
@@ -121,9 +123,9 @@ export default function BillFormPage() {
   return (
     <Box p={5} display="flex" flexDirection="column" gap={4}>
       <HStack justifyContent="space-between">
-        <Text fontWeight="bold" fontSize="2xl">
+        <PageTitle>
           Factura {number}
-        </Text>
+        </PageTitle>
         <Button variant="outline" onClick={() => navigate("/ventas/facturas")}>
           <ArrowLeft size={18} /> Volver al listado
         </Button>

@@ -1,13 +1,11 @@
 import type { UserDto } from "@/api/users.api.ts";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
-import TableEditable from "@/components/ui/table-edit";
-import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
+import TableEditable from "@/components/ui/tables/table-edit";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { toaster } from "@/components/ui/toaster";
 import {
   useAllUsers,
-  useToggleUserActiveStatus,
 } from "@/queries/users.queries";
 import {
   useAllRoles,
@@ -41,8 +39,6 @@ import {
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Power,
-  Pencil,
   Trash2,
   Save,
   Plus,
@@ -65,8 +61,6 @@ export const RegisterPage = () => {
   });
 
   // Mutations
-  const { mutate: toggleActive, isPending: isToggling } =
-    useToggleUserActiveStatus();
 
   // Role Mutations
   const createRole = useCreateRole();
@@ -258,39 +252,6 @@ export const RegisterPage = () => {
               </Select.Root>
 
               <Spacer />
-
-              <ConfirmActionDialog
-                title={selectedUser?.isActive ? "Desactivar usuario" : "Activar usuario"}
-                description={
-                  selectedUser?.isActive
-                    ? `¿Estás seguro de que deseas desactivar al usuario ${selectedUser?.email}?`
-                    : `¿Estás seguro de que deseas activar al usuario ${selectedUser?.email}?`
-                }
-                acceptText="Confirmar"
-                onAccept={() => selectedUser && toggleActive(selectedUser.id)}
-                trigger={
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    colorPalette="brand"
-                    disabled={selectedUser === null || isToggling}
-                  >
-                    <Power size={16} />
-                    {selectedUser?.isActive ? "Desactivar" : "Activar"}
-                  </Button>
-                }
-              />
-
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="brand"
-                disabled={selectedUser === null}
-                onClick={() => selectedUser && navigate(`/register/${selectedUser.id}`)}
-              >
-                <Pencil size={16} />
-                Editar
-              </Button>
 
               <Button
                 size="sm"

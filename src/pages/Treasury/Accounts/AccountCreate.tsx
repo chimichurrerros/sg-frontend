@@ -27,6 +27,7 @@ import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import PageTitle from "@/components/ui/title";
 
 const accountTypeCollection = createListCollection({
   items: Object.entries(accountTypeMap).map(([value, label]) => ({
@@ -103,7 +104,7 @@ export default function AccountCreate() {
   return (
     <Stack gap={4} paddingInline="15%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nueva Cuenta</Heading>
+        <PageTitle>Nueva Cuenta</PageTitle>
         <Button
           variant="ghost"
           size="sm"

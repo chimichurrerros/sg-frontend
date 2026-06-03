@@ -1,6 +1,6 @@
 import { Box, Button, ButtonGroup, Grid, Input, Spinner, Stack, Steps, Text, Textarea } from "@chakra-ui/react";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";
@@ -11,6 +11,8 @@ import { useAllBranches } from "@/queries/branches.queries";
 import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
 import type { PurchaseOrder } from "@/api/purchaseOrders.api";
+import PageTitle from "@/components/ui/title";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 const STEPS = [
     { title: "Datos Generales", description: "OC, proveedor y factura" },
@@ -272,12 +274,17 @@ export default function PurchaseReceiptWizard() {
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Fecha *
                     </Text>
-                    <Input
+                    <DatePickerWrapper
+                    size="sm"
+                    value={date}
+                    onChange={(e)=>setDate(e[0])}
+                    />
+                    {/* <Input
                         size="sm"
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                    />
+                    /> */}
                 </Box>
             </Grid>
             <Box>
@@ -398,9 +405,9 @@ export default function PurchaseReceiptWizard() {
 
     return (
         <Box display="flex" flexDirection="column" gap={6} height="full" minHeight="0">
-            <Text fontSize="2xl" fontWeight="bold">
+            <PageTitle>
                 Recepción de Órdenes de Compra
-            </Text>
+            </PageTitle>
 
             <Steps.Root count={3} step={currentStep} onStepChange={(e: { step: number }) => setCurrentStep(e.step)}>
                 <Steps.List>

@@ -4,9 +4,9 @@ import { AlertDialog } from "@/components/ui/dialogs/alert-dialog";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import type { EditableLabel } from "@/components/ui/table-edit";
-import TableEditable from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import type { EditableLabel } from "@/components/ui/tables/table-edit";
+import TableEditable from "@/components/ui/tables/table-edit";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { useAllBranches } from "@/queries/branches.queries";
@@ -16,6 +16,7 @@ import { Box, Flex, HStack, IconButton, Spinner, Text, Textarea, VStack } from "
 import { ArrowLeft, CornerDownLeft, CornerDownRight, FileInputIcon, FileText, HandCoins, PackagePlus, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 interface ReturnSheetPageProps {
     mode: "view" | "create";
@@ -141,10 +142,10 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
         <Box height="89vh" display="flex" flexDirection="column" gap={4}>
             <Flex justify="space-between" alignItems="center" flexShrink={0} direction="row">
                 <Box>
-                    <Text fontSize="2xl" fontWeight="bold">
+                    <PageTitle>
                         {mode === "create" && "Nueva"} Devolución
                         {mode === "view" && displayData && ` N° ${displayData.id} de la venta ${displayData.salesOrderNumber || "-"}`}
-                    </Text>
+                    </PageTitle>
                     {mode === "view" && displayData && (
                         <Text fontSize="md" fontWeight="bold" color="gray.500" mt={1}>
                             Fecha de Devolución: {parseDate(displayData.date)}

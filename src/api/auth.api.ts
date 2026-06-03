@@ -30,6 +30,7 @@ export interface UserDto {
   phoneNumbers: string[];
   roleName: string;        // ← "Admin" | "User"
   branchId: number;
+  permissions: string[];
 }
 
 export interface UserWrapperDto {

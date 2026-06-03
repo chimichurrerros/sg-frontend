@@ -55,6 +55,8 @@ import SaleListPage from "@/pages/Sales/SaleListPage";
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
+import CreditNotesPage from "@/pages/Sales/CreditNotes/CreditNotesListPage";
+import CreditNoteSheetPage from "@/pages/Sales/CreditNotes/CreditNoteSheetPage";
 
 export const router = createBrowserRouter([
   {
@@ -88,16 +90,13 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
-          {
-            path: "/ventas/presupuestos/crear",
-            element: <BudgetSheetPage mode="create" />,
-          },
+          {path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" />,},
           {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
-
           {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
           {path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
-
           {path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
+          {path: "/ventas/notas-de-credito", element: <CreditNotesPage/> },
+          {path: "/ventas/notas-de-credito/:id", element: <CreditNoteSheetPage/> },
 
           /* ===== COMPRAS ===== */
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },

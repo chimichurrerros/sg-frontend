@@ -18,6 +18,7 @@ import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
 import AvailableSuppliersTable from "./AvailableSuppliersTable";
+import PageTitle from "@/components/ui/title";
 
 export default function PurchaseRequestCreate() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function PurchaseRequestCreate() {
   return (
     <Stack gap={4} paddingInline="5%" height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nuevo Pedido de Compra</Heading>
+        <PageTitle>Nuevo Pedido de Compra</PageTitle>
         <Button
           variant="ghost"
           size="sm"
