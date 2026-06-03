@@ -159,17 +159,27 @@ export const AddUserPage = () => {
       return;
     }
 
-    registerUser(formData, {
-      onSuccess: () => {
-        toaster.create({ title: "Usuario creado con éxito", type: "success" });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-        navigate("/register");
+    registerUser(
+      {
+        name: formData.name,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password!,
+        branchId: formData.branchId,
+        roleId: formData.roleId,
       },
-      onError: (error: any) => {
-        const errMsg = error.response?.data?.detail || error.response?.data?.title || error.message;
-        setFormError("Ha ocurrido un error al registrar: " + errMsg);
-      },
-    });
+      {
+        onSuccess: () => {
+          toaster.create({ title: "Usuario creado con éxito", type: "success" });
+          queryClient.invalidateQueries({ queryKey: ["users"] });
+          navigate("/register");
+        },
+        onError: (error: any) => {
+          const errMsg = error.response?.data?.detail || error.response?.data?.title || error.message;
+          setFormError("Ha ocurrido un error al registrar: " + errMsg);
+        },
+      }
+    );
   };
 
   return (
