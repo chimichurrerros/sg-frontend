@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAdmin: false,
 
-      setAuth: (user) => set({ user, isAdmin: user.roleName === "Admin" }),
+      setAuth: (user) => set({ user, isAdmin: user.roleName.toLowerCase() === "admin" }),
       clearAuth: () => set({ user: null, isAdmin: false }),
     }),
     { name: "auth-storage" },

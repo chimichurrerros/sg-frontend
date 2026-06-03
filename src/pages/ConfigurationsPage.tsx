@@ -24,7 +24,7 @@ export default function ConfigurationsPage() {
     function handleResetToDefault() {
         const resetConfig: AppConfigurations = {
             saveSidebarState: true,
-            lastSidebarState: false  // Resetear también el último estado
+            lastSidebarState: false  
         };
 
         saveLocalStorage("appConfig", resetConfig);
@@ -37,7 +37,7 @@ export default function ConfigurationsPage() {
                     <Box w="full " h="full" display="flex" alignItems="center" justifyContent="space-between" flexDirection="row" gap={10} padding={3} rounded="md">
                         <Box display="flex" flexDirection="row" gap={10} alignItems="center">
                             <Box border="2px solid" bgColor="white" borderColor="gray.300" padding={3} rounded="md">
-                                <Image src="/public/favicon.svg" boxSize="150px" />
+                                <Image src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExamYwY2I0Mnl4MzJxdW5yYmo4dWxxdmFqamQ4eDFrODB0YW9ob29wdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/n3oAfxLN7Fy9hlFjFu/giphy.gif" boxSize="150px" />
                             </Box>
                             <Text fontWeight="bold" textStyle="4xl">BIGOTIRES S.A</Text>
                         </Box>
@@ -102,6 +102,7 @@ export default function ConfigurationsPage() {
                         <Checkbox.Root checked={config.saveSidebarState} onCheckedChange={(checked) => {
                             setConfig({ ...config, saveSidebarState: !config.saveSidebarState });
                             saveLocalStorage("appConfig", {
+                                ...config,
                                 saveSidebarState: checked.checked
                             });
                         }}>

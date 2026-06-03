@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react/box";
 import { Heading } from "@chakra-ui/react/heading";
-import { Text, Button, Icon, HStack, Flex } from "@chakra-ui/react";
+import { Text, Button, Icon, HStack } from "@chakra-ui/react";
 import { TriangleAlert } from "lucide-react";
 
 interface errorProps {
@@ -21,12 +21,11 @@ export const ErrorScreen: React.FC<errorProps> = ({
   retryText = "Reintentar",
 }) => {
   return (
-    <Flex
-      w="100%"
-      h="100%"
+    <Box
+      w="full"
+      h="full"
       alignItems="center"
       justifyContent="center"
-      bgColor="gray.50"
       rounded="lg"
     >
       <Box
@@ -98,6 +97,6 @@ export const ErrorScreen: React.FC<errorProps> = ({
           )}
         </Box>
       </Box>
-    </Flex>
+    </Box>
   );
 };

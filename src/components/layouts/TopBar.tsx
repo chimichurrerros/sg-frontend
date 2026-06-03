@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Text, Menu, Avatar, Icon } from "@chakra-ui/react";
-import { AlignLeft, LogOut, User, Settings, PanelLeft } from "lucide-react";
+import { LogOut, User, Settings, PanelLeft } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLogout }    from "@/queries/auth.queries";
 import { NAV_CONFIG }   from "@/constants/navigation";
@@ -9,6 +9,9 @@ interface Props { onToggle: () => void; }
 
 function useBreadcrumb() {
   const { pathname } = useLocation();
+  if (pathname === "/dash/contabilidad/libro-diario") {
+    return "Contabilidad / Libro Diario";
+  }
   for (const item of NAV_CONFIG) {
     if (item.path === pathname) return item.label;
     const child = item.children?.find(c => c.path === pathname);

@@ -1,0 +1,316 @@
+import { Box, Table } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { LoadingScreen } from "../screens/loading-screen";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { Text } from "@chakra-ui/react";
+import EmptyDataScreen from "../screens/empty-data-screen";
+import { ErrorScreen } from "../screens/error-screen";
+export interface label<T extends { id: number }> {
+    labelName: string,
+    propName?: keyof T
+    textIfNull?: string
+    isSortable?: boolean
+    sortFunction?: (a: T, b: T) => number
+    isComponent?: boolean
+    render?: (item: T) => React.ReactNode
+    transformFunction?: (value: any) => string
+}
+
+export interface tableSelectProps<T extends { id: number }> {
+    labels: label<T>[]
+    data: T[]
+    onSelect: (item: T | null) => void
+    onDoubleClick?: (item: T) => void
+    noItemsComponent?: React.ReactNode
+    height?: string
+    minheight?: string
+    loadingMessage?: string
+    loading: boolean
+    error?: Error | null
+    isError?: boolean
+    maxHeight?: string
+}
+
+/**
+ * Generic Table, works with a type T, this table was thinked to work with api queries(data is a tanstack query state)
+ * labels: list of label(label name = name of the finalData in table header, prop name = the name of the object property, textIfNull: Text shown if the object finalData was null ej:
+ *  obj : {name : "Peristocles"}
+ *  his label should be {labelName: "Nombre", propName: "name" ,textIfNull: "Sin nombre"}
+ * onSelect: do smth when the row is selected
+ * onDoubleClick: do smth when you press Enter having a selected row or when you double click a row
+ * noItemsComponent: Component shown when there aren't finalData to show in the table( i recommend EmptyState component from chakra ui)
+ * height & minHeight : customize the table height and minHeight
+ * loading message: message shown in the loading screen component
+ * loading: loading state, if true, LoadingScreen is showed with the loading message
+ * if you want a scroll you must pass he height arg
+ * Pagination must be managed outside of this component
+ *
+ */
+export const sortIcon = {
+    "Asc": ArrowUp,
+    "Desc": ArrowDown
+}
+export const getSorticon = (sortDirection: "Asc" | "Desc") => {
+    const Icon = sortIcon[sortDirection]
+    return <Icon size="16px" />
+}
+
+export default function TableSelect<T extends { id: number }>(
+    { labels, data, onSelect, onDoubleClick, noItemsComponent,
+        height, minheight, loading, loadingMessage = "Cargando datos, espere un momento....", error = null, isError = false, maxHeight
+    }: tableSelectProps<T>) {
+
+
+
+    const [selected, setSelected] = React.useState<T | null>(null);
+    const selectedRowRef = React.useRef<HTMLTableRowElement | null>(null);
+    const [sortDirection, setSortDirection] = useState<"Asc" | "Desc">("Desc");
+    const [sortHeader, setSortHeader] = useState<number | null>(null);
+    const [finalData, setFinalData] = useState(data);
+
+    useEffect(() => {
+        setFinalData(data);
+    }, [data]);
+
+    const moverArriba = () => {
+        if (!selected) {
+            setSelected(finalData[0]);
+            onSelect(finalData[0]);
+            return;
+        }
+        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+        if (currentIndex === -1) {
+            setSelected(null);
+            onSelect(null);
+            return;
+        }
+        const newSelected = finalData[Math.max(currentIndex - 1, 0)];
+        setSelected(newSelected);
+        onSelect(newSelected);
+    };
+
+    const moverAbajo = () => {
+        if (!selected) {
+            if (finalData.length !== 0) {
+                setSelected(finalData[finalData.length - 1]);
+                onSelect(finalData[finalData.length - 1]);
+            }
+            return;
+        }
+        const currentIndex = finalData.findIndex((s: T) => selected.id === s.id);
+        if (currentIndex === -1) {
+            setSelected(null);
+            onSelect(null);
+            return;
+        }
+        const newSelected =
+            finalData[Math.min(currentIndex + 1, finalData.length - 1)];
+        setSelected(newSelected);
+        onSelect(newSelected);
+    };
+
+    useHotkeys("up", (event) => {
+        event.preventDefault();
+        moverArriba();
+    });
+    useHotkeys("down", (event) => {
+        event.preventDefault();
+        moverAbajo();
+    });
+
+    useHotkeys("enter", (event) => {
+        event.preventDefault();
+        if (!selected || !onDoubleClick) return;
+        onDoubleClick(selected);
+    });
+
+    useEffect(() => {
+        if (selectedRowRef.current) {
+            setTimeout(() => {
+                selectedRowRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 200);
+        }
+    }, [selected]);
+    useEffect(() => {
+        setFinalData(data);
+    }, [data]);
+
+
+    function sortfinalData(sortFunction: ((a: T, b: T) => number)) {
+        const sortedData = [...finalData].sort(sortFunction);
+        if (sortDirection === "Desc") {
+            setFinalData(sortedData.reverse());
+        } else {
+            setFinalData(sortedData);
+        }
+    }
+    return (
+        <Box flex="1" minHeight="0" my={3}>
+            {loading ? (
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    height="full"
+                    border="1px solid"
+                    borderColor={"gray.300"}
+                    rounded="md"
+                >
+                    <LoadingScreen message={loadingMessage} height={height || "400px"} />
+                </Box>
+            ) : (
+                <Table.ScrollArea borderWidth="1px" rounded="md" height={height || "100%"} minHeight={minheight || "auto"} maxHeight={maxHeight || "60vh"} tabIndex={0} >
+                    <Table.Root size="sm" stickyHeader >
+                        <Table.Header >
+                            <Table.Row bg="bg.subtle" hidden={loading}>
+                                {labels && labels.map((label: label<T>, index: number) =>
+                                    <Table.ColumnHeader
+                                        key={index}
+                                        bgColor={sortHeader === index ? "gray.200" : ""}
+                                        paddingX={5}
+                                        textAlign="left"
+                                        userSelect="none"
+                                        onClick={() => {
+                                            if (!label.isSortable) return;
+                                            if (sortHeader === index) { setSortDirection(sortDirection === "Asc" ? "Desc" : "Asc") }
+                                            else { setSortHeader(index) }
+                                            if (label.sortFunction) sortfinalData(label.sortFunction)
+                                        }
+                                        }
+                                        _hover={{
+                                            bg: label.isSortable ? "gray.100" : "transparent",
+                                        }}
+                                    >
+                                        <Box
+                                            display="flex"
+                                            flexDirection="row"
+                                            gap={3}
+                                            alignContent="center"
+                                        >
+
+                                            <Text fontWeight="bold">{label.labelName}</Text>
+                                            <Box width="20px" visibility={label.isSortable && sortHeader === index ? "visible" : "hidden"}>
+                                                {label.isSortable && sortHeader === index && getSorticon(sortDirection)}
+                                            </Box>
+                                        </Box>
+                                    </Table.ColumnHeader>)}
+                            </Table.Row>
+                        </Table.Header>
+
+                        <Table.Body >
+                            {isError && error && <Table.Row>
+                                <Table.Cell
+                                    colSpan={labels.length}
+                                    height={`calc(${height} - 1vh)`}
+                                    border="hidden"
+                                    verticalAlign="middle"
+                                    textAlign="center"
+
+                                >
+                                    <ErrorScreen errorMessage={error.message || "Error desconocido"} title={"Error al traer datos"} />
+                                </Table.Cell>
+                            </Table.Row>}
+                            {loading &&
+                                <Table.Row>
+                                    <Table.Cell
+                                        colSpan={labels.length}
+                                        height={`calc(${height} - 1vh)`}
+                                        border="hidden"
+                                        verticalAlign="middle"
+                                        textAlign="center"
+
+                                    >
+                                        <LoadingScreen message={loadingMessage} />
+                                    </Table.Cell>
+                                </Table.Row>
+                            }
+                            {finalData && !loading && !isError && finalData.length > 0 && [...finalData].map((item: T) =>
+                                <Table.Row
+                                    key={item.id}
+                                    onClick={() => {
+                                        setTimeout(() => {
+                                            if (selected && selected.id === item.id) {
+                                                setSelected(null);
+                                                onSelect(null)
+                                            } else {
+                                                setSelected(item);
+                                                onSelect(item);
+                                            }
+                                        }, 200)
+
+                                    }}
+                                    ref={selected?.id === item.id ? selectedRowRef : null}
+                                    bg={selected?.id === item.id ? "green.subtle" : "transparent"}
+                                    _hover={{
+                                        bg: selected?.id === item.id ? "green.subtle" : "gray.100"
+                                    }}
+                                    _focus={{
+                                        bg: "green.subtle",
+                                        outline: "none"
+                                    }}
+                                    cursor="pointer"
+                                    onDoubleClick={() => onDoubleClick && onDoubleClick(item)
+                                    }
+
+                                >
+                                    {labels && labels.map((label: label<T>, index: number) =>
+                                        <Table.Cell
+                                            key={index}
+                                            onDoubleClick={() => onDoubleClick && onDoubleClick(item)}
+                                            pl={5}
+                                        >
+                                            {label.isComponent && label.render ? (
+                                                label.render(item)
+                                            ) : (
+                                                (() => {
+                                                    if (!label.propName) return label.textIfNull || "-";
+                                                    const value = item[label.propName];
+                                                    if (value === undefined || value === null) return label.textIfNull || "-";
+                                                    if (label.transformFunction) return label.transformFunction(value);
+                                                    return String(value || value===0 ? value : "-");
+                                                })()
+                                            )}
+                                        </Table.Cell>)}
+                                </Table.Row>
+                            )}
+                            {!loading && !isError && finalData && finalData.length === 0 &&
+                                <Table.Row>
+                                    <Table.Cell
+                                        colSpan={labels.length}
+                                        p={0}
+                                        border="hidden"
+                                    >
+                                        <Box
+                                            position="relative"
+                                            height={height || "200px"}
+                                        >
+                                            <Box
+                                                position="absolute"
+                                                top="50%"
+                                                left="50%"
+                                                transform="translate(-50%, -50%)"
+                                                width="100%"
+                                                textAlign="center"
+                                            >
+                                                <Box
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                >
+                                                    {noItemsComponent ? noItemsComponent : <EmptyDataScreen title="No se encontraron datos" message="No hay datos para mostrar en este momento." />}
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    </Table.Cell>
+                                </Table.Row>
+                            }
+                        </Table.Body>
+                    </Table.Root>
+
+                </Table.ScrollArea>)}</Box>
+    )
+}
