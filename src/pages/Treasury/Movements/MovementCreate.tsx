@@ -30,7 +30,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
-import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
+import { RadioGroupWrapper } from "@/components/ui/wrappers/radio-group-wrapper";
 import { CurrencyInput } from "@/components/ui/currency-input";
 
 export default function MovementCreate() {

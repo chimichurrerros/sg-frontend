@@ -4,7 +4,7 @@ import { Pencil, Trash2Icon, Plus, Save } from "lucide-react";
 import { LuSearch } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import type { StockItem } from "@/types/inventory";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { useAllStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
@@ -15,6 +15,7 @@ import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
 import type { PaginationParams } from "@/types/types";
 import { IconButton } from "@chakra-ui/react";
+import PageTitle from "@/components/ui/title";
 
 export default function StockListPage() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
@@ -182,7 +183,7 @@ export default function StockListPage() {
 
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <Text fontWeight="bold" fontSize="3xl">Listado de Productos en Inventario</Text>
+            <PageTitle>Listado de Productos en Inventario</PageTitle>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>

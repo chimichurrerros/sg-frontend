@@ -25,7 +25,7 @@ import { useAllAccountPlans } from "@/queries/accountPlans.queries";
 import { useCreateEntry } from "@/queries/entries.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { toaster } from "@/components/ui/toaster";
 

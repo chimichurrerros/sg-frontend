@@ -10,7 +10,7 @@ import {
   FilePlus, 
   ChevronRight 
 } from "lucide-react";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";

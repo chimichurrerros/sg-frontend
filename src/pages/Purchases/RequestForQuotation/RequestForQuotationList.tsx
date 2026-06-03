@@ -4,11 +4,11 @@ import type { RequestForQuotationFilterParams } from "@/api/requestForQuotation.
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetRequestForQuotations } from "@/queries/request-for-quotation.queries";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import {
   Box,
   Button,

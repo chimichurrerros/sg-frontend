@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { Box, Button, IconButton, Input, Stack, Text } from "@chakra-ui/react";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { useCallback, useEffect, useState } from "react";
 import { LuPlus, LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
@@ -11,7 +11,7 @@ import { parsePrice } from "@/constants/price";
 import type { PurchaseOrderDTO, PurchaseOrderFilterParams } from "@/api/purchase-orders.ts";
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 const purchaseOrderStates: Record<number, string> = {
   1: "Pendiente",

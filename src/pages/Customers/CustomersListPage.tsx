@@ -1,7 +1,7 @@
 import type { Customer, CustomerRequest } from "@/api/customers.api";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useCreateCustomer, useEditCustomer, useGetCustomers } from "@/queries/customers.queries";
 import type { PaginationParams } from "@/types/types";
@@ -11,7 +11,8 @@ import { useEffect, useState } from "react";
 import { LuSearch, LuPencil, LuPlus, LuX, LuCheck } from "react-icons/lu";
 import { isValidRuc } from "../Sales/SaleSheetPage";
 import { parseDate } from "@/constants/date";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import PageTitle from "@/components/ui/title";
 
 type FormMode = "create" | "edit" | null;
 
@@ -84,7 +85,7 @@ export const CustomersListPage = () => {
 
     return (
         <Stack>
-            <Text fontWeight="bold" fontSize="3xl">Clientes registrados</Text>
+            <PageTitle>Clientes registrados</PageTitle>
             <Flex gap="0.8rem">
                 <InputGroup startElement={<LuSearch />} maxW="32rem">
                     <Input placeholder="Buscar" variant="subtle" />

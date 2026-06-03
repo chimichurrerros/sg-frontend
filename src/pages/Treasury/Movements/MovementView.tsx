@@ -15,6 +15,7 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -78,9 +79,9 @@ export default function MovementView() {
     return (
         <Box display="flex" flexDirection="column" minHeight="0" p={4}>
             <Box display="flex" flexDirection="row" gap={4} py={2} justifyContent="space-between">
-                <Text fontSize="2xl" fontWeight="bold">
+                <PageTitle>
                     Movimiento N° {movement.id}
-                </Text>
+                </PageTitle>
 
                 <Box display="flex" gap={4}>
                     <Button variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/movimientos")}>

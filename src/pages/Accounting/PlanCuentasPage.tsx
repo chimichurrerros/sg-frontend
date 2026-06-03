@@ -32,7 +32,7 @@ import { useAllAccountantProcesses, useCreateAccountantProcess, useUpdateAccount
 import { useAllAccountPlans, useCreateAccountPlan, useUpdateAccountPlan, useDeleteAccountPlan } from "@/queries/accountPlans.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { toaster } from "@/components/ui/toaster";
 
 export default function PlanCuentasPage() {

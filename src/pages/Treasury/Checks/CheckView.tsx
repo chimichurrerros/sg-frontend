@@ -11,6 +11,7 @@ import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useGetCheckById, useUpdateCheck } from "@/queries/checks.queries";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { parsePrice } from "@/constants/price";
+import PageTitle from "@/components/ui/title";
 
 function LabelValue({ label, value }: { label: string; value: string }) {
     return (
@@ -58,9 +59,9 @@ export default function CheckView() {
     return (
         <Box display="flex" flexDirection="column" justifyContent="space-between" minHeight="0">
             <Box display="flex" flexDirection="row" gap={4} py={2} justifyContent="space-between">
-                <Text fontSize="2xl" fontWeight="bold">
+                <PageTitle>
                     Cheque N° {check.number}
-                </Text>
+                </PageTitle>
                 <Box display="flex" gap={4}>
                     <IconButton
                         padding={2}

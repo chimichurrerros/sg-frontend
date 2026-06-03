@@ -6,7 +6,7 @@ import {
     useAllSuppliers,
     useEditSupplier,
 } from "@/queries/suppliers.queries";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
@@ -15,6 +15,7 @@ import { useState } from "react";
 import { LuSearch, LuPencil, LuTrash2, LuPlus } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import type { PaginationParams } from "@/types/types";
+import PageTitle from "@/components/ui/title";
 
 export default function SupplierListPage() {
     const navigate = useNavigate();
@@ -87,9 +88,9 @@ export default function SupplierListPage() {
 
     return (
         <Stack gap={4} p={4}>
-            <Text fontSize="3xl" fontWeight="bold">
+            <PageTitle>
                 Proveedores
-            </Text>
+            </PageTitle>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>

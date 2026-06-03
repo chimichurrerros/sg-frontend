@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, Input, Spinner } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ExternalLink, FileInput, FileQuestion, Save } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";

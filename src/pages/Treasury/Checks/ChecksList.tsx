@@ -3,7 +3,7 @@ import { parseDate } from "@/constants/date";
 import { useUpdateCheck } from "@/queries/checks.queries";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetChecksKeys } from "@/queries/checks.queries";
 import type { PaginationParams } from "@/types/types";
@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { parsePrice } from "@/constants/price";
 import PageSizeControl from "@/components/ui/page-size-control";
+import PageTitle from "@/components/ui/title";
 
 const checkLabels: label<Check>[] = [
     { labelName: "Nro.", propName: "number", isSortable: true, sortFunction: (a, b) => a.number.localeCompare(b.number) },
@@ -62,8 +63,7 @@ export default function ChecksList() {
 
     return (
         <Box display="flex" flexDirection="column" gap={4} p={4} height="100%" minHeight="0">
-            <Text fontSize="2xl" fontWeight="bold">Listado de Cheques</Text>
-
+            <PageTitle>Listado de Cheques</PageTitle>
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
                     <Input placeholder="Buscar Cheques..." />

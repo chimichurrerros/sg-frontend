@@ -28,6 +28,7 @@ import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuMail, LuSave } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import PageTitle from "@/components/ui/title";
 
 // Separate schema for editing users (where password is not required)
 const editUserSchema = z.object({
@@ -191,9 +192,9 @@ export const AddUserPage = () => {
   return (
     <Stack gap={4} paddingInline="15%" py={6}>
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">
+        <PageTitle>
           {isEditMode ? "Editar usuario" : "Nuevo usuario"}
-        </Heading>
+        </PageTitle>
         <Button
           variant="ghost"
           size="sm"

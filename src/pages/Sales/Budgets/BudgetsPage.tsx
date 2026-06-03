@@ -3,7 +3,7 @@ import { Button, DatePicker, Grid, GridItem, HStack, IconButton, Input, InputGro
 import { LuCalendar } from "react-icons/lu";
 import { CalendarOff, CalendarPlus, DollarSign, ExternalLink, FolderOpen, Heading } from "lucide-react";
 import React, { useState } from "react";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,10 @@ import { useCustomerQuotes } from "@/queries/customer-quotes.queries";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { parsePrice } from "@/constants/price";
 import { parseDate } from "@/constants/date";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { useGetAllCustomers } from "@/queries/customers.queries";
+import PageTitle from "@/components/ui/title";
 
 
 export default function BudgetsPage() {
@@ -49,7 +50,7 @@ export default function BudgetsPage() {
     }
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <Text fontWeight="bold" fontSize="3xl">Listado de Presupuestos</Text>
+            <PageTitle>Listado de Presupuestos</PageTitle>
             {/* Buttons and filters */}
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <Box display="flex" flexDirection="row" gap={2} alignItems="center">

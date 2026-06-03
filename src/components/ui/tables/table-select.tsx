@@ -1,11 +1,11 @@
 import { Box, Table } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { LoadingScreen } from "./screens/loading-screen";
+import { LoadingScreen } from "../screens/loading-screen";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Text } from "@chakra-ui/react";
-import EmptyDataScreen from "./screens/empty-data-screen";
-import { ErrorScreen } from "./screens/error-screen";
+import EmptyDataScreen from "../screens/empty-data-screen";
+import { ErrorScreen } from "../screens/error-screen";
 export interface label<T extends { id: number }> {
     labelName: string,
     propName?: keyof T

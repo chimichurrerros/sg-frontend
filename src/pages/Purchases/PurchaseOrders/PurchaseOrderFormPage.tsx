@@ -24,7 +24,7 @@ import { useMe } from "@/queries/auth.queries";
 import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 
 const formatDateTime = (value: string) => {
   const d = new Date(value);
