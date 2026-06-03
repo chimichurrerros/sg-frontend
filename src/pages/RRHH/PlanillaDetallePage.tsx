@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { Badge, Box, Button, Card, CloseButton, createListCollection, Dialog, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
 import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
-import { parseDate } from "@/constants/date";
+import { parseDate, parseDateTime } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { processTypeNameMap, formatStatusColor, translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
 import { useAddEmployees, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
@@ -189,11 +189,11 @@ export default function PlanillaDetallePage() {
             </Box>
             <Box>
               <Text fontSize="sm" color="fg.muted">Fecha de Alta</Text>
-              <Text fontWeight="semibold">{formatDate(process?.startDate)}</Text>
+              <Text fontWeight="semibold">{process?.closedAt ? parseDateTime(process.closedAt) : formatDate(process?.startDate)}</Text>
             </Box>
             <Box>
               <Text fontSize="sm" color="fg.muted">Fecha de Pago</Text>
-              <Text fontWeight="semibold">{formatDate(process?.payDate)}</Text>
+              <Text fontWeight="semibold">{process?.paidAt ? parseDateTime(process.paidAt) : formatDate(process?.payDate)}</Text>
             </Box>
           </Grid>
         </Card.Body>

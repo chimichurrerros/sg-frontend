@@ -25,7 +25,7 @@ import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-act
 import { toaster } from "@/components/ui/toaster";
 import { useGetDepartments } from "@/queries/departments.queries";
 import { useCreatePosition, useDeletePosition, useGetPositions, useUpdatePosition } from "@/queries/positions.queries";
-import { parsePrice } from "@/constants/price";
+import { formatDecimal, parsePrice } from "@/constants/price";
 import type { PositionResponseDto } from "@/types/organization";
 
 export default function AreaDetailPage() {
@@ -159,9 +159,9 @@ export default function AreaDetailPage() {
         </HStack>
 
         <HStack gap={2}>
-          <DestructiveActionDialog title="Eliminar cargo" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<IconButton variant="outline" disabled={!selected || saving}>{deletePosition.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</IconButton>} />
-          <IconButton variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</IconButton>
-          <IconButton colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</IconButton>
+          <DestructiveActionDialog title="Eliminar cargo" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<Button variant="outline" colorPalette="brand" disabled={!selected || saving}>{deletePosition.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</Button>} />
+          <Button variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</Button>
+          <Button colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</Button>
         </HStack>
       </Box>
 
@@ -178,7 +178,7 @@ export default function AreaDetailPage() {
 
             <Field.Root>
               <Field.Label>Salario base por defecto</Field.Label>
-              <Input placeholder="0" type="number" min="0" value={defaultBasicSalary} onChange={(event) => setDefaultBasicSalary(event.target.value)} disabled={saving} />
+              <Input placeholder="0" type="text" inputMode="numeric" value={formatDecimal(defaultBasicSalary || "0")} onChange={(event) => { const raw = event.target.value.replace(/[^0-9]/g, ""); setDefaultBasicSalary(raw); }} disabled={saving} />
             </Field.Root>
           </Grid>
 

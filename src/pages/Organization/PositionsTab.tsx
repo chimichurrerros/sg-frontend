@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BriefcaseBusiness, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, Input, InputGroup, Spinner, Stack, Text } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
-import { parsePrice } from "@/constants/price";
+import { formatDecimal, parsePrice } from "@/constants/price";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import PageSizeControl from "@/components/ui/page-size-control";
@@ -137,7 +137,7 @@ export function PositionsTab() {
 
             <Field.Root>
               <Field.Label>Salario base por defecto</Field.Label>
-              <Input placeholder="0" type="number" min="0" value={defaultBasicSalary} onChange={(event) => setDefaultBasicSalary(event.target.value)} disabled={saving} />
+              <Input placeholder="0" type="text" inputMode="numeric" value={formatDecimal(defaultBasicSalary || "0")} onChange={(event) => { const raw = event.target.value.replace(/[^0-9]/g, ""); setDefaultBasicSalary(raw); }} disabled={saving} />
             </Field.Root>
           </Grid>
 

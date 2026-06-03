@@ -113,6 +113,16 @@ const toDateInputToday = () => {
 const getFullName = (employee?: { name?: string | null; lastname?: string | null; firstName?: string | null; lastName?: string | null } | null) =>
   `${employee?.name ?? employee?.firstName ?? ""} ${employee?.lastname ?? employee?.lastName ?? ""}`.trim();
 
+const formatNumber = (value: number | string): string => {
+  const num = Number(value);
+  if (isNaN(num)) return "";
+  return new Intl.NumberFormat("es-PY", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+};
+
 interface EmployeeFormPageProps {
   basePath?: string;
   breadcrumb?: string;
@@ -488,11 +498,13 @@ export default function EmployeeFormPage({
         <Stack gap={4}>
           <Heading size="md">Datos Laborales</Heading>
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
-            <Field.Root invalid={!!errors.legajo}>
-              <Field.Label>Legajo <Text as="span" color="red.500">*</Text></Field.Label>
-              <Input {...register("legajo")} placeholder="Legajo" disabled={formDisabled} />
-              <Field.ErrorText>{errors.legajo?.message}</Field.ErrorText>
-            </Field.Root>
+            {isEditMode && (
+              <Field.Root invalid={!!errors.legajo}>
+                <Field.Label>Legajo</Field.Label>
+                <Input {...register("legajo")} placeholder="Legajo" disabled />
+                <Field.ErrorText>{errors.legajo?.message}</Field.ErrorText>
+              </Field.Root>
+            )}
 
             <Field.Root invalid={!!errors.branchId}>
               <Field.Label>Sucursal</Field.Label>
@@ -677,13 +689,22 @@ export default function EmployeeFormPage({
 
                 <Field.Root invalid={!!errors.baseSalary}>
                   <Field.Label>Salario Base <Text as="span" color="red.500">*</Text></Field.Label>
-                  <Input
-                    type="number"
-                    step="1"
-                    min="0"
-                    {...register("baseSalary", { valueAsNumber: true })}
-                    placeholder="0"
-                    disabled={formDisabled}
+                  <Controller
+                    name="baseSalary"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatNumber(field.value ?? 0)}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, "");
+                          field.onChange(raw ? Number(raw) : 0);
+                        }}
+                        placeholder="0"
+                        disabled={formDisabled}
+                      />
+                    )}
                   />
                   <Field.ErrorText>{errors.baseSalary?.message}</Field.ErrorText>
                 </Field.Root>

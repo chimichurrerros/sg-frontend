@@ -14,16 +14,11 @@ const today = new Date();
 const currentYear = today.getFullYear();
 const currentMonth = today.getMonth() + 1;
 
-const firstDayOfMonth = (year: number, month: number): string =>
-  `${year}-${String(month).padStart(2, "0")}-01`;
-
 const createPlanillaSchema = z.object({
   name: z.string().trim().min(1, "El nombre es requerido"),
   processTypeId: z.coerce.number().min(1, "El tipo es requerido"),
   year: z.coerce.number().int().min(2000, "Año inválido").max(2100, "Año inválido"),
   month: z.coerce.number().int().min(1).max(12, "Mes inválido"),
-  startDate: z.string().min(1, "La fecha de alta es requerida"),
-  payDate: z.string().optional().or(z.literal("")),
 });
 
 type CreatePlanillaFormInput = z.input<typeof createPlanillaSchema>;
@@ -55,18 +50,13 @@ export default function CrearPlanillaPage() {
       processTypeId: ProcessTypeId.Monthly,
       year: currentYear,
       month: currentMonth,
-      startDate: firstDayOfMonth(currentYear, currentMonth),
-      payDate: "",
     },
   });
 
-  const selectedYear = form.watch("year");
-  const selectedMonth = form.watch("month");
-
-  const computedStartDate = useMemo(
-    () => firstDayOfMonth(selectedYear || currentYear, selectedMonth || currentMonth),
-    [selectedYear, selectedMonth],
-  );
+  const todayISO = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
 
   const handleSubmit = (formData: CreatePlanillaFormOutput) => {
     createPayrollProcess.mutate(
@@ -75,10 +65,8 @@ export default function CrearPlanillaPage() {
         processTypeId: formData.processTypeId,
         year: formData.year,
         month: formData.month,
-        startDate: formData.payDate?.trim()
-          ? formData.payDate
-          : computedStartDate,
-        payDate: formData.payDate?.trim() || null,
+        startDate: todayISO,
+        payDate: null,
         payrollStatusId: PayrollStatusId.Open,
       },
       {
@@ -200,25 +188,6 @@ export default function CrearPlanillaPage() {
                   {...form.register("year")}
                 />
                 <Field.ErrorText>{form.formState.errors.year?.message}</Field.ErrorText>
-              </Field.Root>
-
-              <Field.Root invalid={!!form.formState.errors.startDate} required>
-                <Field.Label>Fecha de Alta <Text as="span" color="red.500">*</Text></Field.Label>
-                <Input
-                  type="date"
-                  {...form.register("startDate")}
-                />
-                <Text fontSize="xs" color="fg.muted">Se calcula automáticamente según mes/año</Text>
-                <Field.ErrorText>{form.formState.errors.startDate?.message}</Field.ErrorText>
-              </Field.Root>
-
-              <Field.Root>
-                <Field.Label>Fecha de Pago</Field.Label>
-                <Input
-                  type="date"
-                  {...form.register("payDate")}
-                />
-                <Text fontSize="xs" color="fg.muted">Opcional</Text>
               </Field.Root>
             </Grid>
 

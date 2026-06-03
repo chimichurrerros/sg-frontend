@@ -9,6 +9,8 @@ export interface PayrollProcessResponseDto {
   month: number;
   startDate: string;
   payDate?: string | null;
+  closedAt?: string | null;
+  paidAt?: string | null;
   payrollStatusId: number;
   payrollStatusName: string;
 }
