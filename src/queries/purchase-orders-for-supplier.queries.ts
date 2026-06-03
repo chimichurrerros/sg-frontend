@@ -13,6 +13,13 @@ export const useGetPurchaseOrdersForSupplier = (params: PurchaseOrderForSupplier
   });
 };
 
+export const useGetAllPurchaseOrdersForSupplier = () => {
+  return useQuery({
+    queryKey: [...purchaseOrderForSupplierKeys.all, "all"],
+    queryFn: () => purchaseOrderForSupplierApi.getAllWithoutPagination(),
+  });
+};
+
 export const useGetPurchaseOrderForSupplierById = (id: number) => {
   return useQuery({
     queryKey: purchaseOrderForSupplierKeys.detail(id),

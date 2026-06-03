@@ -246,6 +246,9 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# AI
+AGENTS.md
+
 # Windows shortcuts
 *.lnk
 

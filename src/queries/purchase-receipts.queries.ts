@@ -1,10 +1,22 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { purchaseReceiptsApi, type CreatePurchaseReceiptRequest } from "@/api/purchaseReceipts.api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+    purchaseReceiptsApi,
+    type CreatePurchaseReceiptRequest,
+    type PurchaseReceiptFilterParams,
+} from "@/api/purchaseReceipts.api";
 import { toaster } from "@/components/ui/toaster";
 import { RETRIES } from "@/constants/queryConstants";
 
 export const purchaseReceiptsKeys = {
     all: ["purchaseReceipts"] as const,
+    detail: (id: number) => ["purchaseReceipt", id] as const,
+};
+
+export const useGetPurchaseReceipts = (params: PurchaseReceiptFilterParams) => {
+    return useQuery({
+        queryKey: [...purchaseReceiptsKeys.all, params],
+        queryFn: () => purchaseReceiptsApi.get(params),
+    });
 };
 
 export const useCreatePurchaseReceipt = () => {

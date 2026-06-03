@@ -50,10 +50,11 @@ export interface PurchaseOrderForSupplierFilterParams {
 }
 
 export const purchaseOrderForSupplierStateMap: Record<number, string> = {
-  0: "Pendiente",
-  1: "Aprobado",
-  2: "Rechazado",
-  3: "Completado",
+  1: "Pendiente",
+  2: "Confirmado",
+  3: "Parcialmente Recibido",
+  4: "Recibido",
+  5: "Cancelado",
 };
 
 export const purchaseOrderForSupplierApi = {
@@ -67,6 +68,10 @@ export const purchaseOrderForSupplierApi = {
       .get<PurchaseOrdersForSupplierGetResponse>(`/api/purchaseorders-for-supplier`, { params: queryParams })
       .then((r) => r.data);
   },
+  getAllWithoutPagination: () =>
+    apiClient
+      .get<PurchaseOrdersForSupplierGetResponse>("/api/purchaseorders-for-supplier/all")
+      .then((r) => r.data),
   getById: (id: number) =>
     apiClient
       .get<{ purchaseOrderForSupplier: PurchaseOrderForSupplier }>(`/api/purchaseorders-for-supplier/${id}`)

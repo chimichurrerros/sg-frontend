@@ -44,6 +44,7 @@ import SupplierQuoteSheet from "@/pages/Purchases/SupplierQuotes/SupplierQuoteSh
 import PurchaseOrdersForSupplierList from "@/pages/Purchases/PurchaseOrdersForSupplier/PurchaseOrdersForSupplierList";
 import PurchaseOrdersForSupplierView from "@/pages/Purchases/PurchaseOrdersForSupplier/PurchaseOrdersForSupplierView";
 import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
+import PurchaseReceiptList from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptList";
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
@@ -115,7 +116,8 @@ export const router = createBrowserRouter([
           { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
           { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
           { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
-          { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
+          { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptList /> },
+          { path: "/compras/recepcion-ordenes-compra/nueva", element: <PurchaseReceiptWizard /> },
           { path: "/compras/ordenes-por-proveedor", element: <PurchaseOrdersForSupplierList /> },
           { path: "/compras/ordenes-por-proveedor/:id", element: <PurchaseOrdersForSupplierView /> },
 

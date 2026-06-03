@@ -1,19 +1,26 @@
-import { Box, Button, ButtonGroup, Grid, Input, Spinner, Stack, Steps, Text, Textarea } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Field, Grid, Input, Spinner, Stack, Steps, Text, Textarea } from "@chakra-ui/react";
 import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
 import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { useMemo, useState } from "react";
+import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { Package, CheckCircle2 } from "lucide-react";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { useAllBranches } from "@/queries/branches.queries";
-import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries";
+import { useGetAllPurchaseOrdersForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
-import type { PurchaseOrder } from "@/api/purchaseOrders.api";
+import type { PurchaseOrderForSupplier } from "@/api/purchaseOrderForSupplier.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {
+    purchaseReceiptStep0Schema,
+    purchaseReceiptDetailsSchema,
+} from "@/schemas/purchaseReceipts.schema";
 
 const STEPS = [
-    { title: "Datos Generales", description: "OC, proveedor y factura" },
+    { title: "Datos Generales", description: "OC por proveedor y factura" },
     { title: "Productos", description: "Cantidades y precios" },
     { title: "Confirmación", description: "Revisar y finalizar" },
 ];
@@ -30,31 +37,57 @@ interface DetailItem {
 export default function PurchaseReceiptWizard() {
     const navigate = useNavigate();
 
-    const { data: purchaseOrders, isPending: loadingPOs } = useAllPurchaseOrders();
+    const { data: pofsData, isPending: loadingPOFS } = useGetAllPurchaseOrdersForSupplier();
     const { data: suppliersData, isPending: loadingSuppliers } = useAllSuppliers();
     const { data: branchesData, isPending: loadingBranches } = useAllBranches();
     const { mutate: createReceipt, isPending: isSubmitting } = useCreatePurchaseReceipt();
 
-    const [currentStep, setCurrentStep] = useState(0);
-    const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
-    const [supplierId, setSupplierId] = useState("");
-    const [branchId, setBranchId] = useState("");
-    const [billNumber, setBillNumber] = useState("");
-    const [stamp, setStamp] = useState("");
-    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-    const [observation, setObservation] = useState("");
-    const [details, setDetails] = useState<DetailItem[]>([]);
+    const {
+        control,
+        register,
+        trigger,
+        watch,
+        setValue,
+        getValues,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(purchaseReceiptStep0Schema),
+        defaultValues: {
+            pofsId: "",
+            supplierId: "",
+            branchId: "",
+            billNumber: "",
+            stamp: "",
+            date: new Date().toISOString().split("T")[0],
+            observation: "",
+        },
+    });
 
-    const purchaseOrdersList = useMemo(() => purchaseOrders?.purchaseOrders || [], [purchaseOrders]);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [selectedPOFS, setSelectedPOFS] = useState<PurchaseOrderForSupplier | null>(null);
+    const [details, setDetails] = useState<DetailItem[]>([]);
+    const [detailErrors, setDetailErrors] = useState<string[]>([]);
+
+    const watchedPofsId = watch("pofsId");
+    const watchedSupplierId = watch("supplierId");
+    const watchedBranchId = watch("branchId");
+    const watchedBillNumber = watch("billNumber");
+    const watchedDate = watch("date");
+    const watchedObservation = watch("observation");
+
+    const pofsList = useMemo(() =>
+        (pofsData?.purchaseOrdersForSupplier || []).filter((p) => p.state === 1),
+        [pofsData],
+    );
     const suppliers = useMemo(() => suppliersData?.suppliers || [], [suppliersData]);
     const branches = useMemo(() => branchesData?.branches || [], [branchesData]);
 
-    const poOptions = useMemo(() =>
-        purchaseOrdersList.map((po) => ({
-            value: po.id.toString(),
-            label: `#${po.number} - ${po.supplierName} - ${po.date.slice(0, 10)}`,
+    const pofsOptions = useMemo(() =>
+        pofsList.map((pofs) => ({
+            value: pofs.id.toString(),
+            label: `#${pofs.number} - ${pofs.supplierName} - ${pofs.date?.slice(0, 10)}`,
         })),
-        [purchaseOrdersList],
+        [pofsList],
     );
 
     const supplierOptions = useMemo(() =>
@@ -73,17 +106,21 @@ export default function PurchaseReceiptWizard() {
         [branches],
     );
 
-    const handlePOChange = (value: string) => {
-        const po = purchaseOrdersList.find((p) => p.id.toString() === value) || null;
-        setSelectedPO(po);
-        if (po) {
-            setSupplierId(po.supplierId.toString());
+    useEffect(() => {
+        if (watchedPofsId) {
+            const pofs = pofsList.find((p) => p.id.toString() === watchedPofsId) || null;
+            setSelectedPOFS(pofs);
+            if (pofs) {
+                setValue("supplierId", pofs.supplierId.toString());
+            }
+        } else {
+            setSelectedPOFS(null);
         }
-    };
+    }, [watchedPofsId, pofsList, setValue]);
 
     const loadProducts = () => {
-        if (!selectedPO) return;
-        const items: DetailItem[] = selectedPO.details.map((d, i) => ({
+        if (!selectedPOFS) return;
+        const items: DetailItem[] = selectedPOFS.details.map((d, i) => ({
             id: i + 1,
             productId: d.productId,
             productName: d.productName,
@@ -92,11 +129,93 @@ export default function PurchaseReceiptWizard() {
             price: d.price,
         }));
         setDetails(items);
+        setDetailErrors([]);
+    };
+
+    const validateDetails = (): boolean => {
+        if (details.length === 0) {
+            setDetailErrors(["Debe haber al menos un producto para recibir"]);
+            return false;
+        }
+        const result = purchaseReceiptDetailsSchema.safeParse(
+            details.map((d) => ({ productId: d.productId, quantity: d.quantity, price: d.price })),
+        );
+        if (!result.success) {
+            const errs = result.error.issues
+                .filter((issue) => issue.path.length >= 1)
+                .map((issue) => {
+                    const idx = typeof issue.path[0] === "number" ? issue.path[0] : 0;
+                    const product = details[idx]?.productName || `Ítem ${idx + 1}`;
+                    return `${product}: ${issue.message}`;
+                });
+            if (errs.length === 0) {
+                errs.push("Datos inválidos en los productos");
+            }
+            setDetailErrors(errs);
+            return false;
+        }
+        setDetailErrors([]);
+        return true;
+    };
+
+    const goNext = async () => {
+        if (currentStep === 0) {
+            const valid = await trigger(["pofsId", "supplierId", "branchId", "billNumber", "date"]);
+            if (!valid) return;
+            loadProducts();
+        }
+        if (currentStep === 1) {
+            if (!validateDetails()) return;
+        }
+        setCurrentStep((s) => Math.min(s + 1, 2));
+    };
+
+    const goBack = () => {
+        setCurrentStep((s) => Math.max(s - 1, 0));
+    };
+
+    const onFormSubmit = async () => {
+        const valid = await trigger();
+        if (!valid || !selectedPOFS || !validateDetails()) return;
+        const data = getValues();
+        createReceipt(
+            {
+                purchaseOrderForSupplierId: Number(data.pofsId),
+                billNumber: data.billNumber.trim(),
+                stamp: data.stamp?.trim() || "",
+                date: data.date,
+                supplierId: Number(data.supplierId),
+                branchId: Number(data.branchId),
+                observation: data.observation?.trim() || "",
+                details: details.map((d) => ({
+                    productId: d.productId,
+                    quantity: d.quantity,
+                    price: d.price,
+                })),
+            },
+            {
+                onSuccess: () => {
+                    toaster.create({
+                        title: "Recepción registrada exitosamente",
+                        type: "success",
+                    });
+                    navigate("/compras/recepcion-ordenes-compra");
+                },
+                onError: (error: Error) => {
+                    const axiosError = error as { response?: { data?: { title?: string } } };
+                    const msg = axiosError.response?.data?.title || error.message;
+                    toaster.create({
+                        title: "Error al registrar recepción: " + msg,
+                        type: "error",
+                    });
+                },
+            },
+        );
     };
 
     const productLabels: EditableLabel<DetailItem>[] = [
         { labelName: "Producto", propName: "productName" },
-        { labelName: "Cant. Pedida", propName: "quantityOrdered" },
+        { labelName: "Cant. Ordenada", propName: "quantityOrdered" },
         {
             labelName: "Cant. Recibida", propName: "quantity", isEditable: true, inputType: "number",
             validate: (v) => {
@@ -115,170 +234,114 @@ export default function PurchaseReceiptWizard() {
         },
     ];
 
-    const goNext = () => {
-        if (currentStep === 0) {
-            if (!selectedPO) {
-                toaster.create({ title: "Seleccione una orden de compra", type: "error" });
-                return;
-            }
-            if (!supplierId) {
-                toaster.create({ title: "Seleccione un proveedor", type: "error" });
-                return;
-            }
-            if (!branchId) {
-                toaster.create({ title: "Seleccione una sucursal", type: "error" });
-                return;
-            }
-            if (!billNumber.trim()) {
-                toaster.create({ title: "Ingrese el número de factura", type: "error" });
-                return;
-            }
-            loadProducts();
-        }
-        if (currentStep === 1) {
-            if (details.length === 0) {
-                toaster.create({ title: "No hay productos para recibir", type: "error" });
-                return;
-            }
-            const invalidPrice = details.some((d) => d.price < 0);
-            const invalidQty = details.some((d) => d.quantity < 0);
-            if (invalidPrice || invalidQty) {
-                toaster.create({ title: "Cantidades y precios deben ser valores positivos", type: "error" });
-                return;
-            }
-        }
-        setCurrentStep((s) => Math.min(s + 1, 2));
-    };
-
-    const goBack = () => {
-        setCurrentStep((s) => Math.max(s - 1, 0));
-    };
-
-    const handleSubmit = () => {
-        if (!selectedPO || !supplierId || !branchId) return;
-        createReceipt(
-            {
-                purchaseOrderId: selectedPO.id,
-                billNumber: billNumber.trim(),
-                stamp: stamp.trim(),
-                date,
-                supplierId: Number(supplierId),
-                branchId: Number(branchId),
-                observation: observation.trim(),
-                details: details.map((d) => ({
-                    productId: d.productId,
-                    quantity: d.quantity,
-                    price: d.price,
-                })),
-            },
-            {
-                onSuccess: () => {
-                    toaster.create({
-                        title: "Recepción registrada exitosamente",
-                        type: "success",
-                    });
-                    setCurrentStep(0);
-                    setSelectedPO(null);
-                    setSupplierId("");
-                    setBranchId("");
-                    setBillNumber("");
-                    setStamp("");
-                    setDate(new Date().toISOString().split("T")[0]);
-                    setObservation("");
-                    setDetails([]);
-                },
-                onError: (error: Error) => {
-                    const axiosError = error as { response?: { data?: { title?: string } } };
-                    const msg = axiosError.response?.data?.title || error.message;
-                    toaster.create({
-                        title: "Error al registrar recepción: " + msg,
-                        type: "error",
-                    });
-                },
-            },
-        );
-    };
-
     const renderStep0 = () => (
         <Stack gap={4}>
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                <Box>
-                    <Text fontSize="sm" fontWeight="medium" mb={1}>
-                        Orden de Compra *
-                    </Text>
-                    <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-                        <SelectWrapper
-                            options={poOptions}
-                            width="100%"
-                            placeholder="Seleccione una OC"
-                            value={selectedPO ? selectedPO.id.toString() : ""}
-                            onValueChange={handlePOChange}
-                            disabled={loadingPOs}
-                        />
-                        {loadingPOs && <Spinner size="sm" />}
-                    </Box>
+            {/* OC - full width, own row */}
+            <Field.Root invalid={!!errors.pofsId} width="50%">
+                <Text fontSize="sm" fontWeight="medium" mb={1}>
+                    Orden de Compra por Proveedor *
+                </Text>
+                <Box position="relative" width="100%">
+                    <Controller
+                        name="pofsId"
+                        control={control}
+                        render={({ field }) => (
+                            <ComboboxWrapper
+                                options={pofsOptions}
+                                width="100%"
+                                placeholder="Buscar orden de compra..."
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                disabled={loadingPOFS}
+                                clearable
+                            />
+                        )}
+                    />
+                    {loadingPOFS && (
+                        <Box position="absolute" top="50%" transform="translateY(-50%)" right={3} zIndex={1}>
+                            <Spinner size="sm" />
+                        </Box>
+                    )}
                 </Box>
-                <Box>
+                <Field.ErrorText>{errors.pofsId?.message}</Field.ErrorText>
+            </Field.Root>
+
+            {/* Supplier + Branch - 2 cols */}
+            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                <Field.Root invalid={!!errors.supplierId}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Proveedor *
                     </Text>
-                    <SelectWrapper
-                        options={supplierOptions}
-                        width="100%"
-                        placeholder="Seleccione un proveedor"
-                        value={supplierId}
-                        onValueChange={setSupplierId}
-                        disabled={loadingSuppliers}
+                    <Controller
+                        name="supplierId"
+                        control={control}
+                        render={({ field }) => (
+                            <SelectWrapper
+                                options={supplierOptions}
+                                width="100%"
+                                placeholder="Seleccione un proveedor"
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                disabled={!!watchedPofsId || loadingSuppliers}
+                            />
+                        )}
                     />
-                </Box>
-                <Box>
+                    <Field.ErrorText>{errors.supplierId?.message}</Field.ErrorText>
+                </Field.Root>
+                <Field.Root invalid={!!errors.branchId}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Sucursal *
                     </Text>
-                    <SelectWrapper
-                        options={branchOptions}
-                        width="100%"
-                        placeholder="Seleccione una sucursal"
-                        value={branchId}
-                        onValueChange={setBranchId}
-                        disabled={loadingBranches}
+                    <Controller
+                        name="branchId"
+                        control={control}
+                        render={({ field }) => (
+                            <SelectWrapper
+                                options={branchOptions}
+                                width="100%"
+                                placeholder="Seleccione una sucursal"
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                disabled={loadingBranches}
+                            />
+                        )}
                     />
-                </Box>
+                    <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
+                </Field.Root>
             </Grid>
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                <Box>
+                <Field.Root invalid={!!errors.billNumber}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Nro. Factura *
                     </Text>
                     <Input
                         size="sm"
-                        value={billNumber}
-                        onChange={(e) => setBillNumber(e.target.value)}
+                        {...register("billNumber")}
                         placeholder="001-001-0000000"
                     />
-                </Box>
+                    <Field.ErrorText>{errors.billNumber?.message}</Field.ErrorText>
+                </Field.Root>
                 <Box>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Timbrado
                     </Text>
                     <Input
                         size="sm"
-                        value={stamp}
-                        onChange={(e) => setStamp(e.target.value)}
+                        {...register("stamp")}
                         placeholder="Timbrado de la factura"
                     />
                 </Box>
-                <Box>
+                <Field.Root invalid={!!errors.date}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Fecha *
                     </Text>
                     <Input
                         size="sm"
                         type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
+                        {...register("date")}
                     />
-                </Box>
+                    <Field.ErrorText>{errors.date?.message}</Field.ErrorText>
+                </Field.Root>
             </Grid>
             <Box>
                 <Text fontSize="sm" fontWeight="medium" mb={1}>
@@ -286,8 +349,7 @@ export default function PurchaseReceiptWizard() {
                 </Text>
                 <Textarea
                     size="sm"
-                    value={observation}
-                    onChange={(e) => setObservation(e.target.value)}
+                    {...register("observation")}
                     placeholder="Observaciones (opcional)"
                     rows={3}
                 />
@@ -297,21 +359,33 @@ export default function PurchaseReceiptWizard() {
 
     const renderStep1 = () => (
         <Box>
-            {selectedPO ? (
-                <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden" height="40vh">
-                    <TableEditable
-                        labels={productLabels}
-                        data={details}
-                        height="100%"
-                        noItemsComponent={
-                            <EmptyDataScreen
-                                title="Sin productos"
-                                message="Esta orden de compra no tiene productos."
-                                icon={<Package size={48} color="gray" />}
-                            />
-                        }
-                        onDataChange={(newData) => setDetails(newData)}
-                    />
+            {selectedPOFS ? (
+                <Box>
+                    {detailErrors.length > 0 && (
+                        <Box mb={3} p={3} bg="red.50" border="1px solid" borderColor="red.200" borderRadius="md">
+                            {detailErrors.map((err, i) => (
+                                <Text key={i} color="red.600" fontSize="sm">{err}</Text>
+                            ))}
+                        </Box>
+                    )}
+                    <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden" height="40vh">
+                        <TableEditable
+                            labels={productLabels}
+                            data={details}
+                            height="100%"
+                            noItemsComponent={
+                                <EmptyDataScreen
+                                    title="Sin productos"
+                                    message="Esta orden de compra no tiene productos."
+                                    icon={<Package size={48} color="gray" />}
+                                />
+                            }
+                            onDataChange={(newData) => {
+                                setDetails(newData);
+                                setDetailErrors([]);
+                            }}
+                        />
+                    </Box>
                 </Box>
             ) : (
                 <Box
@@ -333,16 +407,16 @@ export default function PurchaseReceiptWizard() {
     const totalAmount = details.reduce((sum, d) => sum + d.quantity * d.price, 0);
 
     const renderStep2 = () => {
-        const po = selectedPO;
-        const supplier = suppliers.find((s) => s.id.toString() === supplierId);
-        const branch = branches.find((b) => b.id.toString() === branchId);
+        const pofs = selectedPOFS;
+        const supplier = suppliers.find((s) => s.id.toString() === watchedSupplierId);
+        const branch = branches.find((b) => b.id.toString() === watchedBranchId);
         return (
             <Stack gap={6}>
                 <Box p={4} bg="bg.subtle" borderRadius="md">
                     <Grid templateColumns="repeat(2, 1fr)" gap={4}>
                         <Box>
-                            <Text fontSize="sm" color="gray.500">Orden de Compra</Text>
-                            <Text fontWeight="medium">#{po?.id} - {po?.supplierName}</Text>
+                            <Text fontSize="sm" color="gray.500">OC por Proveedor</Text>
+                            <Text fontWeight="medium">#{pofs?.id} - {pofs?.supplierName}</Text>
                         </Box>
                         <Box>
                             <Text fontSize="sm" color="gray.500">Proveedor</Text>
@@ -354,7 +428,7 @@ export default function PurchaseReceiptWizard() {
                         </Box>
                         <Box>
                             <Text fontSize="sm" color="gray.500">Factura</Text>
-                            <Text fontWeight="medium">{billNumber || "-"}</Text>
+                            <Text fontWeight="medium">{watchedBillNumber || "-"}</Text>
                         </Box>
                     </Grid>
                 </Box>
@@ -430,7 +504,7 @@ export default function PurchaseReceiptWizard() {
             </Steps.Root>
 
             <ButtonGroup size="lg" justifyContent="space-between" display="flex">
-                <Button variant="outline" onClick={() => navigate("/compras/cotizaciones-proveedores")}>
+                <Button variant="outline" onClick={() => navigate("/compras/recepcion-ordenes-compra")}>
                     Cancelar
                 </Button>
                 <Box display="flex" gap={3}>
@@ -442,7 +516,7 @@ export default function PurchaseReceiptWizard() {
                             Siguiente
                         </Button>
                     ) : (
-                        <Button bgColor="brand.primary" onClick={handleSubmit} loading={isSubmitting}>
+                        <Button bgColor="brand.primary" onClick={onFormSubmit} loading={isSubmitting}>
                             Finalizar
                         </Button>
                     )}
