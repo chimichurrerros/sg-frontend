@@ -34,7 +34,7 @@ export const registerSchema = z.object({
     .min(1, "La confirmación de contraseña es requerida"),
   roleId: z
     .number({ message: "El rol es requerido" })
-    .min(1, "Seleccione un rol válido"),
+    .min(0, "Seleccione un rol válido"),
   branchId: z
     .number({ message: "La sucursal es requerida" })
     .min(1, "Seleccione una sucursal válida"),
