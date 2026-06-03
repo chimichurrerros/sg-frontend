@@ -418,7 +418,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             onChange={(e) => updateCustomerEmail(e.target.value)}
             readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
-            placeholder="Email del cliente (opcional)"
+            placeholder="Email del cliente"
           />
         </Box>
         <Box flex={2} minW="180px">
@@ -429,7 +429,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             value={saleForm.customer.birthDate}
             onChange={(dates: string[]) => updateCustomerBirthdate(dates[0])}
             readOnly= {!isClientEditable || mode === "view"}
-            placeholder="Fecha de nacimiento (opcional)"
+            placeholder="Fecha de nacimiento"
 
             />
         </Box>
