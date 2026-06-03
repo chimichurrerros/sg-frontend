@@ -22,7 +22,7 @@ import {
   Contact,
   HandHelping,
   FileText,
-  StickyNote
+  StickyNote,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -50,10 +50,10 @@ export const NAV_CONFIG: NavItem[] = [
     icon: ShoppingCart,
     section: "Operaciones",
     children: [
-            {
+      {
         id: "ventas",
         label: "Listado de Ventas",
-        icon: ListOrdered ,
+        icon: ListOrdered,
         path: "/ventas",
       },
       {
@@ -80,55 +80,57 @@ export const NAV_CONFIG: NavItem[] = [
         icon: HandHelping,
         path: "/ventas/devoluciones",
       },
-        {
+      {
         id: "notas-credito-ventas",
         label: "Notas de Crédito(Ventas)",
-        icon:  StickyNote ,
+        icon: StickyNote,
         path: "/ventas/notas-de-credito",
       },
     ],
   },
   {
-    id: "compras", label: "Compras", icon: NotebookPen, path: "/compras",
+    id: "compras",
+    label: "Compras",
+    icon: NotebookPen,
+    path: "/compras",
     children: [
       {
         id: "pedidos-compra",
         label: "Pedidos de Compra",
         icon: ScrollText,
-        path: "/compras/pedidos"
+        path: "/compras/pedidos",
       },
       {
         id: "solicitudes-cotizacion",
         label: "Solicitudes de Cot.",
         icon: FileText,
-        path: "/compras/solicitudes-cotizacion"
+        path: "/compras/solicitudes-cotizacion",
       },
       {
         id: "cotizaciones-proveedores",
         label: "Cotizaciones",
-        icon:   TableProperties,
-        path: "/compras/cotizaciones-proveedores"
+        icon: TableProperties,
+        path: "/compras/cotizaciones-proveedores",
       },
       {
         id: "ordenes-de-compra",
         label: "Órdenes de Compra",
         icon: ClipboardCheck,
-        path: "/compras/ordenes-de-compra"
+        path: "/compras/ordenes-de-compra",
       },
       {
         id: "ordenes-por-proveedor",
         label: "OC por Proveedor",
         icon: Truck,
-        path: "/compras/ordenes-por-proveedor"
+        path: "/compras/ordenes-por-proveedor",
       },
       {
         id: "recepcion-ordenes-compra",
         label: "Recepción de OC",
-        icon:   Package,
-        path: "/compras/recepcion-ordenes-compra"
+        icon: Package,
+        path: "/compras/recepcion-ordenes-compra",
       },
-    ]
-
+    ],
   },
   {
     id: "tesoreria",
@@ -136,7 +138,12 @@ export const NAV_CONFIG: NavItem[] = [
     icon: Landmark,
     path: "/tesoreria",
     children: [
-      { id: "bancos", label: "Bancos", icon: Building, path: "/tesoreria/bancos" },
+      {
+        id: "bancos",
+        label: "Bancos",
+        icon: Building,
+        path: "/tesoreria/bancos",
+      },
       {
         id: "cuentas",
         label: "Cuentas",
@@ -153,9 +160,15 @@ export const NAV_CONFIG: NavItem[] = [
         id: "cheques",
         label: "Cheques",
         icon: ScrollText,
-        path: "/tesoreria/cheques"
+        path: "/tesoreria/cheques",
       },
     ],
+  },
+  {
+    id: "contabilidad",
+    label: "Contabilidad",
+    icon: FileText,
+    path: "/dash/contabilidad",
   },
   // { id: "rrhh", label: "RR.HH.", icon: Users, path: "/dash/rrhh" },
   {
@@ -192,12 +205,6 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/inventario",
       },
     ],
-  },
-  {
-    id: "contabilidad",
-    label: "Contabilidad",
-    icon: FileText,
-    path: "/dash/contabilidad",
   },
   {
     id: "configuraciones",

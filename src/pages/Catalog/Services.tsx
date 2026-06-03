@@ -31,7 +31,11 @@ export const Services = () => {
       propName: "price",
       transformFunction: (value) => parsePrice(value),
     },
-    { labelName: "Costo", propName: "cost" },
+    {
+      labelName: "Costo",
+      propName: "cost",
+      transformFunction: (value) => parsePrice(value),
+    },
   ];
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ServiceResponseDto | null>(null);
