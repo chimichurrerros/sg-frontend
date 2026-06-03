@@ -8,6 +8,7 @@ import { registerSchema } from "@/schemas/auth.schema";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   createListCollection,
   Field,
   Flex,
@@ -48,6 +49,7 @@ const editUserSchema = z.object({
   branchId: z
     .number({ message: "La sucursal es requerida" })
     .min(1, "Seleccione una sucursal válida"),
+  isActive: z.boolean().optional(),
 });
 
 interface UserFormInput {
@@ -58,6 +60,7 @@ interface UserFormInput {
   confirmPassword?: string;
   roleId: number;
   branchId: number;
+  isActive?: boolean;
 }
 
 export const AddUserPage = () => {
@@ -112,6 +115,7 @@ export const AddUserPage = () => {
       confirmPassword: "",
       roleId: 0,
       branchId: 0,
+      isActive: true,
     },
   });
 
@@ -125,6 +129,7 @@ export const AddUserPage = () => {
         email: u.email ?? "",
         branchId: u.branchId ?? 0,
         roleId: u.roleId ?? 0,
+        isActive: u.isActive ?? false,
       });
     }
   }, [userData, reset]);
@@ -142,6 +147,7 @@ export const AddUserPage = () => {
             email: formData.email,
             branchId: formData.branchId,
             roleId: formData.roleId,
+            isActive: formData.isActive,
           },
         },
         {
@@ -199,39 +205,42 @@ export const AddUserPage = () => {
       </Flex>
 
       <Stack as="form" onSubmit={handleSubmit(handleSave)} gap={4}>
-        <Grid templateColumns="2fr 2fr" gap={4} alignItems="center">
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.name} required>
+        <Grid templateColumns="repeat(2, 1fr)" gap={4} alignItems="center" w="full">
+          <GridItem colSpan={1} w="full">
+            <Field.Root invalid={!!errors.name} required w="full">
               <Field.Label>Nombre</Field.Label>
               <Input
                 {...register("name")}
                 placeholder="Nombre"
                 disabled={isPending}
+                w="full"
               />
               <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.lastName} required>
+          <GridItem colSpan={1} w="full">
+            <Field.Root invalid={!!errors.lastName} required w="full">
               <Field.Label>Apellido</Field.Label>
               <Input
                 {...register("lastName")}
                 placeholder="Apellido"
                 disabled={isPending}
+                w="full"
               />
               <Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={4}>
-            <Field.Root invalid={!!errors.email} required>
+          <GridItem colSpan={2} w="full">
+            <Field.Root invalid={!!errors.email} required w="full">
               <Field.Label>Correo electrónico</Field.Label>
               <Input
                 {...register("email")}
                 placeholder="correo@bigotires.com.py"
                 type="email"
                 disabled={isPending}
+                w="full"
               />
               <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
             </Field.Root>
@@ -239,26 +248,36 @@ export const AddUserPage = () => {
 
           {!isEditMode && (
             <>
-              <GridItem colSpan={2}>
-                <Field.Root invalid={!!errors.password} required>
+              <GridItem colSpan={1} w="full">
+                <Field.Root invalid={!!errors.password} required w="full">
                   <Field.Label>Contraseña</Field.Label>
-                  <PasswordInput {...register("password")} disabled={isPending} />
+                  <PasswordInput
+                    {...register("password")}
+                    disabled={isPending}
+                    w="full"
+                    rootProps={{ w: "full" }}
+                  />
                   <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
                 </Field.Root>
               </GridItem>
 
-              <GridItem colSpan={2}>
-                <Field.Root invalid={!!errors.confirmPassword} required>
+              <GridItem colSpan={1} w="full">
+                <Field.Root invalid={!!errors.confirmPassword} required w="full">
                   <Field.Label>Repetir contraseña</Field.Label>
-                  <PasswordInput {...register("confirmPassword")} disabled={isPending} />
+                  <PasswordInput
+                    {...register("confirmPassword")}
+                    disabled={isPending}
+                    w="full"
+                    rootProps={{ w: "full" }}
+                  />
                   <Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>
                 </Field.Root>
               </GridItem>
             </>
           )}
 
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.roleId} required>
+          <GridItem colSpan={1} w="full">
+            <Field.Root invalid={!!errors.roleId} required w="full">
               <Field.Label>Rol asignado</Field.Label>
               <Controller
                 name="roleId"
@@ -269,6 +288,7 @@ export const AddUserPage = () => {
                     value={field.value ? [String(field.value)] : []}
                     onValueChange={(e) => field.onChange(e.value[0] ? Number(e.value[0]) : null)}
                     disabled={isPending}
+                    w="full"
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -299,8 +319,8 @@ export const AddUserPage = () => {
             </Field.Root>
           </GridItem>
 
-          <GridItem colSpan={2}>
-            <Field.Root invalid={!!errors.branchId} required>
+          <GridItem colSpan={1} w="full">
+            <Field.Root invalid={!!errors.branchId} required w="full">
               <Field.Label>Sucursal asignada</Field.Label>
               <Controller
                 name="branchId"
@@ -311,6 +331,7 @@ export const AddUserPage = () => {
                     value={field.value ? [String(field.value)] : []}
                     onValueChange={(e) => field.onChange(e.value[0] ? Number(e.value[0]) : null)}
                     disabled={isPending}
+                    w="full"
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
@@ -340,6 +361,28 @@ export const AddUserPage = () => {
               <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
             </Field.Root>
           </GridItem>
+
+          {isEditMode && (
+            <GridItem colSpan={2} w="full">
+              <Field.Root w="full">
+                <Controller
+                  name="isActive"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox.Root
+                      checked={field.value}
+                      onCheckedChange={(e) => field.onChange(e.checked)}
+                      disabled={isPending}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label fontSize="sm" fontWeight="medium">Usuario activo</Checkbox.Label>
+                    </Checkbox.Root>
+                  )}
+                />
+              </Field.Root>
+            </GridItem>
+          )}
         </Grid>
 
         {formError && (
