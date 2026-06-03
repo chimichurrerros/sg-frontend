@@ -7,8 +7,9 @@ import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { Box, Flex, Grid, GridItem, HStack, IconButton, Separator, Table, Text, VStack } from "@chakra-ui/react";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import type { CreditNoteDetail } from "@/api/credit-notes-api";
+import PageTitle from "@/components/ui/title";
 
 export default function CreditNoteSheetPage() {
     const { id } = useParams();
@@ -47,9 +48,9 @@ export default function CreditNoteSheetPage() {
         <Box height="89vh" display="flex" flexDirection="column" gap={4} p={4}>
             <Flex justify="space-between" alignItems="center" flexShrink={0}>
                 <Box>
-                    <Text fontSize="2xl" fontWeight="bold">
+                    <PageTitle>
                         Nota de Crédito N° {creditNote.id}
-                    </Text>
+                    </PageTitle>
                 </Box>
                 <HStack gap={2}>
                     <IconButton

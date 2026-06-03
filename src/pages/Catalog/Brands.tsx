@@ -1,6 +1,6 @@
 import type { ProductBrandDTO } from "@/api/catalog.api";
 import TableBar from "@/components/ui/table-bar";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { catalogKeys, useAllBrands, useCreateBrand, useDeleteBrand, useUpdateBrand } from "@/queries/catalog.queries";
 import {

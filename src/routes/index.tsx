@@ -90,15 +90,10 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
-          {
-            path: "/ventas/presupuestos/crear",
-            element: <BudgetSheetPage mode="create" />,
-          },
+          {path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" />,},
           {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
-
           {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
           {path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
-
           {path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
           {path: "/ventas/notas-de-credito", element: <CreditNotesPage/> },
           {path: "/ventas/notas-de-credito/:id", element: <CreditNoteSheetPage/> },

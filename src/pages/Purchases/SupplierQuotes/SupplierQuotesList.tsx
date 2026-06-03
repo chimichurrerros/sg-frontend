@@ -2,9 +2,9 @@ import type { SupplierQuote, SupplierQuoteFilterParams } from "@/api/supplierQuo
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import type { label } from "@/components/ui/table-select";
-import TableSelect from "@/components/ui/table-select";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import type { label } from "@/components/ui/tables/table-select";
+import TableSelect from "@/components/ui/tables/table-select";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 import { toaster } from "@/components/ui/toaster";
 import { useEditSupplierQuote, useGetSupplierQuotes } from "@/queries/supplier-quotes.queries";
 import { supplierQuoteStatusMap } from "@/types/purchases";
@@ -17,7 +17,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { parsePrice } from "@/constants/price";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 
 const stateOptions = Object.entries(supplierQuoteStatusMap).map(
   ([key, label]) => ({ label, value: key }),

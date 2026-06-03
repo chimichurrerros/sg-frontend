@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react/box";
 import { Button, DatePicker, HStack, IconButton, Input, Portal, Text, type DateValue } from "@chakra-ui/react";
 import { CalendarOff, ExternalLink, FolderOpen, HandCoins } from "lucide-react";
 import React, { useRef, useState } from "react";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useNavigate } from "react-router-dom";
@@ -10,13 +10,14 @@ import PageSizeControl from "@/components/ui/page-size-control";
 import { parsePrice } from "@/constants/price";
 import { parseDate } from "@/constants/date";
 import { parseDate as parseDateChakra } from "@chakra-ui/react";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import type { SaleReturn, SaleReturnParams } from "@/api/returns.api";
 
 import { useGetSalesReturns } from "@/queries/sales-return.queries";
 import { useAllBranches } from "@/queries/branches.queries";
 import { LuCalendar } from "react-icons/lu";
+import PageTitle from "@/components/ui/title";
 export default function ReturnsPage() {
     const [selected, setSelected] = React.useState<SaleReturn | null>(null);
     const [params, setParams] = useState<SaleReturnParams>({ page: 1, pageSize: 10 });
@@ -57,7 +58,7 @@ export default function ReturnsPage() {
 
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <Text fontWeight="bold" fontSize="3xl">Listado de Devoluciones</Text>
+            <PageTitle>Listado de Devoluciones</PageTitle>
 
             {/* Buttons and filters */}
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">

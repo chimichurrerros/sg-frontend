@@ -6,8 +6,7 @@ import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoleDetails, useSyncRolePermissions } from "@/queries/roles.queries";
 import { PERMISSION_GROUPS } from "@/constants/permissions";
-import { toaster } from "@/components/ui/toaster";
-
+import PageTitle from "@/components/ui/title"
 export const RolePermissionsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -66,9 +65,9 @@ export const RolePermissionsPage = () => {
     <Stack gap={6} paddingInline="10%" py={6}>
       <Flex alignItems="center" justifyContent="space-between" wrap="wrap" gap={4}>
         <VStack align="start" gap={1}>
-          <Heading size="xl" color="brand.primary">
+          <PageTitle>
             Permisos del Rol: {roleName}
-          </Heading>
+          </PageTitle>
           <Text color="gray.500" fontSize="sm">
             Configura y asigna los accesos específicos para este rol de usuario.
           </Text>

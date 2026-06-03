@@ -15,10 +15,10 @@ import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
 import ProductsTable from "./components/ProductsTable";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
-import { type EditableLabel } from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import { RadioGroupWrapper } from "@/components/ui/wrappers/radio-group-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
+import { type EditableLabel } from "@/components/ui/tables/table-edit";
 // import { parseDate } from "@/constants/date";
 import { paymentMethods, saleConditions, useCreateSale, useGetSaleById } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
@@ -29,8 +29,9 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
 import { useAllBranches } from "@/queries/branches.queries";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 import { useAuthStore } from "@/stores/auth.store";
+import PageTitle from "@/components/ui/title";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -290,9 +291,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     <Box height="89vh" display="flex" flexDirection="column">
       <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
         <Box display="flex" gap={3}>
-          <Text fontSize="2xl" fontWeight="bold">
-            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}
-          </Text>
+          <PageTitle> {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}</PageTitle>
           {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
         </Box>
 

@@ -3,11 +3,11 @@ import { purchaseOrderForSupplierStateMap } from "@/api/purchaseOrderForSupplier
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { useGetPurchaseOrdersForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import {
   Box,
   Button,
@@ -18,6 +18,7 @@ import {
 import { Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 const formatDate = (value: string) => {
   const d = new Date(value);
@@ -84,9 +85,9 @@ export default function PurchaseOrdersForSupplierList() {
 
   return (
     <Box display="flex" flexDirection="column" gap={4} p={4} height="100%" minHeight="0">
-      <Text fontSize="2xl" fontWeight="bold">
+      <PageTitle>
         Órdenes de Compra por Proveedor
-      </Text>
+      </PageTitle>
 
       <Box
         display="flex"

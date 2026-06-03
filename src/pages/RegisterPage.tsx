@@ -1,7 +1,7 @@
 import type { UserDto } from "@/api/users.api.ts";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
-import TableEditable from "@/components/ui/table-edit";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
+import TableEditable from "@/components/ui/tables/table-edit";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { toaster } from "@/components/ui/toaster";
 import {

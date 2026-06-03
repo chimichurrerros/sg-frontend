@@ -11,7 +11,7 @@ import { Save, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BillDetail } from "@/types/bill-detail";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import {
   useAllBills,
   useCreateBill,
@@ -25,6 +25,7 @@ import {
 import type { PaginationType } from "@/types/types";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 export default function BillFormPage() {
   const navigate = useNavigate();
@@ -301,21 +302,29 @@ export default function BillFormPage() {
               <Text mb={1} fontSize="sm" fontWeight="medium">
                 Fecha
               </Text>
-              <Input
+              <DatePickerWrapper
+              value={formDate}
+              onChange={(e)=>setFormDate(e[0])}
+              />
+              {/* <Input
                 type="date"
                 value={formDate}
                 onChange={(e) => setFormDate(e.target.value)}
-              />
+              /> */}
             </Box>
             <Box>
               <Text mb={1} fontSize="sm" fontWeight="medium">
                 Vencimiento
               </Text>
-              <Input
+              <DatePickerWrapper
+              value={formDueDate}
+              onChange={(e)=>setFormDueDate(e[0])}
+              />
+              {/* <Input
                 type="date"
                 value={formDueDate}
                 onChange={(e) => setFormDueDate(e.target.value)}
-              />
+              /> */}
             </Box>
             <Box>
               <Text mb={1} fontSize="sm" fontWeight="medium">

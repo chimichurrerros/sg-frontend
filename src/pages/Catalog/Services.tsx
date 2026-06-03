@@ -1,6 +1,6 @@
 import type { ServiceResponseDto } from "@/api/service.api";
 import TableBar from "@/components/ui/table-bar";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import {

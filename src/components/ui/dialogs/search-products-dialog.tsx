@@ -11,7 +11,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { NumberInput } from "@chakra-ui/react/number-input";
 import { HStack } from "@chakra-ui/react/stack";
 import { Box, Kbd } from "@chakra-ui/react";
-import TableSelect, { type label } from "../table-select";
+import TableSelect, { type label } from "../tables/table-select";
 import type { ProductSelect } from "@/types/sales";
 import EmptyDataScreen from "../screens/empty-data-screen";
 import { parsePrice } from "@/constants/price";
