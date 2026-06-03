@@ -77,7 +77,6 @@ export default function CheckView() {
                             padding={2}
                             variant="outline"
                             disabled={isAlreadySettled || isRejecting || isReconciling}
-                            onClick={() => rejectMutation.mutate()}
                         >
                             {isRejecting ? <Spinner size="sm" /> : <BanknoteX />}
                             Anular Cheque
