@@ -27,8 +27,8 @@ type CreatePlanillaFormOutput = z.output<typeof createPlanillaSchema>;
 const processTypeCollection = createListCollection({
   items: [
     { label: processTypeNameMap[ProcessTypeId.Monthly], value: String(ProcessTypeId.Monthly) },
-    { label: processTypeNameMap[ProcessTypeId.Bonus], value: String(ProcessTypeId.Bonus) },
-    { label: processTypeNameMap[ProcessTypeId.Settlement], value: String(ProcessTypeId.Settlement) },
+    { label: processTypeNameMap[ProcessTypeId.Biweekly], value: String(ProcessTypeId.Biweekly) },
+    { label: processTypeNameMap[ProcessTypeId.Weekly], value: String(ProcessTypeId.Weekly) },
   ],
 });
 

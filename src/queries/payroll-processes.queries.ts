@@ -5,6 +5,7 @@ import {
   payrollProcessesApi,
   type AddEmployeesRequestDto,
   type EligibleEmployeeResponseDto,
+  type PayrollConceptSummaryResponseDto,
   type PayrollDetailSummaryResponseDto,
   type PayrollEmployeeReceiptDto,
   type PayrollProcessCalculationResponseDto,
@@ -186,6 +187,15 @@ export const useGetPayrollDetailSummaries = (processId?: number) => {
   return useQuery<PayrollDetailSummaryResponseDto[]>({
     queryKey: processId ? ["payroll-processes", processId, "detail-summaries"] as const : ["payroll-processes", "summaries", "none"] as const,
     queryFn: () => payrollProcessesApi.getDetailSummaries(processId ?? 0),
+    enabled: Boolean(processId),
+    retry: RETRIES,
+  });
+};
+
+export const useGetPayrollConceptSummaries = (processId?: number) => {
+  return useQuery<PayrollConceptSummaryResponseDto[]>({
+    queryKey: processId ? ["payroll-processes", processId, "concept-summaries"] as const : ["payroll-processes", "concept-summaries", "none"] as const,
+    queryFn: () => payrollProcessesApi.getConceptSummaries(processId ?? 0),
     enabled: Boolean(processId),
     retry: RETRIES,
   });

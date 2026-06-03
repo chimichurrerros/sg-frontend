@@ -93,6 +93,16 @@ export interface EligibleEmployeeResponseDto {
   positionName: string | null;
 }
 
+export interface ConceptSummaryItemDto {
+  conceptName: string;
+  totalAmount: number;
+}
+
+export interface PayrollConceptSummaryResponseDto {
+  payrollType: string;
+  concepts: ConceptSummaryItemDto[];
+}
+
 export interface PayrollDetailSummaryResponseDto {
   employeeId: number;
   fileNumber: string;
@@ -140,6 +150,8 @@ export const payrollProcessesApi = {
     apiClient.post<{ addedCount: number }>(`/api/payroll-processes/${id}/add-employees`, body).then((response) => response.data),
   getDetailSummaries: (id: number) =>
     apiClient.get<PayrollDetailSummaryResponseDto[]>(`/api/payroll-processes/${id}/detail-summaries`).then((response) => response.data),
+  getConceptSummaries: (id: number) =>
+    apiClient.get<PayrollConceptSummaryResponseDto[]>(`/api/payroll-processes/${id}/concept-summaries`).then((response) => response.data),
   removeEmployeeFromProcess: (processId: number, employeeId: number) =>
     apiClient.delete(`/api/payroll-processes/${processId}/employees/${employeeId}`).then((response) => response.data),
   closeProcess: (id: number) =>

@@ -16,14 +16,14 @@ export const formatStatusColor = (statusName?: string | null): string => {
 
 export const ProcessTypeId = {
   Monthly: 1,
-  Bonus: 2,
-  Settlement: 3,
+  Biweekly: 2,
+  Weekly: 3,
 } as const;
 
 export const processTypeNameMap: Record<number, string> = {
   [ProcessTypeId.Monthly]: "Mensual",
-  [ProcessTypeId.Bonus]: "Aguinaldo",
-  [ProcessTypeId.Settlement]: "Liquidación",
+  [ProcessTypeId.Biweekly]: "Quincenal",
+  [ProcessTypeId.Weekly]: "Semanal",
 };
 
 export const PayrollStatusId = {

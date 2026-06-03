@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge, Box, Button, Card, CloseButton, createListCollection, Dialog, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
-import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote } from "react-icons/lu";
+import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote, LuPrinter } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { parseDate, parseDateTime } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
@@ -10,6 +10,8 @@ import type { EligibleEmployeeResponseDto, PayrollDetailSummaryResponseDto } fro
 import { parseApiError } from "@/utils/api-error";
 import { toaster } from "@/components/ui/toaster";
 import EmployeePayrollDetailModal from "./EmployeePayrollDetailModal";
+import ConceptSummaryModal from "./ConceptSummaryModal";
+import PayrollBatchReceipt from "./PayrollBatchReceipt";
 
 const formatDate = (value?: string | null) => (value ? parseDate(value) : "-");
 
@@ -26,7 +28,6 @@ export default function PlanillaDetallePage() {
   const removeEmployeeMutation = useRemoveEmployeeFromProcess(Number.isFinite(processId) ? processId : undefined);
   const closeProcessMutation = useClosePayrollProcess(Number.isFinite(processId) ? processId : undefined);
 
-  const summaryRef = useRef<HTMLDivElement>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [employeeSearch, setEmployeeSearch] = useState("");
   const [branchFilter, setBranchFilter] = useState("");
@@ -34,6 +35,8 @@ export default function PlanillaDetallePage() {
   const [positionFilter, setPositionFilter] = useState("");
 
   const [modalEmployee, setModalEmployee] = useState<{ id: number; name: string } | null>(null);
+  const [conceptSummaryOpen, setConceptSummaryOpen] = useState(false);
+  const [batchReceiptOpen, setBatchReceiptOpen] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [payConfirmOpen, setPayConfirmOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
@@ -397,7 +400,7 @@ export default function PlanillaDetallePage() {
         </Card.Body>
       </Card.Root>
 
-      <Card.Root ref={summaryRef} id="resumen" variant="outline">
+      <Card.Root variant="outline">
         <Card.Header>
           <Heading size="md">Resultados de Pre-Liquidación</Heading>
         </Card.Header>
@@ -477,10 +480,7 @@ export default function PlanillaDetallePage() {
 
       {summaries.length > 0 && (
         <HStack justify="flex-end" gap={3} flexWrap="wrap">
-          <Button
-            variant="outline"
-            onClick={() => summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          >
+          <Button variant="outline" onClick={() => setConceptSummaryOpen(true)}>
             Resumen
           </Button>
           {isProcessOpen && (
@@ -501,6 +501,11 @@ export default function PlanillaDetallePage() {
               <LuBanknote /> Proceder al pago
             </Button>
           )}
+          {isPaid && summaries.length > 0 && (
+            <Button colorPalette="brand" variant="outline" onClick={() => setBatchReceiptOpen(true)}>
+              <LuPrinter /> Imprimir Recibos
+            </Button>
+          )}
         </HStack>
       )}
 
@@ -511,6 +516,20 @@ export default function PlanillaDetallePage() {
         open={modalEmployee !== null}
         onClose={() => setModalEmployee(null)}
       />
+
+      <ConceptSummaryModal
+        processId={processId}
+        open={conceptSummaryOpen}
+        onClose={() => setConceptSummaryOpen(false)}
+      />
+
+      {batchReceiptOpen && (
+        <PayrollBatchReceipt
+          processId={processId}
+          summaries={summaries}
+          onClose={() => setBatchReceiptOpen(false)}
+        />
+      )}
 
       <Dialog.Root open={closeConfirmOpen} onOpenChange={(e) => { if (!e.open) setCloseConfirmOpen(false); }}>
         <Portal>

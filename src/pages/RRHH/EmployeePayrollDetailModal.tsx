@@ -131,7 +131,7 @@ export default function EmployeePayrollDetailModal({
                     </Stack>
                   </Box>
 
-                  {receipt.earnings.length > 0 && (
+                  {receipt.earnings.filter((e) => e.amount !== 0).length > 0 && (
                     <Box>
                       <Text fontWeight="bold" fontSize="md" mb={2} color="green.700">Haberes</Text>
                       <Table.ScrollArea borderWidth="1px" rounded="md">
@@ -143,7 +143,7 @@ export default function EmployeePayrollDetailModal({
                             </Table.Row>
                           </Table.Header>
                           <Table.Body>
-                            {receipt.earnings.map((e, i) => (
+                            {receipt.earnings.filter((e) => e.amount !== 0).map((e, i) => (
                               <Table.Row key={i}>
                                 <Table.Cell>
                                   {e.conceptName}
@@ -160,7 +160,7 @@ export default function EmployeePayrollDetailModal({
                     </Box>
                   )}
 
-                  {receipt.deductions.length > 0 && (
+                  {receipt.deductions.filter((d) => d.amount !== 0).length > 0 && (
                     <Box>
                       <Text fontWeight="bold" fontSize="md" mb={2} color="red.700">Descuentos</Text>
                       <Table.ScrollArea borderWidth="1px" rounded="md">
@@ -172,7 +172,7 @@ export default function EmployeePayrollDetailModal({
                             </Table.Row>
                           </Table.Header>
                           <Table.Body>
-                            {receipt.deductions.map((d, i) => (
+                            {receipt.deductions.filter((d) => d.amount !== 0).map((d, i) => (
                               <Table.Row key={i}>
                                 <Table.Cell>{d.conceptName}</Table.Cell>
                                 <Table.Cell textAlign="end" fontFamily="mono">{parsePrice(d.amount)}</Table.Cell>

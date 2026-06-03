@@ -1,11 +1,12 @@
-import { useEffect, useRef } from "react";
-import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+import { Box, Button, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
 import { LuX } from "react-icons/lu";
+import { payrollProcessesApi, type PayrollEmployeeReceiptDto, type PayrollDetailSummaryResponseDto } from "@/api/payroll-processes.api";
 import { parsePrice } from "@/constants/price";
-import type { PayrollEmployeeReceiptDto } from "@/api/payroll-processes.api";
 
-interface PayrollReceiptProps {
-  receipt: PayrollEmployeeReceiptDto;
+interface PayrollBatchReceiptProps {
+  processId: number;
+  summaries: PayrollDetailSummaryResponseDto[];
   onClose: () => void;
 }
 
@@ -130,23 +131,31 @@ function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmploy
   );
 }
 
-export default function PayrollReceipt({ receipt, onClose }: PayrollReceiptProps) {
+export default function PayrollBatchReceipt({ processId, summaries, onClose }: PayrollBatchReceiptProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [receipts, setReceipts] = useState<PayrollEmployeeReceiptDto[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      window.print();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleAfterPrint = () => {
-      onClose();
+    const fetchAll = async () => {
+      setLoading(true);
+      try {
+        const results = await Promise.all(
+          summaries.map((s) =>
+            payrollProcessesApi.getEmployeeReceipt(processId, s.employeeId)
+          )
+        );
+        setReceipts(results);
+      } finally {
+        setLoading(false);
+      }
     };
-    window.addEventListener("afterprint", handleAfterPrint);
-    return () => window.removeEventListener("afterprint", handleAfterPrint);
-  }, [onClose]);
+    fetchAll();
+  }, [processId, summaries]);
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <>
@@ -160,11 +169,11 @@ export default function PayrollReceipt({ receipt, onClose }: PayrollReceiptProps
           body * {
             visibility: hidden;
           }
-          #receipt-print-area,
-          #receipt-print-area * {
+          #batch-receipt-print-area,
+          #batch-receipt-print-area * {
             visibility: visible;
           }
-          #receipt-print-area {
+          #batch-receipt-print-area {
             position: absolute;
             left: 0;
             top: 0;
@@ -186,10 +195,13 @@ export default function PayrollReceipt({ receipt, onClose }: PayrollReceiptProps
             border-top: 1px dashed #000;
             margin: 6px 0;
           }
+          .receipt-employee-break {
+            page-break-before: always;
+          }
         }
 
         @media screen {
-          #receipt-print-area {
+          #batch-receipt-print-area {
             background: white;
             color: black;
             font-family: 'Courier New', monospace;
@@ -232,7 +244,7 @@ export default function PayrollReceipt({ receipt, onClose }: PayrollReceiptProps
       `}</style>
 
       <Box
-        id="receipt-print-area"
+        id="batch-receipt-print-area"
         position="fixed"
         inset={0}
         zIndex={9999}
@@ -240,20 +252,35 @@ export default function PayrollReceipt({ receipt, onClose }: PayrollReceiptProps
         overflowY="auto"
         p={4}
       >
-        <Box className="receipt-no-print" textAlign="right" mb={2}>
+        <Box className="receipt-no-print" display="flex" justifyContent="space-between" mb={2}>
+          <Button variant="outline" size="sm" colorPalette="brand" onClick={handlePrint}>
+            Imprimir
+          </Button>
           <Button variant="outline" size="sm" onClick={onClose}>
             <LuX /> Cerrar
           </Button>
         </Box>
 
-        <Box ref={printRef}>
-          <ReceiptHalf label="ORIGINAL" receipt={receipt} />
-          <hr className="receipt-cut-line" />
-          <Box textAlign="center" className="receipt-no-print" fontSize="xs" color="gray.500" mb={1}>
-            — Línea de corte —
+        {loading ? (
+          <Box textAlign="center" py={10}>
+            <Spinner size="xl" />
+            <Text mt={4}>Cargando recibos...</Text>
           </Box>
-          <ReceiptHalf label="DUPLICADO" receipt={receipt} />
-        </Box>
+        ) : (
+          <Box ref={printRef}>
+            {receipts.map((receipt, idx) => (
+              <Box key={idx}>
+                {idx > 0 && <div className="receipt-employee-break" />}
+                <ReceiptHalf label="ORIGINAL" receipt={receipt} />
+                <hr className="receipt-cut-line" />
+                <Box textAlign="center" className="receipt-no-print" fontSize="xs" color="gray.500" mb={1}>
+                  — Línea de corte —
+                </Box>
+                <ReceiptHalf label="DUPLICADO" receipt={receipt} />
+              </Box>
+            ))}
+          </Box>
+        )}
       </Box>
     </>
   );
