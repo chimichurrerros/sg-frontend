@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Badge,
   Box,
   Button,
   CloseButton,
@@ -145,12 +144,7 @@ export default function EmployeePayrollDetailModal({
                           <Table.Body>
                             {receipt.earnings.filter((e) => e.amount !== 0).map((e, i) => (
                               <Table.Row key={i}>
-                                <Table.Cell>
-                                  {e.conceptName}
-                                  {e.isIpsDeductible && (
-                                    <Badge size="xs" colorPalette="blue" ml={2}>IPS</Badge>
-                                  )}
-                                </Table.Cell>
+                                <Table.Cell>{e.conceptName}</Table.Cell>
                                 <Table.Cell textAlign="end" fontFamily="mono">{parsePrice(e.amount)}</Table.Cell>
                               </Table.Row>
                             ))}
@@ -193,10 +187,6 @@ export default function EmployeePayrollDetailModal({
                       <HStack justify="space-between">
                         <Text color="gray.600">Total Descuentos:</Text>
                         <Text fontWeight="bold" fontFamily="mono">{parsePrice(receipt.totalDeductions)}</Text>
-                      </HStack>
-                      <HStack justify="space-between">
-                        <Text color="gray.600">Total Deducible IPS:</Text>
-                        <Text fontWeight="medium" fontFamily="mono">{parsePrice(receipt.totalIpsDeductible)}</Text>
                       </HStack>
                       <HStack justify="space-between" borderTopWidth="1px" pt={1} mt={1}>
                         <Text fontWeight="bold" fontSize="md">Sueldo Neto:</Text>

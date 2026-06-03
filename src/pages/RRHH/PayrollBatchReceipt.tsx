@@ -10,7 +10,7 @@ interface PayrollBatchReceiptProps {
   onClose: () => void;
 }
 
-function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmployeeReceiptDto }) {
+function ReceiptHalf({ receipt }: { receipt: PayrollEmployeeReceiptDto }) {
   return (
     <Box className="receipt-half">
       <Box textAlign="center" mb={3}>
@@ -48,7 +48,7 @@ function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmploy
           <thead>
             <tr>
               <th style={{ textAlign: "left", width: "60%" }}>Concepto</th>
-              <th style={{ textAlign: "right", width: "40%" }}>Importe (G$)</th>
+              <th style={{ textAlign: "right", width: "40%" }}>Importe</th>
             </tr>
           </thead>
           <tbody>
@@ -61,7 +61,7 @@ function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmploy
             )}
             {receipt.earnings.filter((e) => e.amount !== 0).map((e, i) => (
               <tr key={`e-${i}`}>
-                <td>{e.conceptName}{e.isIpsDeductible ? " (*)" : ""}</td>
+                <td>{e.conceptName}</td>
                 <td style={{ textAlign: "right" }}>{parsePrice(e.amount)}</td>
               </tr>
             ))}
@@ -93,12 +93,6 @@ function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmploy
               <td style={{ fontWeight: "bold" }}>Total Descuentos</td>
               <td style={{ textAlign: "right" }}>{parsePrice(receipt.totalDeductions)}</td>
             </tr>
-            <tr>
-              <td style={{ fontSize: "xs", color: "gray.600", fontStyle: "italic" }}>
-                (*) Deducible IPS: {parsePrice(receipt.totalIpsDeductible)}
-              </td>
-              <td />
-            </tr>
             <tr className="receipt-net-row">
               <td style={{ fontWeight: "bold", fontSize: "1.1em" }}>Sueldo Neto</td>
               <td style={{ textAlign: "right", fontWeight: "bold", fontSize: "1.1em" }}>
@@ -122,11 +116,6 @@ function ReceiptHalf({ label, receipt }: { label: string; receipt: PayrollEmploy
         </HStack>
       </Box>
 
-      <Box textAlign="center" mt={2}>
-        <Text fontSize="xs" color="gray.500" fontStyle="italic">
-          {label} - Documento emitido por sistema de gestión
-        </Text>
-      </Box>
     </Box>
   );
 }
@@ -271,12 +260,12 @@ export default function PayrollBatchReceipt({ processId, summaries, onClose }: P
             {receipts.map((receipt, idx) => (
               <Box key={idx}>
                 {idx > 0 && <div className="receipt-employee-break" />}
-                <ReceiptHalf label="ORIGINAL" receipt={receipt} />
+                <ReceiptHalf receipt={receipt} />
                 <hr className="receipt-cut-line" />
                 <Box textAlign="center" className="receipt-no-print" fontSize="xs" color="gray.500" mb={1}>
                   — Línea de corte —
                 </Box>
-                <ReceiptHalf label="DUPLICADO" receipt={receipt} />
+                <ReceiptHalf receipt={receipt} />
               </Box>
             ))}
           </Box>
