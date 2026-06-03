@@ -3,7 +3,7 @@ import { Box } from "@chakra-ui/react/box";
 import { IconButton } from "@chakra-ui/react/button";
 import { Input } from "@chakra-ui/react/input";
 import { Kbd } from "@chakra-ui/react/kbd";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Text } from "@chakra-ui/react/text"
 import { PackageOpenIcon, Plus } from "lucide-react";
@@ -36,6 +36,34 @@ export default function PurchaseProductsTable({ products, onDataChange, readOnly
     if (readOnly) return;
     addProdRef.current?.click();
   });
+
+  useEffect(() => {
+    if (!aviableProducts?.products || !productCode) return;
+
+    const prod = aviableProducts.products.find(p => p.barcode === productCode);
+    if (!prod) return;
+
+    const exist = products.some(p => p.productId === prod.id);
+
+    if (exist) {
+      onDataChange(products.map(p =>
+        p.productId === prod.id
+          ? { ...p, quantityRequested: p.quantityRequested + 1 }
+          : p
+      ));
+    } else {
+      const nextId = products.length > 0
+        ? Math.max(...products.map(p => p.id)) + 1
+        : 1;
+      onDataChange([...products, {
+        id: nextId,
+        productId: prod.id,
+        productName: prod.name || "Producto sin nombre",
+        quantityRequested: 1,
+      }]);
+    }
+    setProductCode("");
+  }, [productCode, aviableProducts]);
 
   const generateRow = (product: ProductSelect, quantity: number): PurchaseProductRow => ({
     id: nextId++,
@@ -89,6 +117,7 @@ export default function PurchaseProductsTable({ products, onDataChange, readOnly
             loading={loadingProducts}
             error={errorProducts}
             isError={isErrorProducts}
+            careStock={false}
             trigger={
               <IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts} ref={addProdRef}>
                 {aviableProducts ? <Plus /> : <Spinner />} Item
