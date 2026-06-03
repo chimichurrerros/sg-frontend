@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi, type LoginRequest, type RegisterRequest } from "@/api/auth.api";
 import { useAuthStore } from "@/stores/auth.store";
+import { useEffect } from "react";
 
 export const authKeys = {
   me: ["auth", "me"] as const,
@@ -13,8 +14,9 @@ export const authKeys = {
  */
 export const useMe = () => {
   const user = useAuthStore((s) => s.user);
+  const setAuth = useAuthStore((s) => s.setAuth);
 
-  return useQuery({
+  const query = useQuery({
     queryKey: authKeys.me,
     queryFn:  async () => {
       const wrapper = await authApi.me();
@@ -23,6 +25,14 @@ export const useMe = () => {
     enabled:   !!user,               // only fetch if we think we're logged in
     staleTime: 1000 * 60 * 5,
   });
+
+  useEffect(() => {
+    if (query.data) {
+      setAuth(query.data);
+    }
+  }, [query.data, setAuth]);
+
+  return query;
 };
 
 export const useLogin = () => {
