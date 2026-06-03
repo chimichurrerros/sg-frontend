@@ -1,253 +1,121 @@
 import { Box, Spinner } from "@chakra-ui/react";
-import {
-  IconButton,
-  Input,
-  Text,
-  Button,
-  VStack,
-  HStack,
-} from "@chakra-ui/react";
-import { Save, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Text, Button, HStack, Grid, GridItem, Checkbox } from "@chakra-ui/react";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BillDetail } from "@/types/bill-detail";
-import TableSelect, { type label } from "@/components/ui/tables/table-select";
-import {
-  useAllBills,
-  useCreateBill,
-  useEditBill,
-} from "@/queries/bills.queries";
-import {
-  useBillDetailsByBillId,
-  useCreateBillDetail,
-  useEditBillDetail,
-} from "@/queries/bill-details.queries";
+import { useBillById } from "@/queries/bills.queries";
+import { useBillDetailsByBillId } from "@/queries/bill-details.queries";
+import { useGetSaleById } from "@/queries/sales.queries";
+import { useAllProducts } from "@/queries/catalog.queries";
+import { parsePrice } from "@/constants/price";
+import { parseDate } from "@/constants/date";
 import type { PaginationType } from "@/types/types";
-import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import { toaster } from "@/components/ui/toaster";
-import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+import { LoadingScreen } from "@/components/ui/screens/loading-screen";
+import PageTitle from "@/components/ui/title";
 
 export default function BillFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEditing = !!id && id !== "nueva";
+  const billId = id ? parseInt(id) : 0;
 
-  const [formNumber, setFormNumber] = useState("");
-  const [formDate, setFormDate] = useState("");
-  const [formDueDate, setFormDueDate] = useState("");
-  const [formTotal, setFormTotal] = useState("");
-  const [formTaxTotal, setFormTaxTotal] = useState("");
-  const [formBillType, setFormBillType] = useState("1");
-  const [formBillState, setFormBillState] = useState("0");
-  const [formCustomerId, setFormCustomerId] = useState("");
-  const [formPaymentTerms, setFormPaymentTerms] = useState("");
-  const [formIsCredit, setFormIsCredit] = useState(false);
+  const [number, setNumber] = useState("");
+  const [date, setDate] = useState("");
+  const [salesOrderId, setSalesOrderId] = useState(0);
+  const [customerName, setCustomerName] = useState("");
+  const [customerRuc, setCustomerRuc] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [isCredit, setIsCredit] = useState(false);
 
   const [details, setDetails] = useState<BillDetail[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<BillDetail | null>(null);
-  const [showDetailForm, setShowDetailForm] = useState(false);
-  const [isEditingDetail, setIsEditingDetail] = useState(false);
-  const [editingDetailId, setEditingDetailId] = useState<number | null>(null);
-  const [formDetailProductId, setFormDetailProductId] = useState("");
-  const [formDetailQuantity, setFormDetailQuantity] = useState("");
-  const [formDetailPrice, setFormDetailPrice] = useState("");
-  const [formDetailTaxRate, setFormDetailTaxRate] = useState("10");
-  const [detailPage, setDetailPage] = useState(1);
-  const [detailPageSize, setDetailPageSize] = useState(10);
+  const [pagination, setPagination] = useState<PaginationType | null>(null);
 
-  const { data: allBills, isPending: loadingBills } = useAllBills();
-  const {
-    data: billDetailsData,
-    isPending: loadingDetails,
-    refetch: refetchDetails,
-  } = useBillDetailsByBillId(id ? parseInt(id) : 0, {
-    page: detailPage,
-    pageSize: detailPageSize,
-  });
-  const createBill = useCreateBill();
-  const editBill = useEditBill();
-  const createDetail = useCreateBillDetail();
-  const editDetail = useEditBillDetail();
+  const { data: billData, isPending: loadingBill } = useBillById(billId, billId > 0);
+  const { data: billDetailsData, isPending: loadingDetails } =
+    useBillDetailsByBillId(billId, { page: 1, pageSize: 100 });
+  const { data: saleData } = useGetSaleById(salesOrderId > 0 ? salesOrderId : undefined);
+  const { data: productsData } = useAllProducts();
 
   useEffect(() => {
-    if (id && !isNaN(parseInt(id)) && allBills?.bills) {
-      const bill = allBills.bills.find((b) => b.id === parseInt(id));
-      if (bill) {
-        setFormNumber(bill.number);
-        setFormDate(bill.date);
-        setFormDueDate(bill.dueDate || "");
-        setFormTotal(bill.total.toString());
-        setFormTaxTotal(bill.taxTotal.toString());
-        setFormBillType(bill.billType.toString());
-        setFormBillState(bill.billState.toString());
-        setFormCustomerId(bill.customerId.toString());
-        setFormPaymentTerms(bill.paymentTerms || "");
-        setFormIsCredit(bill.isCredit);
-      }
+    if (billData?.bill) {
+      const bill = billData.bill;
+      setNumber(bill.number);
+      setDate(bill.date);
+      setSalesOrderId(bill.salesOrderId ?? 0);
+      setIsCredit(bill.isCredit);
     }
-  }, [id, allBills]);
-
-  const [pagination, setPagination] = useState<PaginationType | null>(null);
+  }, [billData]);
 
   useEffect(() => {
     if (billDetailsData?.billDetails) {
       setDetails(billDetailsData.billDetails);
-      console.log(selectedDetail);
     }
     if (billDetailsData?.pagination) {
       setPagination(billDetailsData.pagination);
     }
   }, [billDetailsData]);
 
-  const detailLabels: label<BillDetail>[] = [
-    { labelName: "ID", propName: "id" },
-    { labelName: "Producto", propName: "productId" },
+  useEffect(() => {
+    if (saleData) {
+      setCustomerName(saleData.customerName || "");
+      setCustomerRuc(saleData.customerRuc || "");
+      setCustomerEmail(saleData.customerEmail || "");
+    }
+  }, [saleData]);
+
+  const getProductName = (productId: number) => {
+    const product = productsData?.products.find((p) => p.id === productId);
+    return product?.name ?? `Producto ${productId}`;
+  };
+
+  const getExentas = (d: BillDetail) => (d.taxRate === 0 ? d.price * d.quantity : 0);
+  const getIva5 = (d: BillDetail) => (d.taxRate === 5 ? d.price * d.quantity : 0);
+  const getIva10 = (d: BillDetail) => (d.taxRate === 10 ? d.price * d.quantity : 0);
+
+  const showIfNotZero = (value: number) => (value > 0 ? parsePrice(value) : "-");
+
+  const detailLabels: EditableLabel<BillDetail>[] = [
+    { labelName: "Cód.", propName: "productId" },
     { labelName: "Cantidad", propName: "quantity" },
-    { labelName: "Precio", propName: "price" },
-    { labelName: "Tasa IVA", propName: "taxRate" },
+    {
+      labelName: "Descripción",
+      isComponent: true,
+      render: (item) => getProductName(item.productId),
+    },
+    {
+      labelName: "Precio Unit.",
+      isComponent: true,
+      render: (item) => parsePrice(item.price),
+    },
+    {
+      labelName: "Exentas",
+      isComponent: true,
+      render: (item) => showIfNotZero(getExentas(item)),
+    },
+    {
+      labelName: "5%",
+      isComponent: true,
+      render: (item) => showIfNotZero(getIva5(item)),
+    },
+    {
+      labelName: "10%",
+      isComponent: true,
+      render: (item) => showIfNotZero(getIva10(item)),
+    },
   ];
 
-  const handleSubmitBill = async () => {
-    if (!formNumber.trim() || !formDate || !formTotal || !formCustomerId) {
-      toaster.create({
-        title: "Error",
-        description: "Número, fecha, total y cliente son requeridos",
-        type: "error",
-      });
-      return;
-    }
+  const totalExentas = details.reduce((sum, d) => sum + getExentas(d), 0);
+  const totalIva5 = details.reduce((sum, d) => sum + getIva5(d), 0);
+  const totalIva10 = details.reduce((sum, d) => sum + getIva10(d), 0);
+  const totalGeneral = details.reduce((sum, d) => sum + d.price * d.quantity, 0);
 
-    const billData = {
-      number: formNumber,
-      date: formDate,
-      dueDate: formDueDate || undefined,
-      total: parseFloat(formTotal),
-      taxTotal: parseFloat(formTaxTotal) || 0,
-      billType: parseInt(formBillType),
-      billState: parseInt(formBillState),
-      customerId: parseInt(formCustomerId),
-      paymentTerms: formPaymentTerms || undefined,
-      isCredit: formIsCredit,
-    };
+  const isLoading = loadingBill || loadingDetails;
 
-    try {
-      if (isEditing && id) {
-        await editBill.mutateAsync({ id: parseInt(id), data: billData });
-        toaster.create({
-          title: "Éxito",
-          description: `${formNumber} actualizada`,
-          type: "success",
-        });
-      } else {
-        const result = await createBill.mutateAsync(billData);
-        toaster.create({
-          title: "Éxito",
-          description: `${formNumber} creada`,
-          type: "success",
-        });
-        navigate(`/ventas/facturas/${result.bill.id}`, { replace: true });
-      }
-    } catch {
-      toaster.create({
-        title: "Error",
-        description: isEditing ? "No se pudo actualizar" : "No se pudo crear",
-        type: "error",
-      });
-    }
-  };
-
-  // const handleNewDetail = () => {
-  //   if (!isEditing) {
-  //     toaster.create({
-  //       title: "Error",
-  //       description: "Guardá la factura primero",
-  //       type: "error",
-  //     });
-  //     return;
-  //   }
-  //   setFormDetailProductId("");
-  //   setFormDetailQuantity("");
-  //   setFormDetailPrice("");
-  //   setFormDetailTaxRate("10");
-  //   setIsEditingDetail(false);
-  //   setEditingDetailId(null);
-  //   setShowDetailForm(true);
-  // };
-
-  // const handleEditDetail = () => {
-  //   if (!selectedDetail) return;
-  //   setFormDetailProductId(selectedDetail.productId.toString());
-  //   setFormDetailQuantity(selectedDetail.quantity.toString());
-  //   setFormDetailPrice(selectedDetail.price.toString());
-  //   setFormDetailTaxRate(selectedDetail.taxRate.toString());
-  //   setIsEditingDetail(true);
-  //   setEditingDetailId(selectedDetail.id);
-  //   setShowDetailForm(true);
-  // };
-
-  const handleSubmitDetail = async () => {
-    if (!formDetailProductId || !formDetailQuantity || !formDetailPrice) {
-      toaster.create({
-        title: "Error",
-        description: "Producto, cantidad y precio requeridos",
-        type: "error",
-      });
-      return;
-    }
-
-    const detailData = {
-      billId: parseInt(id || "0"),
-      productId: parseInt(formDetailProductId),
-      quantity: parseFloat(formDetailQuantity),
-      price: parseFloat(formDetailPrice),
-      taxRate: parseFloat(formDetailTaxRate) || 0,
-    };
-
-    try {
-      if (isEditingDetail && editingDetailId) {
-        await editDetail.mutateAsync({ id: editingDetailId, data: detailData });
-        toaster.create({
-          title: "Éxito",
-          description: "Detalle actualizado",
-          type: "success",
-        });
-      } else {
-        await createDetail.mutateAsync(detailData);
-        toaster.create({
-          title: "Éxito",
-          description: "Detalle creado",
-          type: "success",
-        });
-      }
-      setShowDetailForm(false);
-      setSelectedDetail(null);
-      refetchDetails();
-    } catch {
-      toaster.create({
-        title: "Error",
-        description: "Error al guardar detalle",
-        type: "error",
-      });
-    }
-  };
-
-  const handleCancelDetail = () => {
-    setShowDetailForm(false);
-    setIsEditingDetail(false);
-    setEditingDetailId(null);
-  };
-
-  const isPending =
-    createBill.isPending ||
-    editBill.isPending ||
-    createDetail.isPending ||
-    editDetail.isPending;
-  const isLoading = loadingBills || loadingDetails;
-
-  if (isLoading && isEditing) {
+  if (isLoading) {
     return (
-      <Box p={5}>
-        <Spinner />
+      <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
+        <LoadingScreen message="Cargando Factura..."/>
       </Box>
     );
   }
@@ -255,342 +123,77 @@ export default function BillFormPage() {
   return (
     <Box p={5} display="flex" flexDirection="column" gap={4}>
       <HStack justifyContent="space-between">
-        <HStack>
-          {/* <IconButton
-            aria-label="Volver"
-            onClick={() => navigate("/ventas/facturas")}
-          >
-            <ArrowLeft size={20} />
-          </IconButton> */}
-          <Text fontWeight="bold" fontSize="2xl">
-            {isEditing ? `Factura ${formNumber}` : "Nueva Factura"}
-          </Text>
-        </HStack>
-        <Button
-          bg="brand.primary"
-          onClick={handleSubmitBill}
-          disabled={isPending}
-        >
-          {isPending ? (
-            <Spinner size="sm" color="white" />
-          ) : isEditing ? (
-            <Save size={18} />
-          ) : (
-            <Plus size={18} />
-          )}
-          {isEditing ? "Guardar" : "Crear"}
+        <PageTitle>
+          Factura {number}
+        </PageTitle>
+        <Button variant="outline" onClick={() => navigate("/ventas/facturas")}>
+          <ArrowLeft size={18} /> Volver al listado
         </Button>
       </HStack>
 
-      <HStack alignItems="flex-start" gap={4}>
-        <Box flex={1} borderWidth="1px" borderRadius="md" p={4} bg="gray.50">
-          <VStack align="stretch" gap={3}>
-            <Text fontWeight="bold" fontSize="lg">
-              Datos Factura
+      <Box borderWidth="1px" borderRadius="md" overflow="hidden">
+        <Grid templateColumns="2fr 1fr">
+          <GridItem p={4}>
+            <Text fontSize="sm" mb={1}>
+              <strong>Fecha de emisión:</strong> {parseDate(date)}
             </Text>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Número
-              </Text>
-              <Input
-                value={formNumber}
-                onChange={(e) => setFormNumber(e.target.value)}
-                placeholder="001-001-000000001"
-              />
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Fecha
-              </Text>
-              <DatePickerWrapper
-              value={formDate}
-              onChange={(e)=>setFormDate(e[0])}
-              />
-              {/* <Input
-                type="date"
-                value={formDate}
-                onChange={(e) => setFormDate(e.target.value)}
-              /> */}
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Vencimiento
-              </Text>
-              <DatePickerWrapper
-              value={formDueDate}
-              onChange={(e)=>setFormDueDate(e[0])}
-              />
-              {/* <Input
-                type="date"
-                value={formDueDate}
-                onChange={(e) => setFormDueDate(e.target.value)}
-              /> */}
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                ID Cliente
-              </Text>
-              <Input
-                type="number"
-                value={formCustomerId}
-                onChange={(e) => setFormCustomerId(e.target.value)}
-              />
-            </Box>
-          </VStack>
-        </Box>
-
-        <Box flex={1} borderWidth="1px" borderRadius="md" p={4} bg="gray.50">
-          <VStack align="stretch" gap={3}>
-            <Text fontWeight="bold" fontSize="lg">
-              Valores
+            <Text fontSize="sm" mb={1}>
+              <strong>RUC/Documento de Identidad N°:</strong> {customerRuc || "-"}
             </Text>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Total
-              </Text>
-              <Input
-                type="number"
-                value={formTotal}
-                onChange={(e) => setFormTotal(e.target.value)}
-                placeholder="0"
-              />
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                IVA
-              </Text>
-              <Input
-                type="number"
-                value={formTaxTotal}
-                onChange={(e) => setFormTaxTotal(e.target.value)}
-                placeholder="0"
-              />
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Tipo
-              </Text>
-              <select
-                value={formBillType}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setFormBillType(e.target.value)
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <option value="1">Contado</option>
-                <option value="2">Crédito</option>
-              </select>
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Estado
-              </Text>
-              <select
-                value={formBillState}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setFormBillState(e.target.value)
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <option value="0">Pendiente</option>
-                <option value="1">Pagada</option>
-                <option value="2">Anulada</option>
-              </select>
-            </Box>
-          </VStack>
-        </Box>
-
-        <Box flex={1} borderWidth="1px" borderRadius="md" p={4} bg="gray.50">
-          <VStack align="stretch" gap={3}>
-            <Text fontWeight="bold" fontSize="lg">
-              Información Adicional
+            <Text fontSize="sm" mb={1}>
+              <strong>Nombre o Razón Social:</strong> {customerName || "-"}
             </Text>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Términos de Pago
-              </Text>
-              <Input
-                value={formPaymentTerms}
-                onChange={(e) => setFormPaymentTerms(e.target.value)}
-                placeholder="Contado"
-              />
-            </Box>
-            <Box>
-              <Text mb={1} fontSize="sm" fontWeight="medium">
-                Es Crédito
-              </Text>
-              <select
-                value={formIsCredit ? "1" : "0"}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setFormIsCredit(e.target.value === "1")
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <option value="0">No</option>
-                <option value="1">Sí</option>
-              </select>
-            </Box>
-          </VStack>
-        </Box>
-      </HStack>
-
-      {isEditing && (
-        <Box borderWidth="1px" borderRadius="md" p={4}>
-          <HStack justifyContent="space-between" mb={4}>
-            <Text fontWeight="bold" fontSize="lg">
-              Detalles de Factura
+            <Text fontSize="sm">
+              <strong>Correo Electrónico:</strong> {customerEmail || "-"}
             </Text>
-            {/* <HStack>
-              <IconButton
-                aria-label="Editar detalle"
-                disabled={!selectedDetail}
-                onClick={handleEditDetail}
-              >
-                <Pencil size={20} />
-              </IconButton>
-              <IconButton
-                aria-label="Nuevo detalle"
-                bg="brand.primary"
-                onClick={handleNewDetail}
-              >
-                <Plus size={20} />
-              </IconButton>
-            </HStack> */}
-          </HStack>
+          </GridItem>
 
-          {showDetailForm && (
-            <Box borderWidth="1px" borderRadius="md" p={3} mb={4} bg="gray.50">
-              <HStack gap={3}>
-                <Box flex={1}>
-                  <Text mb={1} fontSize="sm">
-                    Producto ID
-                  </Text>
-                  <Input
-                    type="number"
-                    value={formDetailProductId}
-                    onChange={(e) => setFormDetailProductId(e.target.value)}
-                  />
-                </Box>
-                <Box flex={1}>
-                  <Text mb={1} fontSize="sm">
-                    Cantidad
-                  </Text>
-                  <Input
-                    type="number"
-                    value={formDetailQuantity}
-                    onChange={(e) => setFormDetailQuantity(e.target.value)}
-                  />
-                </Box>
-                <Box flex={1}>
-                  <Text mb={1} fontSize="sm">
-                    Precio
-                  </Text>
-                  <Input
-                    type="number"
-                    value={formDetailPrice}
-                    onChange={(e) => setFormDetailPrice(e.target.value)}
-                  />
-                </Box>
-                <Box flex={1}>
-                  <Text mb={1} fontSize="sm">
-                    Tasa IVA
-                  </Text>
-                  <Input
-                    type="number"
-                    value={formDetailTaxRate}
-                    onChange={(e) => setFormDetailTaxRate(e.target.value)}
-                  />
-                </Box>
-              </HStack>
-              <HStack mt={3} justifyContent="flex-end">
-                <Button variant="outline" onClick={handleCancelDetail}>
-                  Cancelar
-                </Button>
-                <Button
-                  bg="brand.primary"
-                  onClick={handleSubmitDetail}
-                  disabled={isPending}
-                >
-                  {isPending ? (
-                    <Spinner size="sm" color="white" />
-                  ) : isEditingDetail ? (
-                    "Guardar"
-                  ) : (
-                    "Agregar"
-                  )}
-                </Button>
-              </HStack>
-            </Box>
-          )}
-
-          <TableSelect
-            data={details}
-            loading={loadingDetails}
-            labels={detailLabels}
-            noItemsComponent={
-              <EmptyDataScreen
-                title="No hay detalles"
-                message="Agregá detalles a la factura"
-              />
-            }
-            onSelect={(item) => setSelectedDetail(item)}
-          />
-
-          {pagination && (
-            <HStack justifyContent="center" mt={2} gap={4}>
-              <IconButton
-                aria-label="Página anterior"
-                disabled={pagination.currentPage <= 1}
-                onClick={() => setDetailPage(pagination.currentPage - 1)}
-              >
-                <ChevronLeft size={18} />
-              </IconButton>
-              <Text fontSize="sm">
-                {pagination.currentPage + 1} / {pagination.totalPages}
-              </Text>
-              <IconButton
-                aria-label="Página siguiente"
-                disabled={pagination.currentPage >= pagination.totalPages - 1}
-                onClick={() => setDetailPage(pagination.currentPage + 1)}
-              >
-                <ChevronRight size={18} />
-              </IconButton>
-              <select
-                value={detailPageSize}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setDetailPageSize(parseInt(e.target.value));
-                  setDetailPage(0);
-                }}
-                style={{
-                  padding: "4px 8px",
-                  borderRadius: "6px",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
+          <GridItem p={4}>
+            <Text fontWeight="bold" fontSize="sm" mb={2}>
+              Condición de venta
+            </Text>
+            <HStack gap={4}>
+              <Checkbox.Root checked={!isCredit} readOnly>
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>Contado</Checkbox.Label>
+              </Checkbox.Root>
+              <Checkbox.Root checked={isCredit} readOnly>
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>Crédito</Checkbox.Label>
+              </Checkbox.Root>
             </HStack>
-          )}
-        </Box>
-      )}
+          </GridItem>
+        </Grid>
+      </Box>
+
+
+      <TableEditable
+        data={details}
+        labels={detailLabels}
+        onDataChange={() => {}}
+        readOnly={true}
+        height="auto"
+      />
+
+      {/* Totales */}
+      <Box borderWidth="1px" borderRadius="md" p={4}>
+        <HStack justifyContent="space-between" mb={2}>
+          <Text fontWeight="bold">SUBTOTAL</Text>
+          <HStack gap={8}>
+            <Text fontSize="sm">Exentas: {totalExentas > 0 ? parsePrice(totalExentas) : "-"}</Text>
+            <Text fontSize="sm">5%: {totalIva5 > 0 ? parsePrice(totalIva5) : "-"}</Text>
+            <Text fontSize="sm">10%: {totalIva10 > 0 ? parsePrice(totalIva10) : "-"}</Text>
+          </HStack>
+        </HStack>
+        <HStack justifyContent="space-between" borderTopWidth="1px" pt={2}>
+          <Text fontWeight="bold" fontSize="lg">TOTAL A PAGAR</Text>
+          <Text fontWeight="bold" fontSize="lg" color="brand.primary">
+            {parsePrice(totalGeneral)}
+          </Text>
+        </HStack>
+      </Box>
     </Box>
   );
 }
