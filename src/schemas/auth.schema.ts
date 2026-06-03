@@ -32,9 +32,12 @@ export const registerSchema = z.object({
   confirmPassword: z
     .string({ message: "La confirmación de contraseña es requerida" })
     .min(1, "La confirmación de contraseña es requerida"),
-  rol: z
-    .string({ message: "El rol es requerido" })
-    .min(1, "El rol es requerido"),
+  roleId: z
+    .number({ message: "El rol es requerido" })
+    .min(1, "Seleccione un rol válido"),
+  branchId: z
+    .number({ message: "La sucursal es requerida" })
+    .min(1, "Seleccione una sucursal válida"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],

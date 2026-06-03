@@ -9,6 +9,8 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
+  branchId: number;
+  roleId: number;
 }
 
 export interface AuthResponse {
@@ -27,6 +29,7 @@ export interface UserDto {
   email: string;
   phoneNumbers: string[];
   roleName: string;        // ← "Admin" | "User"
+  branchId: number;
 }
 
 export interface UserWrapperDto {
@@ -34,7 +37,7 @@ export interface UserWrapperDto {
 }
 
 export interface LoginRequest    { email: string; password: string; }
-export interface RegisterRequest { name: string; lastName: string; email: string; password: string; }
+export interface RegisterRequest { name: string; lastName: string; email: string; password: string; branchId: number; roleId: number; }
 
 export const authApi = {
   login:    (data: LoginRequest)    => apiClient.post<UserWrapperDto>("/api/auth/login", data).then(r => r.data),

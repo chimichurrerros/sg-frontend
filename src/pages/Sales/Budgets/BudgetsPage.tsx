@@ -30,7 +30,14 @@ export default function BudgetsPage() {
         { labelName: "Fecha", propName: "date", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime() },
         { labelName: "Creado por", propName: "userName", isSortable: true, sortFunction: (a, b) => a.userName.localeCompare(b.userName) },
         { labelName: "Fecha Expiración", propName: "expirationDate", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime() },
-        { labelName: "Estado", propName: "status", transformFunction: (value) => customerQuotesStatus[value], isSortable: true, sortFunction: (a, b) => a.status - b.status },
+        {
+            labelName: "Estado", propName: "status",
+            transformFunction: (value) => {
+                console.log("X: " + value, "Y:" + customerQuotesStatus[value])
+                return customerQuotesStatus[value]
+            }
+            , isSortable: true, sortFunction: (a, b) => a.status - b.status
+        },
         { labelName: "Total", propName: "total", transformFunction: (value) => parsePrice(value), isSortable: true, sortFunction: (a, b) => a.total - b.total },
     ];
 
@@ -58,7 +65,7 @@ export default function BudgetsPage() {
                         <FolderOpen size={20} />
                         Abrir Ficha
                     </IconButton>
-                    <IconButton padding={2} bgColor="brand.secondary" disabled={!selected || selected.status!==0}>
+                    <IconButton padding={2} bgColor="brand.secondary" disabled={!selected || selected.status !== 0}>
                         <DollarSign size={20} />
                         Aprobar presupuesto
                     </IconButton>

@@ -22,18 +22,15 @@ interface ReturnSheetPageProps {
 }
 
 export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
-    const returnId = useParams().id;
-    const billId = useParams().billId;
-
+    const  returnId = useParams().id || useParams().sale;
     const navigate = useNavigate();
     const createReturn = useCreateSalesReturn();
     const { data: sales, isPending: salesPending, isError: isSalesError, error: salesError } = useGetAllSales();
-    const { data: salesReturn, isPending, isError, error } = useGetSalesReturnById(Number(returnId), mode === "view");
+    const { data: salesReturn, isPending, isError, error } = useGetSalesReturnById(Number(returnId), mode === "view" );
     const { data: branches } = useAllBranches();
     const [form, setForm] = useState<Partial<SaleReturn>>({})
-    const [selectedSale, setSelectedSale] = useState<FullSaleOrder | null>(null);
+    const [selectedSale, setSelectedSale] = useState<FullSaleOrder | null>();
     const [returnProducts, setReturnProducts] = useState<SaleReturnDetail[]>([])
-
     const saleReturnLabels: EditableLabel<SaleReturnDetail>[] = [
         { labelName: "Producto", propName: "productName" },
         { labelName: "Cantidad a Devolver", propName: "quantity", isEditable: true, inputType: "number", validate: (value, item) => value > 0 && value <= (item?.maxQuantity || 0) },
@@ -64,7 +61,11 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
             ><CornerDownRight /></IconButton>
         })
     }
-
+    useEffect(()=>{
+        if(mode === "create" && !form.salesOrderId && returnId){
+            setForm({...form,salesOrderId:Number(returnId)})
+        }
+    },[form,returnId])
     useEffect(() => {
         if (salesReturn && mode === "view") {
             setForm(salesReturn);

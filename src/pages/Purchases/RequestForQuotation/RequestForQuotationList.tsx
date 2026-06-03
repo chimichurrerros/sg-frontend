@@ -76,6 +76,7 @@ const requestForQuotationLabels: label<RequestForQuotation>[] = [
   {
     labelName: "Observación",
     propName: "observation",
+    transformFunction:(value)=> value? value.length > 20 ? value.slice(0,20)+ "...":value: "-",
     isSortable: true,
     sortFunction: (a, b) =>
       (a.observation ?? "").localeCompare(b.observation ?? ""),

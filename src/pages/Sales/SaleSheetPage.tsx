@@ -10,7 +10,7 @@ import {
   Spinner,
   InputGroup
 } from "@chakra-ui/react";
-import { ArrowLeft, CircleDollarSign, ExternalLink, Printer, X } from "lucide-react";
+import { ArrowLeft, CircleDollarSign, ExternalLink, HandHelpingIcon, Printer, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
@@ -30,6 +30,7 @@ import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
 import { useAllBranches } from "@/queries/branches.queries";
 import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { useAuthStore } from "@/stores/auth.store";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -72,7 +73,8 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   const { data: sale, isPending: loadingSale, isError: isErrorSale, error: saleError } = useGetSaleById(Number(id), mode === "view");
   // const [saveCustomer, setSaveCustomer] = useState(false);
   const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
-  const [branchId, setBranchId] = useState<number | null>(null);
+  const user = useAuthStore((s) => s.user);
+  const branchId = user?.branchId ?? null;
   const { data: branches, isPending: loadingBranches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
@@ -84,6 +86,12 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     }
 
   }, [isErrorBranches, errorBranches])
+
+  useEffect(() => {
+    if (mode === "create" && branchId) {
+      setSaleForm(prev => ({ ...prev, sale: { ...prev.sale, branchId } }));
+    }
+  }, [branchId]);
 
   useEffect(() => {
     if (mode === "view") return;
@@ -103,9 +111,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
     }));
   }, [saleForm.products, dialogAmount]);
 
-  useEffect(() => {
-    setSaleForm({ ...saleForm,sale: { ...saleForm.sale, branchId }, products: [] })
-  }, [branchId])
   useEffect(() => {
     if (isErrorCustomers) {
       toaster.create({ title: "Error al cargar los clientes", description: errorCustomers.message || "Error desconocido", type: "error" })
@@ -293,11 +298,14 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         <Flex align="center" gap={3}>
           <Flex align="flex-end" gap={3}>
-           
+
+              
               <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
-            
+            {mode === "view" && <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} onClick={() => navigate("/ventas/devoluciones/desde/"+sale.id)}>
+                <HandHelpingIcon /> Registrar Devolución
+              </IconButton>}
 
             {mode === "view" && (
               <Box display="flex" flexDirection="column" alignItems="flex-start">
@@ -317,12 +325,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 </InputGroup>
               </Box>
             )}
-            {mode === "create" && <>
-              <SelectWrapper
-                placeholder="Sucursal actual"
-                onValueChange={(value) => { setBranchId(Number(value)) }}
-                options={branches?.branches.map((b) => ({ label: b.name, value: b.id.toString() })) || []} />
-            </>}
             <Box display="flex" flexDirection="column" alignItems="flex-start">
               {mode === "view" && <Text fontWeight="bold" fontSize="md" color="gray.600" whiteSpace="nowrap" mb={1}>
                 Sucursal: {branches?.branches.find(b => b.id == saleForm.sale.branchId)?.name || " "}

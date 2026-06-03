@@ -41,6 +41,8 @@ export interface TableEditableProps<T extends { id: number }> {
     readOnly?: boolean;
     maxHeight?: string;
     width?: string;
+    onRowClick?: (item: T) => void;
+    selectedId?: number;
 }
 
 export default function TableEditable<T extends { id: number }>({
@@ -54,7 +56,9 @@ export default function TableEditable<T extends { id: number }>({
     loading = false,
     readOnly = false,
     maxHeight,
-    width
+    width,
+    onRowClick,
+    selectedId
 }: TableEditableProps<T>) {
     const [editingCell, setEditingCell] = useState<{ rowId: number; propName: string } | null>(null);
     const [editValue, setEditValue] = useState<any>("");
@@ -164,6 +168,7 @@ export default function TableEditable<T extends { id: number }>({
                     h="full"
                     display="flex"
                     alignItems="center"
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <Input
                         ref={inputRef}
@@ -188,8 +193,9 @@ export default function TableEditable<T extends { id: number }>({
             <HStack
                 justify="space-between"
                 w="full"
-                onClick={() => {
+                onClick={(e) => {
                     if (label.isEditable) {
+                        e.stopPropagation();
                         startEditing(item, String(label.propName), value);
                     }
                 }}
@@ -291,7 +297,9 @@ export default function TableEditable<T extends { id: number }>({
                         <Table.Row
                             key={item.id}
                             _hover={{ bg: "gray.50" }}
-                            cursor="default"
+                            bg={selectedId === item.id ? "green.subtle" : "transparent"}
+                            cursor={onRowClick ? "pointer" : "default"}
+                            onClick={() => onRowClick?.(item)}
                             minH="40px"
                             h="40px"
                         >
