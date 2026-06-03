@@ -487,6 +487,23 @@ export default function BalanceGeneralPage() {
               );
             })()} */}
 
+            {/* Total Pasivo + Patrimonio Neto Banner (moved from bottom) */}
+            <Box
+              p={4}
+              bg="white"
+              borderWidth="1px"
+              borderColor="gray.200"
+              borderRadius="xl"
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Text fontWeight="bold" color="gray.700">Total Pasivo + Patrimonio Neto</Text>
+              <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
+                {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
+              </Text>
+            </Box>
+
             {/* Tree Tables Section */}
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6} className="print-grid">
               {/* Left Column: Assets */}
@@ -554,22 +571,7 @@ export default function BalanceGeneralPage() {
                   />
                 </Stack>
 
-                {/* Total Liabilities + Equity Summary */}
-                <Box 
-                  p={4} 
-                  bg="gray.50" 
-                  borderWidth="1px" 
-                  borderColor="gray.200" 
-                  borderRadius="xl"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Text fontWeight="bold" color="gray.700">Total Pasivo + Patrimonio Neto</Text>
-                  <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
-                    {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
-                  </Text>
-                </Box>
+                {/* (Summary moved to top banner) */}
               </Stack>
             </Grid>
           </Stack>

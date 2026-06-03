@@ -4,6 +4,8 @@ import { PublicRoute } from "@/routes/guard/PublicRoute";
 import { LoginPage } from "@/pages/LoginPage";
 import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { AddUserPage } from "@/pages/AddUserPage";
+import { RolePermissionsPage } from "@/pages/RolePermissionsPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
@@ -128,6 +130,9 @@ export const router = createBrowserRouter([
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },
+          { path: "/register/nuevo", element: <AddUserPage /> },
+          { path: "/register/:id", element: <AddUserPage /> },
+          { path: "/register/roles/:id/permisos", element: <RolePermissionsPage /> },
           { path: "/customers", element: <CustomersListPage /> },
 
           { path: "/dash/catalogo", element: <CatalogPage /> },
