@@ -25,9 +25,10 @@ import { useAllAccountPlans } from "@/queries/accountPlans.queries";
 import { useCreateEntry } from "@/queries/entries.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { toaster } from "@/components/ui/toaster";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 interface RowDetail {
   accountPlanId: number;
@@ -270,12 +271,17 @@ export default function NuevoAsientoPage() {
           {/* Entry Date */}
           <Field.Root required>
             <Field.Label fontWeight="semibold" fontSize="xs">Fecha del Asiento</Field.Label>
-            <Input
+            <DatePickerWrapper
+            value={date}
+            onChange={(e)=>setDate(e[0])}
+            readOnly={activeProcess?.isClosed || createEntryMutation.isPending}
+            />
+            {/* <Input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               disabled={activeProcess?.isClosed || createEntryMutation.isPending}
-            />
+            /> */}
           </Field.Root>
 
           {/* Description */}

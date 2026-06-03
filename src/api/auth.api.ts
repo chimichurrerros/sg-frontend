@@ -32,6 +32,7 @@ export interface UserDto {
   roleId?: number;
   branchName?: string;
   branchId: number;
+  permissions: string[];
 }
 
 export interface UserWrapperDto {

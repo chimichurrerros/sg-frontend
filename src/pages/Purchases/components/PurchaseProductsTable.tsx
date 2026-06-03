@@ -8,7 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Text } from "@chakra-ui/react/text"
 import { PackageOpenIcon, Plus } from "lucide-react";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import { useProductByBranch } from "@/queries/catalog.queries";
 import { Spinner } from "@chakra-ui/react";
 import type { ProductSelect } from "@/types/sales";

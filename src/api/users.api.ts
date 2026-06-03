@@ -27,6 +27,7 @@ export interface UserDto {
   createdAt: string;
   branchId: number;
   branchName: string;
+  permissions?: string[];
 }
 
 export interface ListUsersWrapperDto {

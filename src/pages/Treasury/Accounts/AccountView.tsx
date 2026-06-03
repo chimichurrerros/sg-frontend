@@ -24,6 +24,7 @@ import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 const accountTypeCollection = createListCollection({
     items: Object.entries(accountTypeMap).map(([value, label]) => ({
@@ -169,9 +170,9 @@ export default function AccountView() {
     return (
         <Box display="flex" flexDirection="column" minHeight="0" p={4}>
             <Box display="flex" flexDirection="row" gap={4} py={2} justifyContent="space-between">
-                <Text fontSize="2xl" fontWeight="bold">
+                <PageTitle>
                     {isEditing ? "Editando: " : ""}{account.name ?? "Cuenta"}
-                </Text>
+                </PageTitle>
 
                 <Box display="flex" gap={4}>
                     <IconButton padding={2} variant="ghost" color="brand.secondary" onClick={() => navigate("/tesoreria/cuentas")}>

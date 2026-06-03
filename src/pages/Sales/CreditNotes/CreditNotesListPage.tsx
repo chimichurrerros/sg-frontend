@@ -2,18 +2,19 @@ import { Box } from "@chakra-ui/react/box";
 import { Button, DatePicker, HStack, IconButton, Input, Portal, Text, type DateValue } from "@chakra-ui/react";
 import { CalendarOff, ExternalLink, FileText } from "lucide-react";
 import React, { useRef, useState } from "react";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { useNavigate } from "react-router-dom";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { parsePrice } from "@/constants/price";
 import { parseDate } from "@/constants/date";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 import { parseDate as parseDateChakra } from "@chakra-ui/react"
 import { useGetCreditNotes } from "@/queries/credit-notes.queries";
 import type { CreditNote, GetCreditNoteParams } from "@/api/credit-notes-api";
 import { LuCalendar } from "react-icons/lu";
+import PageTitle from "@/components/ui/title";
 
 export default function CreditNotesPage() {
     const [selected, setSelected] = React.useState<CreditNote | null>(null);
@@ -54,7 +55,7 @@ export default function CreditNotesPage() {
 
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <Text fontWeight="bold" fontSize="3xl">Listado de Notas de Crédito</Text>
+            <PageTitle>Listado de Notas de Crédito</PageTitle>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <Box display="flex" flexDirection="row" gap={2} alignItems="center">

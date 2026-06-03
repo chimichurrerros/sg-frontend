@@ -21,6 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { LuArrowLeft, LuSave } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 export default function BankCreate() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function BankCreate() {
   return (
     <Stack gap={4} paddingInline="15%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nuevo Banco</Heading>
+        <PageTitle>Nuevo Banco</PageTitle>
         <Button
           variant="ghost"
           size="sm"

@@ -3,11 +3,12 @@ import { IconButton, Input,Text, Button, VStack, HStack } from "@chakra-ui/react
 import { HousePlusIcon, Pencil, Trash2Icon,  Save, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Branch } from "@/types/branches";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { useAllBranches, useCreateBranch, useEditBranch, useDeleteBranch } from "@/queries/branches.queries";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
+import PageTitle from "@/components/ui/title";
 
 export default function BranchesListPage() {
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
@@ -139,7 +140,7 @@ export default function BranchesListPage() {
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
             <Box display="flex" flexDirection="row" gap={5} alignContent="center" justifyContent="space-between">
-                <Text fontWeight="bold" fontSize="3xl">Listado de sucursales</Text>  <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                <PageTitle>Listado de sucursales</PageTitle>  <Box display="flex" flexDirection="row" gap={2} alignItems="center">
                     {/* <InputGroup flex="1" startElement={<LuSearch />}>
                     <Input placeholder="Buscar sucursales por nombre o dirección" />
                 </InputGroup> */}

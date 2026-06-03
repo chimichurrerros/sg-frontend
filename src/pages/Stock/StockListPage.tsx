@@ -1,20 +1,21 @@
-import { Box, Collapsible, Spinner, Button, VStack, HStack, NativeSelect, Field } from "@chakra-ui/react";
+import { Box, Collapsible, Spinner, Button, VStack, HStack, Field, RadioGroup, Select, Portal, createListCollection } from "@chakra-ui/react";
 import { Input, InputGroup, Text } from "@chakra-ui/react";
 import { Pencil, Trash2Icon, Plus, Save } from "lucide-react";
 import { LuSearch } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { StockItem } from "@/types/inventory";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { useAllStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { useAllBranches } from "@/queries/branches.queries";
-import { useAllProducts } from "@/queries/catalog.queries";
+import { useAllProducts, useAllServices } from "@/queries/catalog.queries";
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
 import type { PaginationParams } from "@/types/types";
 import { IconButton } from "@chakra-ui/react";
+import PageTitle from "@/components/ui/title";
 
 export default function StockListPage() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
@@ -22,6 +23,7 @@ export default function StockListPage() {
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [itemType, setItemType] = useState<"product" | "service">("product");
     const [formProductId, setFormProductId] = useState<number>(0);
     const [formBranchId, setFormBranchId] = useState<number>(0);
     const [formQuantity, setFormQuantity] = useState("");
@@ -29,6 +31,7 @@ export default function StockListPage() {
     const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useAllStock();
     const { data: branchesData } = useAllBranches();
     const { data: productsData } = useAllProducts();
+    const { data: servicesData } = useAllServices();
     const createItem = useCreateStockItem();
     const editItem = useEditStockItem();
     const deleteItem = useDeleteStockItem();
@@ -43,14 +46,53 @@ export default function StockListPage() {
         }
     }, [isErrorAllStock, errorAllStock]);
 
+    const serviceIds = new Set((servicesData?.services ?? []).map((s) => s.id));
+
+    const productCollection = useMemo(
+        () => createListCollection({
+            items: (productsData?.products ?? []).map((p) => ({
+                label: p.name ?? "Sin nombre",
+                value: String(p.id),
+            })),
+        }),
+        [productsData],
+    );
+
+    const serviceCollection = useMemo(
+        () => createListCollection({
+            items: (servicesData?.services ?? []).map((s) => ({
+                label: s.name,
+                value: String(s.id),
+            })),
+        }),
+        [servicesData],
+    );
+
+    const branchCollection = useMemo(
+        () => createListCollection({
+            items: (branchesData?.branches ?? []).map((b) => ({
+                label: b.name,
+                value: String(b.id),
+            })),
+        }),
+        [branchesData],
+    );
+
     const labels: label<StockItem>[] = [
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
-        { labelName: "Nombre Producto", propName: "productName", isSortable: true, sortFunction: (a, b) => a.productName.localeCompare(b.productName) },
+        { labelName: "Nombre", propName: "productName", isSortable: true, sortFunction: (a, b) => a.productName.localeCompare(b.productName) },
         { labelName: "Nombre Sucursal", propName: "branchName", isSortable: true, sortFunction: (a, b) => a.branchName.localeCompare(b.branchName) },
-        { labelName: "Cantidad", propName: "quantity", isSortable: true, sortFunction: (a, b) => a.quantity - b.quantity },
+        {
+            labelName: "Cantidad",
+            isComponent: true,
+            render: (item) => (serviceIds.has(item.productId) ? "-" : item.quantity),
+            isSortable: true,
+            sortFunction: (a, b) => a.quantity - b.quantity,
+        },
     ];
 
     const handleNewItem = () => {
+        setItemType("product");
         setFormProductId(0);
         setFormBranchId(0);
         setFormQuantity("");
@@ -61,6 +103,7 @@ export default function StockListPage() {
 
     const handleEditItem = () => {
         if (!selectedItem) return;
+        setItemType(serviceIds.has(selectedItem.productId) ? "service" : "product");
         setFormProductId(selectedItem.productId);
         setFormBranchId(selectedItem.branchId);
         setFormQuantity(selectedItem.quantity.toString());
@@ -71,6 +114,7 @@ export default function StockListPage() {
 
     const handleCancelForm = () => {
         setShowForm(false);
+        setItemType("product");
         setFormProductId(0);
         setFormBranchId(0);
         setFormQuantity("");
@@ -80,19 +124,23 @@ export default function StockListPage() {
 
     const handleSubmitForm = async () => {
         if (!formProductId || formProductId === 0) {
-            toaster.create({ title: "Error", description: "Seleccioná un producto", type: "error" });
+            toaster.create({ title: "Error", description: `Seleccioná un ${itemType === "service" ? "servicio" : "producto"}`, type: "error" });
             return;
         }
         if (!formBranchId || formBranchId === 0) {
             toaster.create({ title: "Error", description: "Seleccioná una sucursal", type: "error" });
             return;
         }
-        if (!formQuantity || isNaN(Number(formQuantity)) || Number(formQuantity) < 0) {
+        if (itemType === "product" && (!formQuantity || isNaN(Number(formQuantity)) || Number(formQuantity) < 0)) {
             toaster.create({ title: "Error", description: "La cantidad es inválida", type: "error" });
             return;
         }
 
-        const selectedProduct = productsData?.products.find(p => p.id === formProductId);
+        const quantityToSend = itemType === "service" ? 0 : Number(formQuantity);
+
+        const selectedName = itemType === "service"
+            ? servicesData?.services.find((s) => s.id === formProductId)?.name
+            : productsData?.products.find((p) => p.id === formProductId)?.name;
         const selectedBranch = branchesData?.branches.find(b => b.id === formBranchId);
 
         try {
@@ -101,48 +149,49 @@ export default function StockListPage() {
                     id: editingItem.id,
                     data: {
                         productId: formProductId,
-                        productName: selectedProduct?.name ?? "",
+                        productName: selectedName ?? "",
                         branchId: formBranchId,
                         branchName: selectedBranch?.name ?? "",
-                        quantity: Number(formQuantity)
+                        quantity: quantityToSend
                     }
                 });
-                toaster.create({ title: "Éxito", description: `${selectedProduct?.name} fue actualizado`, type: "success" });
+                toaster.create({ title: "Éxito", description: `${selectedName} fue actualizado`, type: "success" });
             } else {
                 const existingItem = allStock?.stocks.find(
                     item => item.productId === formProductId && item.branchId === formBranchId
                 );
 
-                if (existingItem) {
+                if (existingItem && itemType === "product") {
                     const newQuantity = existingItem.quantity + Number(formQuantity);
                     await editItem.mutateAsync({
                         id: existingItem.id,
                         data: {
                             productId: formProductId,
-                            productName: selectedProduct?.name ?? "",
+                            productName: selectedName ?? "",
                             branchId: formBranchId,
                             branchName: selectedBranch?.name ?? "",
                             quantity: newQuantity
                         }
                     });
-                    toaster.create({ 
-                        title: "Éxito", 
-                        description: `Se agregaron ${formQuantity} unidades de ${selectedProduct?.name}`, 
-                        type: "success" 
+                    toaster.create({
+                        title: "Éxito",
+                        description: `Se agregaron ${formQuantity} unidades de ${selectedName}`,
+                        type: "success"
                     });
                 } else {
                     await createItem.mutateAsync({
                         productId: formProductId,
-                        productName: selectedProduct?.name ?? "",
+                        productName: selectedName ?? "",
                         branchId: formBranchId,
                         branchName: selectedBranch?.name ?? "",
-                        quantity: Number(formQuantity)
+                        quantity: quantityToSend
                     });
-                    toaster.create({ title: "Éxito", description: `${selectedProduct?.name} fue creado`, type: "success" });
+                    toaster.create({ title: "Éxito", description: `${selectedName} fue creado`, type: "success" });
                 }
             }
-            
+
             setShowForm(false);
+            setItemType("product");
             setFormProductId(0);
             setFormBranchId(0);
             setFormQuantity("");
@@ -180,9 +229,11 @@ export default function StockListPage() {
         totalPages: Math.ceil(stocks.length / params.pageSize),
     };
 
+    const currentCollection = itemType === "service" ? serviceCollection : productCollection;
+
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <Text fontWeight="bold" fontSize="3xl">Listado de Productos en Inventario</Text>
+            <PageTitle>Listado de Productos en Inventario</PageTitle>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
@@ -225,48 +276,103 @@ export default function StockListPage() {
                                 {isEditing ? "Editar Item" : "Nuevo Item"}
                             </Text>
 
+                            <RadioGroup.Root
+                                value={itemType}
+                                onValueChange={(e) => {
+                                    setItemType(e.value as "product" | "service");
+                                    setFormProductId(0);
+                                    setFormQuantity("");
+                                }}
+                                disabled={isEditing || isPending}
+                            >
+                                <HStack gap={6}>
+                                    <RadioGroup.Item value="product">
+                                        <RadioGroup.ItemHiddenInput />
+                                        <RadioGroup.ItemIndicator />
+                                        <RadioGroup.ItemText>Producto</RadioGroup.ItemText>
+                                    </RadioGroup.Item>
+                                    <RadioGroup.Item value="service">
+                                        <RadioGroup.ItemHiddenInput />
+                                        <RadioGroup.ItemIndicator />
+                                        <RadioGroup.ItemText>Servicio</RadioGroup.ItemText>
+                                    </RadioGroup.Item>
+                                </HStack>
+                            </RadioGroup.Root>
+
                             <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" gap={3}>
                                 <Field.Root required>
-                                    <Field.Label>Producto</Field.Label>
-                                    <NativeSelect.Root disabled={isPending}>
-                                        <NativeSelect.Field
-                                            value={formProductId}
-                                            onChange={(e) => setFormProductId(Number(e.target.value))}
-                                        >
-                                            <option value={0}>Seleccionar producto</option>
-                                            {productsData?.products.map((p) => (
-                                                <option key={p.id} value={p.id}>{p.name}</option>
-                                            ))}
-                                        </NativeSelect.Field>
-                                        <NativeSelect.Indicator />
-                                    </NativeSelect.Root>
+                                    <Field.Label>{itemType === "service" ? "Servicio" : "Producto"}</Field.Label>
+                                    <Select.Root
+                                        collection={currentCollection}
+                                        value={formProductId ? [String(formProductId)] : []}
+                                        onValueChange={(e) => setFormProductId(Number(e.value[0]))}
+                                        disabled={isPending}
+                                    >
+                                        <Select.HiddenSelect />
+                                        <Select.Control>
+                                            <Select.Trigger>
+                                                <Select.ValueText placeholder={`Seleccionar ${itemType === "service" ? "servicio" : "producto"}`} />
+                                            </Select.Trigger>
+                                            <Select.IndicatorGroup>
+                                                <Select.Indicator />
+                                            </Select.IndicatorGroup>
+                                        </Select.Control>
+                                        <Portal>
+                                            <Select.Positioner>
+                                                <Select.Content>
+                                                    {currentCollection.items.map((item) => (
+                                                        <Select.Item item={item} key={item.value}>
+                                                            {item.label}
+                                                            <Select.ItemIndicator />
+                                                        </Select.Item>
+                                                    ))}
+                                                </Select.Content>
+                                            </Select.Positioner>
+                                        </Portal>
+                                    </Select.Root>
                                 </Field.Root>
 
                                 <Field.Root required>
                                     <Field.Label>Sucursal</Field.Label>
-                                    <NativeSelect.Root disabled={isPending}>
-                                        <NativeSelect.Field
-                                            value={formBranchId}
-                                            onChange={(e) => setFormBranchId(Number(e.target.value))}
-                                        >
-                                            <option value={0}>Seleccionar sucursal</option>
-                                            {branchesData?.branches.map((b) => (
-                                                <option key={b.id} value={b.id}>{b.name}</option>
-                                            ))}
-                                        </NativeSelect.Field>
-                                        <NativeSelect.Indicator />
-                                    </NativeSelect.Root>
+                                    <Select.Root
+                                        collection={branchCollection}
+                                        value={formBranchId ? [String(formBranchId)] : []}
+                                        onValueChange={(e) => setFormBranchId(Number(e.value[0]))}
+                                        disabled={isPending}
+                                    >
+                                        <Select.HiddenSelect />
+                                        <Select.Control>
+                                            <Select.Trigger>
+                                                <Select.ValueText placeholder="Seleccionar sucursal" />
+                                            </Select.Trigger>
+                                            <Select.IndicatorGroup>
+                                                <Select.Indicator />
+                                            </Select.IndicatorGroup>
+                                        </Select.Control>
+                                        <Portal>
+                                            <Select.Positioner>
+                                                <Select.Content>
+                                                    {branchCollection.items.map((item) => (
+                                                        <Select.Item item={item} key={item.value}>
+                                                            {item.label}
+                                                            <Select.ItemIndicator />
+                                                        </Select.Item>
+                                                    ))}
+                                                </Select.Content>
+                                            </Select.Positioner>
+                                        </Portal>
+                                    </Select.Root>
                                 </Field.Root>
 
-                                <Field.Root required>
+                                <Field.Root required={itemType === "product"}>
                                     <Field.Label>Cantidad</Field.Label>
                                     <Input
-                                        value={formQuantity}
+                                        value={itemType === "service" ? "" : formQuantity}
                                         onChange={(e) => setFormQuantity(e.target.value)}
-                                        placeholder="0"
+                                        placeholder={itemType === "service" ? "No aplica" : "0"}
                                         type="number"
                                         min="0"
-                                        disabled={isPending}
+                                        disabled={isPending || itemType === "service"}
                                     />
                                 </Field.Root>
                             </Box>
@@ -286,7 +392,7 @@ export default function StockListPage() {
             </Collapsible.Root>
 
             <TableSelect
-                key={String(params.page)} 
+                key={String(params.page)}
                 data={paginatedStocks}
                 loading={loadingAllStock}
                 labels={labels}

@@ -23,11 +23,12 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuMail, LuSave } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import PageTitle from "@/components/ui/title";
 
 // Separate schema for editing users (where password is not required)
 const editUserSchema = z.object({
@@ -45,7 +46,7 @@ const editUserSchema = z.object({
     .email("Ingrese un correo electrónico válido"),
   roleId: z
     .number({ message: "El rol es requerido" })
-    .min(1, "Seleccione un rol válido"),
+    .min(0, "Seleccione un rol válido"),
   branchId: z
     .number({ message: "La sucursal es requerida" })
     .min(1, "Seleccione una sucursal válida"),
@@ -58,8 +59,8 @@ interface UserFormInput {
   email: string;
   password?: string;
   confirmPassword?: string;
-  roleId: number;
-  branchId: number;
+  roleId?: number;
+  branchId?: number;
   isActive?: boolean;
 }
 
@@ -83,19 +84,19 @@ export const AddUserPage = () => {
 
   const isPending = isRegisterPending || isUpdatePending;
 
-  const branchCollection = createListCollection({
+  const branchCollection = useMemo(() => createListCollection({
     items: (branchesData?.branches ?? []).map((b) => ({
       label: b.name,
       value: String(b.id),
     })),
-  });
+  }), [branchesData]);
 
-  const roleCollection = createListCollection({
+  const roleCollection = useMemo(() => createListCollection({
     items: (rolesData?.roles ?? []).map((r) => ({
       label: r.name,
       value: String(r.id),
     })),
-  });
+  }), [rolesData]);
 
   const schema = isEditMode ? editUserSchema : registerSchema;
 
@@ -106,15 +107,15 @@ export const AddUserPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<UserFormInput>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       name: "",
       lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
-      roleId: 0,
-      branchId: 0,
+      roleId: undefined,
+      branchId: undefined,
       isActive: true,
     },
   });
@@ -145,8 +146,8 @@ export const AddUserPage = () => {
             name: formData.name,
             lastName: formData.lastName,
             email: formData.email,
-            branchId: formData.branchId,
-            roleId: formData.roleId,
+            branchId: formData.branchId!,
+            roleId: formData.roleId!,
             isActive: formData.isActive,
           },
         },
@@ -171,8 +172,8 @@ export const AddUserPage = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password!,
-        branchId: formData.branchId,
-        roleId: formData.roleId,
+        branchId: formData.branchId!,
+        roleId: formData.roleId!,
       },
       {
         onSuccess: () => {
@@ -191,9 +192,9 @@ export const AddUserPage = () => {
   return (
     <Stack gap={4} paddingInline="15%" py={6}>
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">
+        <PageTitle>
           {isEditMode ? "Editar usuario" : "Nuevo usuario"}
-        </Heading>
+        </PageTitle>
         <Button
           variant="ghost"
           size="sm"
@@ -285,8 +286,8 @@ export const AddUserPage = () => {
                 render={({ field }) => (
                   <Select.Root
                     collection={roleCollection}
-                    value={field.value ? [String(field.value)] : []}
-                    onValueChange={(e) => field.onChange(e.value[0] ? Number(e.value[0]) : null)}
+                    value={field.value !== undefined && field.value !== null ? [String(field.value)] : []}
+                    onValueChange={(e) => field.onChange(e.value.length > 0 ? Number(e.value[0]) : null)}
                     disabled={isPending}
                     w="full"
                   >
@@ -328,8 +329,8 @@ export const AddUserPage = () => {
                 render={({ field }) => (
                   <Select.Root
                     collection={branchCollection}
-                    value={field.value ? [String(field.value)] : []}
-                    onValueChange={(e) => field.onChange(e.value[0] ? Number(e.value[0]) : null)}
+                    value={field.value !== undefined && field.value !== null ? [String(field.value)] : []}
+                    onValueChange={(e) => field.onChange(e.value.length > 0 ? Number(e.value[0]) : null)}
                     disabled={isPending}
                     w="full"
                   >
