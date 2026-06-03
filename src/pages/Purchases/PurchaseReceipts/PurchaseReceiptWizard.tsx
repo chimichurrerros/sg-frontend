@@ -11,6 +11,7 @@ import { useAllBranches } from "@/queries/branches.queries";
 import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
 import type { PurchaseOrder } from "@/api/purchaseOrders.api";
+import PageTitle from "@/components/ui/title";
 
 const STEPS = [
     { title: "Datos Generales", description: "OC, proveedor y factura" },
@@ -398,9 +399,9 @@ export default function PurchaseReceiptWizard() {
 
     return (
         <Box display="flex" flexDirection="column" gap={6} height="full" minHeight="0">
-            <Text fontSize="2xl" fontWeight="bold">
+            <PageTitle>
                 Recepción de Órdenes de Compra
-            </Text>
+            </PageTitle>
 
             <Steps.Root count={3} step={currentStep} onStepChange={(e: { step: number }) => setCurrentStep(e.step)}>
                 <Steps.List>

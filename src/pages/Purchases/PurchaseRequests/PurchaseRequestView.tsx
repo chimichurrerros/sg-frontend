@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
+import PageTitle from "@/components/ui/title";
 
 export default function PurchaseRequestView() {
   const { id } = useParams();
@@ -77,9 +78,9 @@ export default function PurchaseRequestView() {
   return (
     <Stack gap={4} paddingInline="5%" height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">
+        <PageTitle>
           Pedido de Compra N° {purchaseRequest.id}
-        </Heading>
+        </PageTitle>
         <Flex gap={2}>
           <Button
             variant="ghost"

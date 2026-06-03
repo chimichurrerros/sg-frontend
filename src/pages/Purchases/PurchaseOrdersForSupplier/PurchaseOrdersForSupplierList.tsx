@@ -18,6 +18,7 @@ import {
 import { Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 const formatDate = (value: string) => {
   const d = new Date(value);
@@ -84,9 +85,9 @@ export default function PurchaseOrdersForSupplierList() {
 
   return (
     <Box display="flex" flexDirection="column" gap={4} p={4} height="100%" minHeight="0">
-      <Text fontSize="2xl" fontWeight="bold">
+      <PageTitle>
         Órdenes de Compra por Proveedor
-      </Text>
+      </PageTitle>
 
       <Box
         display="flex"

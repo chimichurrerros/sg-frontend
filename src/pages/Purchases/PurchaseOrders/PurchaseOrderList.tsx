@@ -12,6 +12,7 @@ import type { PurchaseOrderDTO, PurchaseOrderFilterParams } from "@/api/purchase
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import PageTitle from "@/components/ui/title";
 
 const purchaseOrderStates: Record<number, string> = {
   1: "Pendiente",
@@ -98,9 +99,9 @@ export default function PurchaseOrderListPage() {
 
   return (
     <Stack gap={4} p={4} height="100%" minHeight="0">
-      <Text fontSize="3xl" fontWeight="bold">
+      <PageTitle>
         Lista de Órdenes de Compra
-      </Text>
+      </PageTitle>
 
       <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
         <Box display="flex" flexDirection="row" gap={2} alignItems="center">

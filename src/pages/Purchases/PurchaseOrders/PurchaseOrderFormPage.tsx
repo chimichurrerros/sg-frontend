@@ -25,6 +25,7 @@ import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+import PageTitle from "@/components/ui/title";
 
 const formatDateTime = (value: string) => {
   const d = new Date(value);
@@ -118,9 +119,9 @@ export default function PurchaseOrderFormPage() {
       <Stack gap={6} paddingInline="5%" py={6} height="100%">
         {/* Header */}
         <Flex alignItems="center" justifyContent="space-between">
-          <Heading size="xl">
+          <PageTitle>
             Orden de Compra {po.number}
-          </Heading>
+          </PageTitle>
           <Button
             variant="ghost"
             size="sm"
