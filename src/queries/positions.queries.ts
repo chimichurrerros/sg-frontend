@@ -12,7 +12,7 @@ export const positionKeys = {
   all: ["positions"] as const,
 };
 
-export const useGetPositions = (params?: OrganizationQueryDto) => {
+export const useGetPositions = (params?: OrganizationQueryDto & { departmentId?: number }) => {
   return useQuery<ListPositionsWrapperDto>({
     queryKey: [
       ...positionKeys.all,
@@ -21,6 +21,7 @@ export const useGetPositions = (params?: OrganizationQueryDto) => {
       params?.search,
       params?.sortBy,
       params?.sortOrder,
+      params?.departmentId,
     ],
     queryFn: () => positionsApi.getPositions(params),
     retry: RETRIES,

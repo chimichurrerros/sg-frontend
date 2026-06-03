@@ -57,6 +57,7 @@ import PlanillaDetallePage from "@/pages/RRHH/PlanillaDetallePage";
 import CrearPlanillaPage from "@/pages/RRHH/CrearPlanillaPage";
 import AttendancePage from "@/pages/RRHH/AttendancePage";
 import OrganizationPage from "@/pages/Organization/OrganizationPage";
+import AreaDetailPage from "@/pages/Organization/AreaDetailPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
@@ -158,6 +159,7 @@ export const router = createBrowserRouter([
           { path: "/rrhh/planillas/:id", element: <PlanillaDetallePage /> },
           { path: "/rrhh/asistencia", element: <AttendancePage /> },
           { path: "/gestiones/organizacion", element: <OrganizationPage /> },
+          { path: "/gestiones/organizacion/areas/:id", element: <AreaDetailPage /> },
           {
             path: "/gestiones/organizacion/empleados",
             element: (

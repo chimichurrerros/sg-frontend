@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Building2, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, IconButton, Input, InputGroup, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Field, Heading, HStack, Input, InputGroup, Spinner, Stack, Text } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import PageSizeControl from "@/components/ui/page-size-control";
@@ -12,6 +13,7 @@ import { useCreateDepartment, useDeleteDepartment, useGetDepartments, useUpdateD
 import type { DepartmentResponseDto } from "@/types/organization";
 
 export function DepartmentsTab() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<DepartmentResponseDto | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -20,7 +22,6 @@ export function DepartmentsTab() {
   const [isEditing, setIsEditing] = useState(false);
   const [touched, setTouched] = useState(false);
   const [name, setName] = useState("");
-  const [bossId, setBossId] = useState("");
 
   const { data, isPending, isError, error } = useGetDepartments({ page, pageSize, search, sortBy: "name", sortOrder: "asc" });
   const createDepartment = useCreateDepartment();
@@ -33,15 +34,14 @@ export function DepartmentsTab() {
     }
   }, [isError, error]);
 
+  const tableData = useMemo(() => data?.departments ?? [], [data?.departments]);
+
   const labels: label<DepartmentResponseDto>[] = [
-    { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
     { labelName: "Nombre", propName: "name", isSortable: true, sortFunction: (a, b) => (a.name ?? "").localeCompare(b.name ?? "") },
-    { labelName: "Jefe ID", propName: "bossId", textIfNull: "-" },
   ];
 
   const resetForm = () => {
     setName("");
-    setBossId("");
     setIsEditing(false);
     setTouched(false);
     setShowForm(false);
@@ -49,7 +49,6 @@ export function DepartmentsTab() {
 
   const onCreate = () => {
     setName("");
-    setBossId("");
     setIsEditing(false);
     setTouched(false);
     setShowForm(true);
@@ -58,7 +57,6 @@ export function DepartmentsTab() {
   const onEdit = () => {
     if (!selected) return;
     setName(selected.name ?? "");
-    setBossId(selected.bossId !== null ? String(selected.bossId) : "");
     setIsEditing(true);
     setShowForm(true);
   };
@@ -72,7 +70,6 @@ export function DepartmentsTab() {
 
     const body = {
       name: name.trim(),
-      bossId: bossId.trim() ? Number(bossId) : null,
     };
 
     try {
@@ -118,28 +115,21 @@ export function DepartmentsTab() {
         </HStack>
 
         <HStack gap={2}>
-          <DestructiveActionDialog title="Eliminar área" description="Una vez eliminada, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<IconButton variant="outline" disabled={!selected || saving}>{deleteDepartment.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</IconButton>} />
-          <IconButton variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</IconButton>
-          <IconButton colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</IconButton>
+          <DestructiveActionDialog title="Eliminar área" description="Una vez eliminada, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<Button variant="outline" colorPalette="brand" disabled={!selected || saving}>{deleteDepartment.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</Button>} />
+          <Button variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</Button>
+          <Button colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</Button>
         </HStack>
       </Box>
 
       {showForm && (
         <Stack gap={4}>
           <Heading size="md">{isEditing ? "Editar área" : "Nueva área"}</Heading>
-          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
-            <Field.Root invalid={touched && !name.trim()}>
-              <Field.Label>
-                Nombre <Text as="span" color="red.500">*</Text>
-              </Field.Label>
-              <Input placeholder="Nombre del área" value={name} onChange={(event) => setName(event.target.value)} disabled={saving} />
-            </Field.Root>
-
-            <Field.Root>
-              <Field.Label>Jefe inmediato</Field.Label>
-              <Input placeholder="ID del jefe inmediato" type="number" value={bossId} onChange={(event) => setBossId(event.target.value)} disabled={saving} />
-            </Field.Root>
-          </Grid>
+          <Field.Root invalid={touched && !name.trim()}>
+            <Field.Label>
+              Nombre <Text as="span" color="red.500">*</Text>
+            </Field.Label>
+            <Input placeholder="Nombre del área" value={name} onChange={(event) => setName(event.target.value)} disabled={saving} />
+          </Field.Root>
 
           <ButtonGroup justifyContent="space-between">
             <Button variant="outline" onClick={resetForm} disabled={saving}>
@@ -154,10 +144,11 @@ export function DepartmentsTab() {
       )}
 
       <TableSelect
-        data={data?.departments ?? []}
+        data={tableData}
         labels={labels}
         loading={isPending}
         onSelect={setSelected}
+        onDoubleClick={(item) => navigate(`/gestiones/organizacion/areas/${item.id}`)}
         noItemsComponent={<EmptyDataScreen title="No hay áreas" message="Crea una nueva área para comenzar" icon={<Building2 />} />}
       />
 

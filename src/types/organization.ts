@@ -12,13 +12,11 @@ export type PaginationRequestDto = OrganizationQueryDto;
 
 export interface DepartmentRequestDto {
   name: string;
-  bossId?: number | null;
 }
 
 export interface DepartmentResponseDto {
   id: number;
   name: string | null;
-  bossId: number | null;
 }
 
 export interface DepartmentWrapperDto {
@@ -33,12 +31,15 @@ export interface ListDepartmentsWrapperDto {
 export interface PositionRequestDto {
   name: string;
   defaultBasicSalary: number;
+  departmentId?: number | null;
 }
 
 export interface PositionResponseDto {
   id: number;
   name: string | null;
   defaultBasicSalary: number;
+  departmentId: number | null;
+  departmentName: string | null;
 }
 
 export interface PositionWrapperDto {

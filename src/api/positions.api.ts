@@ -7,7 +7,7 @@ import type {
 } from "@/types/organization";
 
 export const positionsApi = {
-  getPositions: (params?: OrganizationQueryDto) =>
+  getPositions: (params?: OrganizationQueryDto & { departmentId?: number }) =>
     apiClient.get<ListPositionsWrapperDto>("/api/positions", { params }).then((response) => response.data),
   createPosition: (body: PositionRequestDto) =>
     apiClient.post<PositionWrapperDto>("/api/positions", body).then((response) => response.data),

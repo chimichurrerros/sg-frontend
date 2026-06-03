@@ -4,20 +4,14 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Collapsible,
-  Field,
   IconButton,
   Input,
   InputGroup,
   Pagination,
-  Portal,
-  Select,
   Stack,
-  Text,
-  createListCollection,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Filter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { LuChevronLeft, LuChevronRight, LuPencil, LuPlus, LuTrash2 } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
@@ -46,9 +40,6 @@ export default function EmployeesPage({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [branchFilter, setBranchFilter] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const employees = data?.employees ?? [];
 
@@ -57,31 +48,9 @@ export default function EmployeesPage({
     [branchesData],
   );
 
-  const branchCollection = useMemo(
-    () =>
-      createListCollection({
-        items: (branchesData?.branches ?? []).map((branch) => ({
-          label: branch.name,
-          value: String(branch.id),
-        })),
-      }),
-    [branchesData],
-  );
-
-  const statusCollection = useMemo(
-    () =>
-      createListCollection({
-        items: [
-          { label: "ACTIVO", value: "ACTIVO" },
-          { label: "RECESO", value: "RECESO" },
-        ],
-      }),
-    [],
-  );
-
   const filteredEmployees = employees.filter((employee) => {
     const term = searchTerm.trim().toLowerCase();
-    const matchesSearch =
+    return (
       !term ||
       [
         employee.legajo,
@@ -95,15 +64,8 @@ export default function EmployeesPage({
       ]
         .join(" ")
         .toLowerCase()
-        .includes(term);
-
-    const matchesBranch =
-      branchFilter.length === 0 ||
-      branchFilter.includes(String(employee.branchId ?? ""));
-    const matchesStatus =
-      statusFilter.length === 0 || statusFilter.includes(employee.status);
-
-    return matchesSearch && matchesBranch && matchesStatus;
+        .includes(term)
+    );
   });
 
   const currentEmployees = filteredEmployees.slice(
@@ -174,19 +136,9 @@ export default function EmployeesPage({
   return (
     <Stack gap={4} p={4}>
 
-      <Box
-        display="flex"
-        flexDirection={{ base: "column", lg: "row" }}
-        gap={3}
-        alignItems={{ base: "stretch", lg: "center" }}
-        justifyContent="space-between"
-      >
-        <Box
-          display="flex"
-          flexDirection={{ base: "column", md: "row" }}
-          gap={3}
-          alignItems={{ base: "stretch", md: "center" }}
-        >
+      {/* Filters bar */}
+      <Box borderWidth="1px" borderRadius="lg" py={3} px={6}>
+        <Box display="flex" flexDirection="row" gap={4} alignItems="center" flexWrap="wrap" justifyContent="space-between">
           <InputGroup startElement={<Search size={16} />} maxW={{ base: "100%", md: "22rem" }}>
             <Input
               placeholder="Buscar"
@@ -199,125 +151,37 @@ export default function EmployeesPage({
             />
           </InputGroup>
 
-          <Button variant="outline" colorPalette="brand" onClick={() => setShowFilters((current) => !current)}>
-            <Filter size={16} />
-            Filtros Avanzados
-          </Button>
-        </Box>
+          <Box display="flex" flexDirection="row" gap={2} flexWrap="wrap">
+            <DestructiveActionDialog
+              title="Eliminar empleado"
+              description="Una vez eliminado el empleado, la acción es irreversible."
+              acceptText="Eliminar"
+              onAccept={handleDelete}
+              trigger={
+                <Button variant="outline" colorPalette="brand" disabled={!selectedEmployee || deleteEmployee.isPending}>
+                  <LuTrash2 />
+                  Eliminar
+                </Button>
+              }
+            />
 
-        <Box display="flex" flexDirection="row" gap={2} flexWrap="wrap">
-          <DestructiveActionDialog
-            title="Eliminar empleado"
-            description="Una vez eliminado el empleado, la acción es irreversible."
-            acceptText="Eliminar"
-            onAccept={handleDelete}
-            trigger={
-              <Button variant="outline" colorPalette="brand" disabled={!selectedEmployee || deleteEmployee.isPending}>
-                <LuTrash2 />
-                Eliminar
-              </Button>
-            }
-          />
+            <Button
+              variant="outline"
+              colorPalette="brand"
+              disabled={!selectedEmployee}
+              onClick={() => selectedEmployee && navigate(`${routeBase}/${selectedEmployee.id}`)}
+            >
+              <LuPencil />
+              Editar
+            </Button>
 
-          <Button
-            variant="outline"
-            colorPalette="brand"
-            disabled={!selectedEmployee}
-            onClick={() => selectedEmployee && navigate(`${routeBase}/${selectedEmployee.id}`)}
-          >
-            <LuPencil />
-            Editar
-          </Button>
-
-          <Button colorPalette="brand" onClick={() => navigate(`${routeBase}/nuevo`)}>
-            <LuPlus />
-            Nuevo
-          </Button>
+            <Button colorPalette="brand" onClick={() => navigate(`${routeBase}/nuevo`)}>
+              <LuPlus />
+              Nuevo
+            </Button>
+          </Box>
         </Box>
       </Box>
-
-      <Collapsible.Root open={showFilters}>
-          <Collapsible.Content>
-          <Box borderWidth="1px" rounded="md" p={4} bg="bg.subtle">
-            <Stack gap={4}>
-              <Text fontWeight="semibold">Filtros</Text>
-              <Box display="grid" gap={4} gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}>
-                <Field.Root>
-                  <Field.Label>Sucursal</Field.Label>
-                  <Select.Root
-                    collection={branchCollection}
-                    value={branchFilter}
-                    multiple
-                    onValueChange={(event) => {
-                      setBranchFilter(event.value);
-                      setPage(1);
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Todas" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.ClearTrigger />
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {branchCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-
-                <Field.Root>
-                  <Field.Label>Estado</Field.Label>
-                  <Select.Root
-                    collection={statusCollection}
-                    value={statusFilter}
-                    multiple
-                    onValueChange={(event) => {
-                      setStatusFilter(event.value);
-                      setPage(1);
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Todos" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.ClearTrigger />
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {statusCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-              </Box>
-            </Stack>
-          </Box>
-        </Collapsible.Content>
-      </Collapsible.Root>
 
       <TableSelect
         data={currentEmployees}

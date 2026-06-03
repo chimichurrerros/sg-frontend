@@ -45,6 +45,7 @@ import type {
   MaritalStatusEnum,
 } from "@/types/employees";
 import type { DepartmentResponseDto, PositionResponseDto, ScheduleResponseDto } from "@/types/organization";
+import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import { parseApiError } from "@/utils/api-error";
 
 const employeeSchema = z.object({
@@ -65,7 +66,6 @@ const employeeSchema = z.object({
   scheduleId: z.coerce.number().min(1, "El horario es requerido"),
   hireDate: z.string().min(1, "La fecha de ingreso es requerida"),
   baseSalary: z.coerce.number().min(0, "El salario debe ser mayor o igual a 0"),
-  status: z.string().min(1, "El estado es requerido"),
 });
 
 type EmployeeFormInput = z.input<typeof employeeSchema>;
@@ -92,18 +92,6 @@ const maritalStatuses = createListCollection({
   ],
 });
 
-const statusCollection = createListCollection({
-  items: [
-    { label: "ACTIVO", value: "ACTIVO" },
-    { label: "RECESO", value: "RECESO" },
-  ],
-});
-
-interface EmployeeFormPageProps {
-  basePath?: string;
-  breadcrumb?: string;
-}
-
 const toDateInput = (value?: string | null) => {
   if (!value) return "";
   if (value.includes("/")) {
@@ -125,6 +113,11 @@ const toDateInputToday = () => {
 const getFullName = (employee?: { name?: string | null; lastname?: string | null; firstName?: string | null; lastName?: string | null } | null) =>
   `${employee?.name ?? employee?.firstName ?? ""} ${employee?.lastname ?? employee?.lastName ?? ""}`.trim();
 
+interface EmployeeFormPageProps {
+  basePath?: string;
+  breadcrumb?: string;
+}
+
 export default function EmployeeFormPage({
   basePath = "/rrhh/empleados",
 }: EmployeeFormPageProps) {
@@ -136,7 +129,11 @@ export default function EmployeeFormPage({
   const isViewMode = isEditMode && searchParams.get("view") === "true";
 
   const navigateBack = () => {
-    navigate(basePath);
+    if (basePath.startsWith("/gestiones/organizacion/")) {
+      navigate("/gestiones/organizacion?tab=employees");
+    } else {
+      navigate(basePath);
+    }
   };
 
   const { data: employeeData } = useGetEmployee(employeeId);
@@ -181,24 +178,12 @@ export default function EmployeeFormPage({
     [departmentsData],
   );
 
-  const positionCollection = useMemo(
-    () =>
-      createListCollection({
-        items: (positionsData?.positions ?? []).map((position: PositionResponseDto) => ({
-          label: position.name ?? `Cargo #${position.id}`,
-          value: String(position.id),
-        })),
-      }),
-    [positionsData],
-  );
 
   const scheduleCollection = useMemo(
     () =>
       createListCollection({
         items: (schedulesData?.schedules ?? []).map((schedule: ScheduleResponseDto) => ({
-          label: schedule.name
-            ? `${schedule.name} (${schedule.arrivalTime.slice(0, 5)} - ${schedule.departureTime.slice(0, 5)})`
-            : `Horario #${schedule.id}`,
+          label: `${schedule.arrivalTime.slice(0, 5)} - ${schedule.departureTime.slice(0, 5)}`,
           value: String(schedule.id),
         })),
       }),
@@ -210,6 +195,7 @@ export default function EmployeeFormPage({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<EmployeeFormInput, any, EmployeeFormOutput>({
     resolver: zodResolver(employeeSchema),
@@ -231,24 +217,8 @@ export default function EmployeeFormPage({
       scheduleId: 0,
       hireDate: toDateInputToday(),
       baseSalary: 0,
-      status: "ACTIVO",
     },
   });
-
-  const watchedAreaId = useWatch({ control, name: "areaId" });
-
-  const filteredBossCollection = useMemo(
-    () =>
-      createListCollection({
-        items: (employeesData?.employees ?? [])
-          .filter((employee) => employee.areaId === watchedAreaId)
-          .map((employee) => ({
-            label: getFullName(employee),
-            value: String(employee.id),
-          })),
-      }),
-    [employeesData, watchedAreaId],
-  );
 
   const employee = employeeData?.employee ?? null;
 
@@ -273,9 +243,42 @@ export default function EmployeeFormPage({
       scheduleId: employee.scheduleId ?? 0,
       hireDate: toDateInput(employee.hireDate),
       baseSalary: employee.baseSalary ?? 0,
-      status: employee.isActive ? "ACTIVO" : "RECESO",
     });
   }, [employee, reset]);
+
+  const watchedAreaId = useWatch<EmployeeFormInput>({ control, name: "areaId" });
+  const watchedPositionId = useWatch<EmployeeFormInput>({ control, name: "positionId" });
+
+  const filteredPositionCollection = useMemo(
+    () =>
+      createListCollection({
+        items: (positionsData?.positions ?? [])
+          .filter((position) =>
+            !watchedAreaId ||
+            !position.departmentId ||
+            position.departmentId === Number(watchedAreaId)
+          )
+          .map((position) => ({
+            label: position.name ?? `Cargo #${position.id}`,
+            value: String(position.id),
+          })),
+      }),
+    [positionsData, watchedAreaId],
+  );
+
+  const positionSalaryMap = useMemo(
+    () => new Map(
+      (positionsData?.positions ?? []).map((p) => [p.id, p.defaultBasicSalary]),
+    ),
+    [positionsData],
+  );
+
+  useEffect(() => {
+    const posId = Number(watchedPositionId);
+    if (posId && positionSalaryMap.has(posId)) {
+      setValue("baseSalary", positionSalaryMap.get(posId)!, { shouldValidate: true });
+    }
+  }, [watchedPositionId, positionSalaryMap, setValue]);
 
   const onSubmit = (formData: EmployeeFormOutput) => {
     const commonData = {
@@ -293,7 +296,7 @@ export default function EmployeeFormPage({
       email: formData.email?.trim() ? formData.email.trim() : null,
       phone: formData.phone?.trim() ? formData.phone.trim() : null,
       address: formData.address?.trim() ? formData.address.trim() : null,
-      isActive: formData.status === "ACTIVO",
+      isActive: true,
     };
 
     if (isEditMode && employeeId) {
@@ -569,88 +572,27 @@ export default function EmployeeFormPage({
               <Field.ErrorText>{errors.areaId?.message}</Field.ErrorText>
             </Field.Root>
 
-            <Field.Root invalid={!!errors.inmediatlyBossId}>
-              <Field.Label>Jefe inmediato</Field.Label>
-              <Controller
-                name="inmediatlyBossId"
-                control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    collection={filteredBossCollection}
-                    value={field.value ? [String(field.value)] : []}
-                    onValueChange={(event) => field.onChange(event.value[0] ? Number(event.value[0]) : null)}
-                    disabled={formDisabled}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Seleccionar jefe inmediato" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.ClearTrigger />
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {bossCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                )}
-              />
-            </Field.Root>
+            <Controller
+              name="inmediatlyBossId"
+              control={control}
+              render={({ field }) => (
+                <ComboboxWrapper
+                  label="Jefe inmediato"
+                  placeholder="Buscar jefe inmediato..."
+                  options={bossCollection.items}
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={(val) => field.onChange(val ? Number(val) : null)}
+                  disabled={formDisabled}
+                  clearable
+                  onClear={() => field.onChange(null)}
+                />
+              )}
+            />
 
             <Field.Root invalid={!!errors.hireDate}>
               <Field.Label>Fecha de Ingreso <Text as="span" color="red.500">*</Text></Field.Label>
               <Input type="date" {...register("hireDate")} disabled={formDisabled} />
               <Field.ErrorText>{errors.hireDate?.message}</Field.ErrorText>
-            </Field.Root>
-
-            <Field.Root invalid={!!errors.status}>
-              <Field.Label>Estado <Text as="span" color="red.500">*</Text></Field.Label>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    collection={statusCollection}
-                    value={field.value ? [field.value] : []}
-                    onValueChange={(event) => field.onChange(event.value[0])}
-                    disabled={formDisabled}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Seleccionar estado" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {statusCollection.items.map((item) => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                )}
-              />
-              <Field.ErrorText>{errors.status?.message}</Field.ErrorText>
             </Field.Root>
 
             {!isEditMode && (
@@ -662,7 +604,7 @@ export default function EmployeeFormPage({
                     control={control}
                     render={({ field }) => (
                       <Select.Root
-                        collection={positionCollection}
+                        collection={filteredPositionCollection}
                         value={field.value ? [String(field.value)] : []}
                         onValueChange={(event) => field.onChange(Number(event.value[0]))}
                         disabled={formDisabled}
@@ -679,7 +621,7 @@ export default function EmployeeFormPage({
                         <Portal>
                           <Select.Positioner>
                             <Select.Content>
-                              {positionCollection.items.map((item) => (
+                              {filteredPositionCollection.items.map((item) => (
                                 <Select.Item item={item} key={item.value}>
                                   {item.label}
                                   <Select.ItemIndicator />

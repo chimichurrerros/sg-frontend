@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { Tabs } from "@chakra-ui/react";
-import { LuBuilding2, LuClock3, LuUsers, LuUserCog } from "react-icons/lu";
+import { LuBuilding2, LuClock3, LuUsers } from "react-icons/lu";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
 import { DepartmentsTab } from "./DepartmentsTab";
-import { PositionsTab } from "./PositionsTab";
 import { SchedulesTab } from "./SchedulesTab";
 
 export default function OrganizationPage() {
@@ -13,7 +12,7 @@ export default function OrganizationPage() {
   const tab = searchParams.get("tab") ?? "employees";
 
   useEffect(() => {
-    if (!["employees", "positions", "schedules", "areas"].includes(tab)) {
+    if (!["employees", "schedules", "areas"].includes(tab)) {
       navigate("/gestiones/organizacion?tab=employees", { replace: true });
     }
   }, [navigate, tab]);
@@ -25,17 +24,13 @@ export default function OrganizationPage() {
           <LuUsers />
           Empleados
         </Tabs.Trigger>
-        <Tabs.Trigger value="positions">
-          <LuUserCog />
-          Cargos
+        <Tabs.Trigger value="areas">
+          <LuBuilding2 />
+          Áreas y Cargos
         </Tabs.Trigger>
         <Tabs.Trigger value="schedules">
           <LuClock3 />
           Horarios
-        </Tabs.Trigger>
-        <Tabs.Trigger value="areas">
-          <LuBuilding2 />
-          Áreas
         </Tabs.Trigger>
       </Tabs.List>
 
@@ -44,14 +39,11 @@ export default function OrganizationPage() {
           routeBase="/gestiones/organizacion/empleados"
         />
       </Tabs.Content>
-      <Tabs.Content value="positions">
-        <PositionsTab />
+      <Tabs.Content value="areas">
+        <DepartmentsTab />
       </Tabs.Content>
       <Tabs.Content value="schedules">
         <SchedulesTab />
-      </Tabs.Content>
-      <Tabs.Content value="areas">
-        <DepartmentsTab />
       </Tabs.Content>
     </Tabs.Root>
   );

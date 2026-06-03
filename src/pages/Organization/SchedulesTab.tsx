@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Clock3, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, IconButton, Input, InputGroup, Spinner, Stack, Text, createListCollection, Portal, Select } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, Input, InputGroup, Spinner, Stack, Text, createListCollection, Portal, Select } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
@@ -46,8 +46,6 @@ export function SchedulesTab() {
   }, [isError, error]);
 
   const labels: label<ScheduleResponseDto>[] = [
-    { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
-    { labelName: "Nombre", propName: "name", isSortable: true, sortFunction: (a, b) => (a.name ?? "").localeCompare(b.name ?? "") },
     { labelName: "Hora ingreso", propName: "arrivalTime", transformFunction: (value) => String(value).slice(0, 5) },
     { labelName: "Hora salida", propName: "departureTime", transformFunction: (value) => String(value).slice(0, 5) },
     { labelName: "Horas", propName: "numberOfHours" },
@@ -145,9 +143,9 @@ export function SchedulesTab() {
         </HStack>
 
         <HStack gap={2}>
-          <DestructiveActionDialog title="Eliminar horario" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<IconButton variant="outline" disabled={!selected || saving}>{deleteSchedule.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</IconButton>} />
-          <IconButton variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</IconButton>
-          <IconButton colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</IconButton>
+          <DestructiveActionDialog title="Eliminar horario" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<Button variant="outline" colorPalette="brand" disabled={!selected || saving}>{deleteSchedule.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</Button>} />
+          <Button variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</Button>
+          <Button colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</Button>
         </HStack>
       </Box>
 

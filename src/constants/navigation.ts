@@ -200,7 +200,7 @@ export const NAV_CONFIG: NavItem[] = [
         id: "organizacion",
         label: "Organización",
         icon: GitBranch,
-        path: "/gestiones/organizacion",
+        path: "/gestiones/organizacion?tab=employees",
       },
       {
         id: "inventario",

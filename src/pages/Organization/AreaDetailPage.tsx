@@ -1,18 +1,44 @@
-import { useEffect, useState } from "react";
-import { BriefcaseBusiness, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, Input, InputGroup, Spinner, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, BriefcaseBusiness, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Field,
+  Grid,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
+  InputGroup,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
-import { parsePrice } from "@/constants/price";
+import { useNavigate, useParams } from "react-router-dom";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import { toaster } from "@/components/ui/toaster";
+import { useGetDepartments } from "@/queries/departments.queries";
 import { useCreatePosition, useDeletePosition, useGetPositions, useUpdatePosition } from "@/queries/positions.queries";
+import { parsePrice } from "@/constants/price";
 import type { PositionResponseDto } from "@/types/organization";
 
-export function PositionsTab() {
+export default function AreaDetailPage() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const areaId = Number(id);
+  const isGeneral = areaId === 0;
+
+  const { data: departmentsData } = useGetDepartments({ page: 1, pageSize: 1000 });
+  const areaName = isGeneral
+    ? "Generales"
+    : departmentsData?.departments?.find((d) => d.id === areaId)?.name ?? "Cargando...";
+
   const [selected, setSelected] = useState<PositionResponseDto | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -23,10 +49,19 @@ export function PositionsTab() {
   const [name, setName] = useState("");
   const [defaultBasicSalary, setDefaultBasicSalary] = useState("");
 
-  const { data, isPending, isError, error } = useGetPositions({ page, pageSize, search, sortBy: "name", sortOrder: "asc" });
   const createPosition = useCreatePosition();
   const updatePosition = useUpdatePosition();
   const deletePosition = useDeletePosition();
+  const saving = createPosition.isPending || updatePosition.isPending || deletePosition.isPending;
+
+  const { data, isPending, isError, error } = useGetPositions({
+    page,
+    pageSize,
+    search,
+    sortBy: "name",
+    sortOrder: "asc",
+    departmentId: areaId,
+  });
 
   useEffect(() => {
     if (isError) {
@@ -36,7 +71,7 @@ export function PositionsTab() {
 
   const labels: label<PositionResponseDto>[] = [
     { labelName: "Nombre", propName: "name", isSortable: true, sortFunction: (a, b) => (a.name ?? "").localeCompare(b.name ?? "") },
-    { labelName: "Salario por defecto", propName: "defaultBasicSalary", transformFunction: parsePrice },
+    { labelName: "Salario por defecto", propName: "defaultBasicSalary", transformFunction: (value) => parsePrice(value) },
   ];
 
   const resetForm = () => {
@@ -73,6 +108,7 @@ export function PositionsTab() {
     const body = {
       name: name.trim(),
       defaultBasicSalary: Number(defaultBasicSalary),
+      departmentId: isGeneral ? null : areaId,
     };
 
     try {
@@ -102,10 +138,15 @@ export function PositionsTab() {
     }
   };
 
-  const saving = createPosition.isPending || updatePosition.isPending || deletePosition.isPending;
-
   return (
     <Box display="flex" flexDirection="column" gap={4} p={4}>
+      <HStack gap={3}>
+        <IconButton variant="ghost" onClick={() => navigate("/gestiones/organizacion?tab=areas")}>
+          <ArrowLeft size={20} />
+        </IconButton>
+        <Heading size="lg">{areaName}</Heading>
+      </HStack>
+
       <Box display="flex" flexDirection={{ base: "column", lg: "row" }} gap={3} justifyContent="space-between" alignItems={{ base: "stretch", lg: "center" }}>
         <HStack gap={3} flex={1}>
           <InputGroup startElement={<LuSearch />} maxW={{ base: "100%", lg: "22rem" }}>
@@ -118,9 +159,9 @@ export function PositionsTab() {
         </HStack>
 
         <HStack gap={2}>
-          <DestructiveActionDialog title="Eliminar cargo" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<Button variant="outline" colorPalette="brand" disabled={!selected || saving}>{deletePosition.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</Button>} />
-          <Button variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</Button>
-          <Button colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</Button>
+          <DestructiveActionDialog title="Eliminar cargo" description="Una vez eliminado, la acción es irreversible." acceptText="Eliminar" onAccept={onDelete} trigger={<IconButton variant="outline" disabled={!selected || saving}>{deletePosition.isPending ? <Spinner size="sm" /> : <Trash2 size={18} />}Eliminar</IconButton>} />
+          <IconButton variant="outline" colorPalette="brand" disabled={!selected || saving} onClick={onEdit}><Pencil size={18} />Editar</IconButton>
+          <IconButton colorPalette="brand" disabled={saving} onClick={onCreate}><Plus size={18} />Nuevo</IconButton>
         </HStack>
       </Box>
 
@@ -158,7 +199,7 @@ export function PositionsTab() {
         labels={labels}
         loading={isPending}
         onSelect={setSelected}
-        noItemsComponent={<EmptyDataScreen title="No hay cargos" message="Crea un nuevo cargo para comenzar" icon={<BriefcaseBusiness />} />}
+        noItemsComponent={<EmptyDataScreen title="No hay cargos" message="Crea un nuevo cargo para esta área" icon={<BriefcaseBusiness />} />}
       />
 
       <PaginationControl pagination={data?.pagination ?? null} onPageChange={(nextPage) => setPage(nextPage)} />
