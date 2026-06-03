@@ -12,6 +12,7 @@ import { useAllPurchaseOrders } from "@/queries/purchase-orders.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
 import type { PurchaseOrder } from "@/api/purchaseOrders.api";
 import PageTitle from "@/components/ui/title";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 const STEPS = [
     { title: "Datos Generales", description: "OC, proveedor y factura" },
@@ -273,12 +274,17 @@ export default function PurchaseReceiptWizard() {
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Fecha *
                     </Text>
-                    <Input
+                    <DatePickerWrapper
+                    size="sm"
+                    value={date}
+                    onChange={(e)=>setDate(e[0])}
+                    />
+                    {/* <Input
                         size="sm"
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                    />
+                    /> */}
                 </Box>
             </Grid>
             <Box>
