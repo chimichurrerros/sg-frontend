@@ -26,9 +26,10 @@ interface SearchProductsDialogProps {
     isError:boolean
     error:Error | null
     careStock?:boolean
+    hideOutOfStock?:boolean
 }
 
-export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError,careStock=true }: SearchProductsDialogProps) => {
+export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError,careStock=true, hideOutOfStock=true }: SearchProductsDialogProps) => {
 
     const [selectedProduct, setSelectedProduct] = React.useState<ProductSelect | null>(null);
     const addref = React.useRef<HTMLButtonElement>(null);
@@ -91,7 +92,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                 data={products
                                     .filter((p:ProductSelect)=>!selectedProductsIds.includes(p.id))
                                     .filter((p:ProductSelect)=>p.name?.toLowerCase().includes(searchParam.toLowerCase()))
-                                    .filter((p:ProductSelect)=>p.quantity > 0 || !careStock)
+                                    .filter((p:ProductSelect)=>p.quantity > 0 || !hideOutOfStock)
                                 }
                                 onSelect={setSelectedProduct}
                                 onDoubleClick={(product) => {
@@ -121,7 +122,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     </NumberInput.IncrementTrigger>
                                 </HStack>
                             </NumberInput.Root>}
-                            {careStock && <><IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
+                            {careStock && hideOutOfStock && <><IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
                                 <RefreshCcw />
                             </IconButton>
                             <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.quantity! ? "visible" : "hidden"}>
@@ -137,7 +138,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     <Button
                                         variant="surface"
                                         colorPalette="green"
-                                        disabled={careStock ?(!selectedProduct|| (selectedProduct ? quantity > products.find(p => p.id === selectedProduct.id)?.quantity! : false)) : false}
+                                        disabled={!selectedProduct || (hideOutOfStock && quantity > products.find(p => p.id === selectedProduct.id)?.quantity!)}
                                         ref={addref}
                                         onClick={()=>selectedProduct && onSelect(selectedProduct,quantity)}
                                     >
