@@ -206,7 +206,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                                 colorScheme="blue"
                                 aria-label="Ver Nota de Crédito"
                                 p={4}
-                                onClick={() => navigate(`/contabilidad/notas-credito/${displayData.creditNoteId}`)}
+                                onClick={() => navigate(`/ventas/notas-de-credito/${displayData.creditNoteId}`)}
                             >
                                 <FileText size={18} /> Ver Nota de Crédito
                             </IconButton>
