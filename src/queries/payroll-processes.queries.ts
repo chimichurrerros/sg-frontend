@@ -15,6 +15,7 @@ import {
   type PayrollProcessUpdateDto,
   type PayrollManualInputDto,
   type UpdatePayrollProcessStatusRequestDto,
+  type ListPayrollDetailSummariesWrapperDto,
 } from "@/api/payroll-processes.api";
 
 export const payrollProcessKeys = {
