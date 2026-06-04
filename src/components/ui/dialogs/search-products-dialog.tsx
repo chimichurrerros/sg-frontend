@@ -19,31 +19,32 @@ import { parsePrice } from "@/constants/price";
 
 interface SearchProductsDialogProps {
     trigger?: React.ReactNode;
-    onSelect: (product:ProductSelect,quantity:number)=>void
-    selectedProductsIds:number[]  //This is in order to show products that you have not add before
-    products:ProductSelect[]
-    loading:boolean
-    isError:boolean
-    error:Error | null
-    careStock?:boolean
-    hideOutOfStock?:boolean
+    onSelect: (product: ProductSelect, quantity: number) => void
+    selectedProductsIds: number[]  //This is in order to show products that you have not add before
+    products: ProductSelect[]
+    loading: boolean
+    isError: boolean
+    error: Error | null
+    showStock?: boolean
+    hideOutOfStock?: boolean
+    showStockMessage?: boolean
 }
 
-export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,products,loading,error,isError,careStock=true, hideOutOfStock=true }: SearchProductsDialogProps) => {
+export const SearchProductsDialog = ({ trigger, onSelect, selectedProductsIds, products, loading, error, isError, showStock = true, hideOutOfStock = true, showStockMessage = true }: SearchProductsDialogProps) => {
 
     const [selectedProduct, setSelectedProduct] = React.useState<ProductSelect | null>(null);
     const addref = React.useRef<HTMLButtonElement>(null);
     const [quantity, setQuantity] = React.useState(1);
-    const [searchParam,setSearchParam] = React.useState("")
+    const [searchParam, setSearchParam] = React.useState("")
 
 
     const labels: label<ProductSelect>[] = [
-        {labelName:"Cód.",propName:"barcode",textIfNull:"---"},
-        { labelName: "Nombre", propName: "name"},
+        { labelName: "Cód.", propName: "barcode", textIfNull: "---" },
+        { labelName: "Nombre", propName: "name" },
         { labelName: "Precio", propName: "price", transformFunction: (value) => parsePrice(value) },
     ];
 
-    if(careStock){ labels.push({ labelName: "Stock", propName: "quantity" })}
+    if (showStock) { labels.push({ labelName: "Stock", propName: "quantity" }) }
     useHotkeys('ctrl+down', (event) => {
         event.preventDefault();
         setQuantity(Math.max(1, quantity - 1));
@@ -80,26 +81,26 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                         </Dialog.Header>
                         <Dialog.Body pb={4}>
                             <InputGroup flex="1" startElement={<LuSearch />}>
-                                <Input placeholder="Buscar productos..." value={searchParam}onChange={(e)=>setSearchParam(e.target.value)} />
+                                <Input placeholder="Buscar productos..." value={searchParam} onChange={(e) => setSearchParam(e.target.value)} />
                             </InputGroup>
                             <Text fontSize="xs" color="gray.500" my={2} fontStyle="italic">
-                                Selecciona y agrega el producto con enter <Kbd size="sm">⏎</Kbd> o el botón de agregar.  
+                                Selecciona y agrega el producto con enter <Kbd size="sm">⏎</Kbd> o el botón de agregar.
                                 <Kbd size="sm">Ctrl</Kbd> + <Kbd size="sm">↑</Kbd> y <Kbd size="sm">Ctrl</Kbd> + <Kbd size="sm">↓</Kbd> para aumentar y disminuir cantidad
                             </Text>
-                            
+
                             <TableSelect
                                 labels={labels}
                                 data={products
-                                    .filter((p:ProductSelect)=>!selectedProductsIds.includes(p.id))
-                                    .filter((p:ProductSelect)=>p.name?.toLowerCase().includes(searchParam.toLowerCase()))
-                                    .filter((p:ProductSelect)=>p.quantity > 0 || !hideOutOfStock)
+                                    .filter((p: ProductSelect) => !selectedProductsIds.includes(p.id))
+                                    .filter((p: ProductSelect) => p.name?.toLowerCase().includes(searchParam.toLowerCase()))
+                                    .filter((p: ProductSelect) => p.quantity > 0 || !hideOutOfStock)
                                 }
                                 onSelect={setSelectedProduct}
                                 onDoubleClick={(product) => {
                                     setSelectedProduct(product);
                                     addref.current?.click();
                                 }}
-                                noItemsComponent={<EmptyDataScreen title={"No hay productos registrados o disponibles"} icon={<FileQuestion/>}message={"No se encontraron productos, prueba a buscar con otro nombre"}/>}
+                                noItemsComponent={<EmptyDataScreen title={"No hay productos registrados o disponibles"} icon={<FileQuestion />} message={"No se encontraron productos, prueba a buscar con otro nombre"} />}
                                 height="300px"
                                 loading={loading}
                                 error={error}
@@ -107,7 +108,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                             />
                         </Dialog.Body>
                         <Dialog.Footer display="flex" justifyContent="space-between" alignItems="center">
-                            {careStock && <NumberInput.Root value={String(quantity)} unstyled spinOnPress={false}>
+                            <Box display={"flex"} flexDirection="row" gap={2}>{showStock && <NumberInput.Root value={String(quantity)} unstyled spinOnPress={false}>
                                 <HStack gap="2">
                                     <NumberInput.DecrementTrigger asChild>
                                         <IconButton variant="outline" size="xs" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
@@ -122,12 +123,12 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                     </NumberInput.IncrementTrigger>
                                 </HStack>
                             </NumberInput.Root>}
-                            {careStock && hideOutOfStock && <><IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
-                                <RefreshCcw />
-                            </IconButton>
-                            <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.quantity! ? "visible" : "hidden"}>
-                                * La cantidad es mayor al stock disponible del producto seleccionado 
-                            </Text></>}
+                                {showStock && <><IconButton size="xs" variant="outline" colorPalette="yellow" aria-label="Stock Warning" onClick={() => setQuantity(1)} >
+                                    <RefreshCcw />
+                                </IconButton>
+                                    {showStockMessage && <Text color="red.500" fontSize="xs" fontStyle="italic" visibility={selectedProduct && quantity > products.find(p => p.id === selectedProduct.id)?.quantity! ? "visible" : "hidden"}>
+                                        * La cantidad es mayor al stock disponible del producto seleccionado
+                                    </Text>}</>}</Box>
                             <Box display="flex" gap={2}>
                                 <Dialog.ActionTrigger asChild>
                                     <Button variant="surface" colorPalette="gray">
@@ -140,7 +141,7 @@ export const SearchProductsDialog = ({ trigger,onSelect,selectedProductsIds,prod
                                         colorPalette="green"
                                         disabled={!selectedProduct || (hideOutOfStock && quantity > products.find(p => p.id === selectedProduct.id)?.quantity!)}
                                         ref={addref}
-                                        onClick={()=>selectedProduct && onSelect(selectedProduct,quantity)}
+                                        onClick={() => selectedProduct && onSelect(selectedProduct, quantity)}
                                     >
                                         Agregar
                                         <Plus size={16} style={{ marginLeft: 8 }} />
