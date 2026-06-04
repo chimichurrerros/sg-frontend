@@ -4,6 +4,7 @@ import { Box, Stack, Text, Icon, Collapsible } from "@chakra-ui/react";
 import { ChevronRight } from "lucide-react";
 import { NAV_CONFIG, type NavItem } from "@/constants/navigation";
 import LogoERP from "@/assets/LogoERP";
+import { useAuthStore } from "@/stores/auth.store";
 
 const SIDEBAR_W = "220px";
 const SIDEBAR_COL = "48px";
@@ -15,6 +16,7 @@ interface Props {
 export const Sidebar = ({ collapsed }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     new Set(["ventas", "rrhh", "gestiones"]),
   );
@@ -92,6 +94,28 @@ export const Sidebar = ({ collapsed }: Props) => {
     );
   };
 
+  const hasPermission = (permission?: string) => {
+    if (!permission) return true;
+    if (user?.roleName.toLowerCase() === "admin") return true;
+    return user?.permissions?.includes(permission) ?? false;
+  };
+
+  const isItemVisible = (item: NavItem) => {
+    if (item.children) {
+      return item.children.some((child) => hasPermission(child.permission));
+    }
+    return hasPermission(item.permission);
+  };
+
+  const getItemSection = (item: NavItem) => {
+    if (["ventas", "compras", "tesoreria", "contabilidad"].includes(item.id)) return "Operaciones";
+    if (["gestiones", "configuraciones"].includes(item.id)) return "Administración";
+    return undefined;
+  };
+
+  const visibleItems = NAV_CONFIG.filter(isItemVisible);
+  let currentSection: string | undefined = undefined;
+
   return (
     <Box
       as="aside"
@@ -143,7 +167,7 @@ export const Sidebar = ({ collapsed }: Props) => {
         py="8px"
         px="8px"
       >
-        {NAV_CONFIG.map((item) => {
+        {visibleItems.map((item) => {
           const active = isActive(item.path);
           const groupActive = nodeHasActiveChild(item);
           const isOpen = openGroups.has(item.id);
@@ -153,9 +177,15 @@ export const Sidebar = ({ collapsed }: Props) => {
             lastSectionShown = item.section;
           }
 
+          const itemSection = getItemSection(item);
+          const showSectionHeader = itemSection && itemSection !== currentSection;
+          if (itemSection) {
+            currentSection = itemSection;
+          }
+
           return (
             <Box key={item.id}>
-              {shouldShowSection && !collapsed && (
+              {showSectionHeader && !collapsed && (
                 <Text
                   px="12px"
                   pt="8px"
@@ -167,7 +197,7 @@ export const Sidebar = ({ collapsed }: Props) => {
                   letterSpacing=".08em"
                   whiteSpace="nowrap"
                 >
-                  {item.section}
+                  {itemSection}
                 </Text>
               )}
 
@@ -227,7 +257,9 @@ export const Sidebar = ({ collapsed }: Props) => {
               {item.children && !collapsed && (
                 <Collapsible.Root open={isOpen}>
                   <Collapsible.Content>
-                    {item.children.map((child) => renderChild(child))}
+                    {item.children
+                      .filter((child) => hasPermission(child.permission))
+                      .map((child) => renderChild(child))}
                   </Collapsible.Content>
                 </Collapsible.Root>
               )}

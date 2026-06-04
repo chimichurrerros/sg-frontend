@@ -4,14 +4,14 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { LuArrowLeft, LuFilter, LuScale, LuPrinter } from "react-icons/lu";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { useBalanceGeneral } from "@/queries/accounting.queries";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
-import TableTree, { type TreeTableRow } from "@/components/ui/table-tree";
+import TableTree, { type TreeTableRow } from "@/components/ui/tables/table-tree";
 import type { BalanceGeneralItem } from "@/types/accounting";
 
 export default function BalanceGeneralPage() {
@@ -487,6 +487,23 @@ export default function BalanceGeneralPage() {
               );
             })()} */}
 
+            {/* Total Pasivo + Patrimonio Neto Banner (moved from bottom) */}
+            <Box
+              p={4}
+              bg="white"
+              borderWidth="1px"
+              borderColor="gray.200"
+              borderRadius="xl"
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Text fontWeight="bold" color="gray.700">Total Pasivo + Patrimonio Neto</Text>
+              <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
+                {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
+              </Text>
+            </Box>
+
             {/* Tree Tables Section */}
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6} className="print-grid">
               {/* Left Column: Assets */}
@@ -554,22 +571,7 @@ export default function BalanceGeneralPage() {
                   />
                 </Stack>
 
-                {/* Total Liabilities + Equity Summary */}
-                <Box 
-                  p={4} 
-                  bg="gray.50" 
-                  borderWidth="1px" 
-                  borderColor="gray.200" 
-                  borderRadius="xl"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Text fontWeight="bold" color="gray.700">Total Pasivo + Patrimonio Neto</Text>
-                  <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
-                    {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
-                  </Text>
-                </Box>
+                {/* (Summary moved to top banner) */}
               </Stack>
             </Grid>
           </Stack>

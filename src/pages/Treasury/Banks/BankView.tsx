@@ -2,7 +2,7 @@ import { type CreateBankRequestDto } from "@/api/banks.api";
 import { useGetBankById, useUpdateBank, useDeleteBank } from "@/queries/banks.queries";
 import { createBankSchema, type CreateBankFormData } from "@/schemas/banks.schema";
 import { toaster } from "@/components/ui/toaster";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import type { BankAccountResponseDto } from "@/api/banks.api";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import {

@@ -4,6 +4,8 @@ import { PublicRoute } from "@/routes/guard/PublicRoute";
 import { LoginPage } from "@/pages/LoginPage";
 import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { AddUserPage } from "@/pages/AddUserPage";
+import { RolePermissionsPage } from "@/pages/RolePermissionsPage";
 import { HomeLayout } from "@/components/layouts/HomeLayout";
 import ConfigurationsPage from "@/pages/ConfigurationsPage";
 import AccountingDashboardPage from "@/pages/Accounting/AccountingDashboardPage";
@@ -65,6 +67,8 @@ import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrde
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
+import CreditNotesPage from "@/pages/Sales/CreditNotes/CreditNotesListPage";
+import CreditNoteSheetPage from "@/pages/Sales/CreditNotes/CreditNoteSheetPage";
 
 export const router = createBrowserRouter([
   {
@@ -99,11 +103,11 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
           {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
-
           {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
           {path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
-
           {path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
+          {path: "/ventas/notas-de-credito", element: <CreditNotesPage/> },
+          {path: "/ventas/notas-de-credito/:id", element: <CreditNoteSheetPage/> },
 
           /* ===== COMPRAS ===== */
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
@@ -136,6 +140,9 @@ export const router = createBrowserRouter([
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },
+          { path: "/register/nuevo", element: <AddUserPage /> },
+          { path: "/register/:id", element: <AddUserPage /> },
+          { path: "/register/roles/:id/permisos", element: <RolePermissionsPage /> },
           { path: "/customers", element: <CustomersListPage /> },
 
           { path: "/dash/catalogo", element: <CatalogPage /> },

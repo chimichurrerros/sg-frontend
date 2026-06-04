@@ -9,7 +9,7 @@ import { Text } from "@chakra-ui/react/text"
 import { PackageOpenIcon, Plus } from "lucide-react";
 import type { ProductSaleDTO, ProductSelect } from "@/types/sales";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import {  useProductByBranch } from "@/queries/catalog.queries";
 import { Spinner } from "@chakra-ui/react";
 import type { ProductDTO } from "@/api/catalog.api";
@@ -37,25 +37,29 @@ export default function ProductsTable({ products, onDataChange, labels, readOnly
     return { ...product,stock, quantity, total: (quantity * product.price), } as ProductSaleDTO
   }
 
- useEffect(() => {
+useEffect(() => {
     if (!aviableProducts?.productsStock || !productCode) return; 
 
-    const prod = aviableProducts.productsStock.find(p => p.barcode === productCode) 
+    const prod = aviableProducts.productsStock.find(p => p.barcode === productCode);
     if (!prod) return;
 
     const exist = products.some(p => p.id === prod.id);
 
     if (exist) {
-        onDataChange(products.map(p =>
-            p.id === prod.id
-                ? { ...p, quantity: Math.min(p.quantity + 1,p.stock), total: (p.quantity + 1) * p.price }
-                : p
-        ));
+      console.log(products)
+        onDataChange(products.map(p => {
+            if (p.id !== prod.id) return p;
+            const newQuantity = careStock
+                ? Math.min(p.quantity + 1, p.stock)
+                : p.quantity + 1;
+            return { ...p, quantity: newQuantity, total: newQuantity * p.price };
+        }));
     } else {
         onDataChange([...products, { ...prod, quantity: 1, total: prod.price, stock: prod.stock } as ProductSaleDTO]);
     }
+
     setProductCode("");
-}, [productCode, aviableProducts]); 
+}, [productCode, aviableProducts]);
 
   return (<Box flex={1} display="flex" flexDirection="column" minHeight="0" height="100%">
     {!readOnly && <Box display="flex" flexDirection="row" gap={3} flexShrink={0}>

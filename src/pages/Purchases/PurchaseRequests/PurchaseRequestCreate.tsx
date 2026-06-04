@@ -1,5 +1,6 @@
 import { useCreatePurchaseRequest } from "@/queries/purchase-request.queries";
 import { toaster } from "@/components/ui/toaster";
+import { useAuthStore } from "@/stores/auth.store";
 import {
   Box,
   Button,
@@ -18,10 +19,12 @@ import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
 import AvailableSuppliersTable from "./AvailableSuppliersTable";
+import PageTitle from "@/components/ui/title";
 
 export default function PurchaseRequestCreate() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
   const { mutate: createPurchaseRequest, isPending } =
     useCreatePurchaseRequest();
   const [observation, setObservation] = useState("");
@@ -71,7 +74,12 @@ export default function PurchaseRequestCreate() {
   return (
     <Stack gap={4} paddingInline="5%" height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">Nuevo Pedido de Compra</Heading>
+        <Box>
+          <PageTitle>Nuevo Pedido de Compra</PageTitle>
+          <Text fontSize="sm" color="gray.500">
+            Sucursal: {user?.branchName ?? "—"}
+          </Text>
+        </Box>
         <Button
           variant="ghost"
           size="sm"
@@ -102,6 +110,7 @@ export default function PurchaseRequestCreate() {
             products={products}
             onDataChange={setProducts}
             readOnly={false}
+            branchId={user?.branchId ?? 0}
           />
         </Box>
 

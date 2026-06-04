@@ -3,13 +3,14 @@ import { LuCalendar } from "react-icons/lu";
 import { parseDate } from "@chakra-ui/react";
 
 export function DatePickerWrapper(
-    { width, onChange, placeholder, value, readOnly =false}:
+    { width, onChange, placeholder, value, readOnly =false,size = "lg"}:
     { 
         value: string | null | undefined;
         width?: string;
         onChange: (date: string[]) => void;
         placeholder?: string;
         readOnly?: boolean;
+        size?:"sm" | "md" | "lg" | "xl" | "xs";
     }
 ) {
     return (
@@ -19,6 +20,7 @@ export function DatePickerWrapper(
             value={value ? [parseDate(value)] : []}
             onValueChange={(e) => onChange(e.value[0]?.toString() ? [e.value[0].toString()] : [])}
             readOnly={readOnly}
+            size={size}
         >
             <DatePicker.Control>
                 <DatePicker.Input placeholder={placeholder || "Fecha"} />

@@ -4,7 +4,7 @@ import { Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { billStatusEnumParse, billTypeEnumParse } from "@/types/bills";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { useAllBills } from "@/queries/bills.queries";
 import { parseDate } from "@/constants/date";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";

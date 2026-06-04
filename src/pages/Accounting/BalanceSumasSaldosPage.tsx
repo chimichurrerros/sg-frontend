@@ -4,14 +4,14 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { LuArrowLeft, LuFilter, LuScale, LuPrinter } from "react-icons/lu";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { useBalanceSumasSaldos } from "@/queries/accounting.queries";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
-import TableTree, { type TreeTableRow } from "@/components/ui/table-tree";
+import TableTree, { type TreeTableRow } from "@/components/ui/tables/table-tree";
 
 export default function BalanceSumasSaldosPage() {
   const navigate = useNavigate();

@@ -1,8 +1,10 @@
 import type { BankResponseDto } from "@/api/banks.api";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
+import PageTitle from "@/components/ui/title";
 import { toaster } from "@/components/ui/toaster";
 import { useGetBanks, useDeleteBank } from "@/queries/banks.queries";
 import type { PaginationParams } from "@/types/types";
@@ -87,9 +89,9 @@ export default function BanksPage() {
       height="100%"
       minHeight="0"
     >
-      <Text fontSize="2xl" fontWeight="bold">
+      <PageTitle>
         Bancos
-      </Text>
+      </PageTitle>
 
       <Box
         display="flex"
@@ -113,18 +115,23 @@ export default function BanksPage() {
             min={5}
           />
         </Box>
-
-        <IconButton
-          padding={2}
-          colorPalette="brand"
-          onClick={() => navigate("/tesoreria/bancos/nuevo")}
-        >
-          <Plus />
-          Nuevo
-        </IconButton>
-        <IconButton
+         <DestructiveActionDialog title="Está seguro/a de desactivar este banco?"  description={"Se desactivará " + selected?.name} trigger={<IconButton
           padding={2}
           variant="outline"
+          disabled={!selected}
+          
+        >
+          <Power />
+          Activar / Desactivar
+        </IconButton>} onAccept={() => {
+            if (selected) {
+              deleteBank(selected.id);
+              setSelected(null);
+            }
+          }}/>
+        <IconButton
+          padding={2}
+          bgColor={"brand.secondary"}
           disabled={!selected}
           onClick={() =>
             selected && navigate(`/tesoreria/bancos/${selected.id}`)
@@ -135,19 +142,15 @@ export default function BanksPage() {
         </IconButton>
         <IconButton
           padding={2}
-          variant="outline"
-          colorPalette="red"
-          disabled={!selected}
-          onClick={() => {
-            if (selected) {
-              deleteBank(selected.id);
-              setSelected(null);
-            }
-          }}
+          colorPalette="brand"
+          onClick={() => navigate("/tesoreria/bancos/nuevo")}
         >
-          <Power />
-          Activar / Desactivar
+          <Plus />
+          Nuevo
         </IconButton>
+
+       
+        
       </Box>
 
       <Box flex="1" minHeight="0" mb={2}>
