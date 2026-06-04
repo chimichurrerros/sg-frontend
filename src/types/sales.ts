@@ -20,6 +20,7 @@ export interface ProductSelect {
   barcode?: string;
   price: number;
   quantity: number;
+  minimumStock?: number;
 }
 export interface SaleTotals{
     subtotal: number;

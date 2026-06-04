@@ -6,7 +6,6 @@ import {
   Button,
   Field,
   Flex,
-  Heading,
   Stack,
   Text,
   Textarea,

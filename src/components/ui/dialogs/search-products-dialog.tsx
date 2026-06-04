@@ -28,9 +28,10 @@ interface SearchProductsDialogProps {
     showStock?: boolean
     hideOutOfStock?: boolean
     showStockMessage?: boolean
+    showMinStock?: boolean
 }
 
-export const SearchProductsDialog = ({ trigger, onSelect, selectedProductsIds, products, loading, error, isError, showStock = true, hideOutOfStock = true, showStockMessage = true }: SearchProductsDialogProps) => {
+export const SearchProductsDialog = ({ trigger, onSelect, selectedProductsIds, products, loading, error, isError, showStock = true, hideOutOfStock = true, showStockMessage = true, showMinStock = false }: SearchProductsDialogProps) => {
 
     const [selectedProduct, setSelectedProduct] = React.useState<ProductSelect | null>(null);
     const addref = React.useRef<HTMLButtonElement>(null);
@@ -45,6 +46,7 @@ export const SearchProductsDialog = ({ trigger, onSelect, selectedProductsIds, p
     ];
 
     if (showStock) { labels.push({ labelName: "Stock", propName: "quantity" }) }
+    if (showMinStock) { labels.push({ labelName: "Stock Mín.", propName: "minimumStock", textIfNull: "-" }) }
     useHotkeys('ctrl+down', (event) => {
         event.preventDefault();
         setQuantity(Math.max(1, quantity - 1));

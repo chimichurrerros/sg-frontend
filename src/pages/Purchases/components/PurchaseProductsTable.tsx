@@ -120,6 +120,7 @@ export default function PurchaseProductsTable({ products, onDataChange, readOnly
             isError={isErrorProducts}
             hideOutOfStock={false}
             showStockMessage={false}
+            showMinStock
             trigger={
               <IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts} ref={addProdRef}>
                 {aviableProducts?.productsStock ? <Plus /> : <Spinner />} Item
