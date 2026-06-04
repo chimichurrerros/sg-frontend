@@ -24,6 +24,7 @@ import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
 import StockListPage from "@/pages/Stock/StockListPage";
 import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
+import SaleListPage from "@/pages/Sales/SaleListPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BanksPage from "@/pages/Treasury/Banks/BanksPage";
@@ -47,11 +48,22 @@ import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseRe
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
+import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
+import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
+import EmployeeHistoryPage from "@/pages/RRHH/Employees/EmployeeHistoryPage";
+import EmployeeFamilyPage from "@/pages/RRHH/Employees/EmployeeFamilyPage";
+import NovedadesPage from "@/pages/RRHH/NovedadesPage";
+import ConceptosManualesPage from "@/pages/RRHH/ConceptosManualesPage";
+import PlanillasPage from "@/pages/RRHH/PlanillasPage";
+import PlanillaDetallePage from "@/pages/RRHH/PlanillaDetallePage";
+import CrearPlanillaPage from "@/pages/RRHH/CrearPlanillaPage";
+import AttendancePage from "@/pages/RRHH/AttendancePage";
+import OrganizationPage from "@/pages/Organization/OrganizationPage";
+import AreaDetailPage from "@/pages/Organization/AreaDetailPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
-import SaleListPage from "@/pages/Sales/SaleListPage";
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
@@ -90,7 +102,6 @@ export const router = createBrowserRouter([
           { path: "/ventas/facturas", element: <BillsListPage /> },
           { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
           { path: "/ventas/facturas/:id", element: <BillFormPage /> },
-          {path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" />,},
           {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
           {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
           {path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
@@ -142,7 +153,60 @@ export const router = createBrowserRouter([
           { path: "/dash/proveedores", element: <SupplierListPage /> },
           { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
           { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
+          { path: "/rrhh/empleados", element: <EmployeesPage /> },
+          { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
+          { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
+          { path: "/rrhh/empleados/:id/cargos", element: <EmployeeHistoryPage /> },
+          { path: "/rrhh/empleados/:id/nucleo-familiar", element: <EmployeeFamilyPage /> },
+          { path: "/rrhh", element: <Navigate to="/rrhh/novedades" replace /> },
+          { path: "/rrhh/novedades", element: <NovedadesPage /> },
+          { path: "/rrhh/conceptos-manuales", element: <ConceptosManualesPage /> },
+          { path: "/rrhh/planillas", element: <PlanillasPage /> },
+          { path: "/rrhh/planillas/nuevo", element: <CrearPlanillaPage /> },
+          { path: "/rrhh/planillas/:id", element: <PlanillaDetallePage /> },
+          { path: "/rrhh/asistencia", element: <AttendancePage /> },
+          { path: "/gestiones/organizacion", element: <OrganizationPage /> },
+          { path: "/gestiones/organizacion/areas/:id", element: <AreaDetailPage /> },
+          {
+            path: "/gestiones/organizacion/empleados",
+            element: (
+              <EmployeesPage
+                routeBase="/gestiones/organizacion/empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/nuevo",
+            element: (
+              <EmployeeFormPage
+                basePath="/gestiones/organizacion/empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/:id",
+            element: (
+              <EmployeeFormPage
+                basePath="/gestiones/organizacion/empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/:id/cargos",
+            element: (
+              <EmployeeHistoryPage
+                basePath="/gestiones/organizacion/empleados"
+              />
+            ),
+          },
+          {
+            path: "/gestiones/organizacion/empleados/:id/nucleo-familiar",
+            element: (
+              <EmployeeFamilyPage
+                basePath="/gestiones/organizacion/empleados"
+              />
+            ),
+          },
           { path: "/sucursales", element: <BranchesListPage /> },
           { path: "/inventario", element: <StockListPage /> },
         ],

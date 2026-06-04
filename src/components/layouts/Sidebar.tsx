@@ -18,8 +18,9 @@ export const Sidebar = ({ collapsed }: Props) => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const [openGroups, setOpenGroups] = useState<Set<string>>(
-    new Set(["ventas"]),
+    new Set(["ventas", "rrhh", "gestiones"]),
   );
+  let lastSectionShown: string | undefined;
 
   const toggleGroup = (id: string) =>
     setOpenGroups((prev) => {
@@ -32,9 +33,66 @@ export const Sidebar = ({ collapsed }: Props) => {
       return next;
     });
 
-  const isActive = (path?: string) => !!path && location.pathname === path;
-  const isGroupActive = (item: NavItem) =>
-    item.children?.some((c) => location.pathname === c.path) ?? false;
+  const isActive = (path?: string) => !!path && location.pathname === path.split("?")[0];
+
+  const nodeHasActiveChild = (node: { path?: string; children?: { path?: string; children?: any[] }[] }) => {
+    if (node.path && isActive(node.path)) {
+      return true;
+    }
+
+    return node.children?.some((child) => nodeHasActiveChild(child)) ?? false;
+  };
+
+  const renderChild = (child: { id: string; label: string; icon: any; path?: string; children?: any[] }, depth = 0) => {
+    const active = isActive(child.path);
+    const childGroupActive = nodeHasActiveChild(child);
+    const isOpen = openGroups.has(child.id);
+    const hasChildren = !!child.children?.length;
+
+    return (
+      <Box key={child.id}>
+        <Box
+          display="flex"
+          alignItems="center"
+          gap="10px"
+          pl={depth === 0 ? "36px" : "52px"}
+          pr="12px"
+          h="32px"
+          cursor={hasChildren ? "pointer" : "pointer"}
+          color={active || childGroupActive ? "brand.secondary" : "#000"}
+          _hover={{
+            bg: "rgba(255,255,255,.07)",
+            color: "brand.secondary",
+          }}
+          fontSize="12px"
+          transition="background .15s, color .15s"
+          onClick={() =>
+            hasChildren ? toggleGroup(child.id) : child.path && navigate(child.path)
+          }
+        >
+          <Icon as={child.icon} boxSize="13px" />
+          <Text flex={1}>{child.label}</Text>
+          {hasChildren && (
+            <Icon
+              as={ChevronRight}
+              boxSize="10px"
+              color="#666"
+              transform={isOpen ? "rotate(90deg)" : "none"}
+              transition="transform .2s"
+            />
+          )}
+        </Box>
+
+        {hasChildren && (
+          <Collapsible.Root open={isOpen}>
+            <Collapsible.Content>
+              {child.children?.map((nested) => renderChild(nested, depth + 1))}
+            </Collapsible.Content>
+          </Collapsible.Root>
+        )}
+      </Box>
+    );
+  };
 
   const hasPermission = (permission?: string) => {
     if (!permission) return true;
@@ -111,8 +169,13 @@ export const Sidebar = ({ collapsed }: Props) => {
       >
         {visibleItems.map((item) => {
           const active = isActive(item.path);
-          const groupActive = isGroupActive(item);
+          const groupActive = nodeHasActiveChild(item);
           const isOpen = openGroups.has(item.id);
+          const shouldShowSection = !!item.section && item.section !== lastSectionShown;
+
+          if (shouldShowSection) {
+            lastSectionShown = item.section;
+          }
 
           const itemSection = getItemSection(item);
           const showSectionHeader = itemSection && itemSection !== currentSection;
@@ -196,31 +259,7 @@ export const Sidebar = ({ collapsed }: Props) => {
                   <Collapsible.Content>
                     {item.children
                       .filter((child) => hasPermission(child.permission))
-                      .map((child) => (
-                        <Box
-                          key={child.id}
-                          display="flex"
-                          alignItems="center"
-                          gap="10px"
-                          pl="36px"
-                          pr="12px"
-                          h="32px"
-                          cursor="pointer"
-                          color={
-                            isActive(child.path) ? "brand.secondary" : "#000"
-                          }
-                          _hover={{
-                            bg: "rgba(255,255,255,.07)",
-                            color: "brand.secondary",
-                          }}
-                          fontSize="12px"
-                          transition="background .15s, color .15s"
-                          onClick={() => child.path && navigate(child.path)}
-                        >
-                          <Icon as={child.icon} boxSize="13px" />
-                          <Text>{child.label}</Text>
-                        </Box>
-                      ))}
+                      .map((child) => renderChild(child))}
                   </Collapsible.Content>
                 </Collapsible.Root>
               )}

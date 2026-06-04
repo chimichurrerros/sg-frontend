@@ -5,7 +5,6 @@ import {
   Settings,
   Plus,
   User,
-  Building2,
   Truck,
   CalendarRange,
   Package,
@@ -14,14 +13,21 @@ import {
   Building,
   CreditCard,
   BanknoteArrowUp,
-  ScrollText,
   TableProperties,
-  NotebookPen,
-  ClipboardCheck,
   ListOrdered,
-  Contact,
+  BadgeCheck,
+  Megaphone,
+  ListChecks,
+  Calculator,
+  GitBranch,
+  Building2,
+  NotebookPen,
+  ScrollText,
+  ClipboardCheck,
   HandHelping,
   FileText,
+  UserCheck,
+  Contact,
   StickyNote,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -29,8 +35,9 @@ import type { LucideIcon } from "lucide-react";
 export interface NavChild {
   id: string;
   label: string;
-  path: string;
   icon: LucideIcon;
+  path?: string;
+  children?: NavChild[];
   permission?: string;
 }
 
@@ -180,6 +187,18 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/tesoreria/cheques",
         permission: "checks.view",
       },
+    ],
+  },
+  {
+    id: "rrhh",
+    label: "RR.HH.",
+    icon: BadgeCheck,
+    section: "Operaciones",
+    children: [
+      { id: "rrhh-novedades", label: "Novedades", icon: Megaphone, path: "/rrhh/novedades" },
+      { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ListChecks, path: "/rrhh/conceptos-manuales" },
+      { id: "rrhh-asistencia", label: "Asistencia", icon: UserCheck, path: "/rrhh/asistencia" },
+      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
     ],
   },
   {
