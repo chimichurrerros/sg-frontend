@@ -10,6 +10,7 @@ import { useGetAllCustomers } from "@/queries/customers.queries";
 import { useGetAllSales } from "@/queries/sales.queries";
 import { useAllStock } from "@/queries/stock.queries";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
+import { useAuthStore } from "@/stores/auth.store";
 import { Box, Heading, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import {
   ClipboardList,
@@ -20,9 +21,28 @@ import {
   Users,
 } from "lucide-react";
 
-export const HomePage = () => {
-  const { data: user, isLoading: userLoading } = useMe();
+interface DashboardProps {
+  user: any;
+  greeting: string;
+  dateStr: string;
+}
 
+const UserDashboard = ({ user, greeting, dateStr }: DashboardProps) => {
+  return (
+    <Stack gap={6} paddingInline="5%">
+      <Box>
+        <Heading size="xl" textTransform="capitalize">
+          {greeting}, {user?.name} {user?.lastName}
+        </Heading>
+        <Text color="gray.500" fontSize="sm">
+          {dateStr}
+        </Text>
+      </Box>
+    </Stack>
+  );
+};
+
+const AdminDashboard = ({ user, greeting, dateStr }: DashboardProps) => {
   const { data: productsData, isLoading: productsLoading } = useAllProducts();
   const { data: servicesData, isLoading: servicesLoading } = useAllServices();
   const { data: customersData, isLoading: customersLoading } = useGetAllCustomers();
@@ -30,32 +50,12 @@ export const HomePage = () => {
   const { data: salesData, isLoading: salesLoading } = useGetAllSales();
   const { data: stockData, isLoading: stockLoading } = useAllStock();
 
-  if (userLoading) {
-    return <LoadingScreen message="Cargando..." height="full" />;
-  }
-
   const productCount = productsData?.products?.length ?? 0;
   const serviceCount = servicesData?.services?.length ?? 0;
   const customerCount = customersData?.length ?? 0;
   const supplierCount = suppliersData?.suppliers?.length ?? 0;
-  const saleCount = salesData?.salesOrders?.length ?? 0;
+  const saleCount = salesData?.salesOrders.length ?? 0;
   const stockCount = stockData?.stocks?.length ?? 0;
-
-  const now = new Date();
-  const hour = now.getHours();
-  const greeting =
-    hour < 12
-      ? "Buenos días"
-      : hour < 18
-        ? "Buenas tardes"
-        : "Buenas noches";
-
-  const dateStr = now.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   return (
     <Stack gap={6} paddingInline="5%">
@@ -116,4 +116,35 @@ export const HomePage = () => {
       <QuickActions />
     </Stack>
   );
+};
+
+export const HomePage = () => {
+  const { data: user, isLoading: userLoading } = useMe();
+  const isAdmin = useAuthStore((s) => s.isAdmin);
+
+  if (userLoading) {
+    return <LoadingScreen message="Cargando..." height="full" />;
+  }
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting =
+    hour < 12
+      ? "Buenos días"
+      : hour < 18
+        ? "Buenas tardes"
+        : "Buenas noches";
+
+  const dateStr = now.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  if (!isAdmin) {
+    return <UserDashboard user={user} greeting={greeting} dateStr={dateStr} />;
+  }
+
+  return <AdminDashboard user={user} greeting={greeting} dateStr={dateStr} />;
 };

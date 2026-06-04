@@ -83,7 +83,7 @@ export const AddSupplierPage = () => {
     useEffect(() => {
         if (supplierData?.supplier) {
             const supplier = supplierData.supplier;
-            console.log("categorias del supplier:", supplier.productCategoryIds);
+            const categoryIds = supplier.supplierCategories?.map(sc => sc.productCategoryId) ?? [];
 
             reset({
                 ruc: supplier.ruc,
@@ -93,7 +93,7 @@ export const AddSupplierPage = () => {
                 phone: supplier.phone ?? "",
                 address: supplier.address ?? "",
                 isActive: supplier.isActive,
-                productCategoryIds: (supplier.productCategoryIds ?? []).map(Number),
+                productCategoryIds: categoryIds,
             });
         }
     }, [supplierData, reset]);
@@ -120,9 +120,9 @@ export const AddSupplierPage = () => {
                         queryClient.invalidateQueries({
                             queryKey: suppliersKeys.suppliers,
                         });
-                        navigate("/dash/proveedores");
+                        navigate("/proveedores");
                     },
-                    onError: (error: any) => {
+                    onError: (error) => {
                         setFormError(
                             "Ha ocurrido un error al actualizar el proveedor: " +
                             error?.message,
@@ -137,9 +137,9 @@ export const AddSupplierPage = () => {
             onSuccess: () => {
                 toaster.create({ title: "Proveedor creado con éxito" });
                 queryClient.invalidateQueries({ queryKey: suppliersKeys.suppliers });
-                navigate("/dash/proveedores");
+                navigate("/proveedores");
             },
-            onError: (error: any) => {
+            onError: (error) => {
                 setFormError(
                     "Ha ocurrido un error al crear el proveedor: " + error?.message,
                 );
@@ -157,7 +157,7 @@ export const AddSupplierPage = () => {
                     variant="ghost"
                     size="sm"
                     alignSelf="start"
-                    onClick={() => navigate("/dash/proveedores")}
+                    onClick={() => navigate("/proveedores")}
                 >
                     <LuArrowLeft /> Volver a proveedores
                 </Button>

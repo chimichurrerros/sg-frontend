@@ -15,10 +15,10 @@ import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type Sale, type SaleCondition } from "@/types/sales.ts";
 import ProductsTable from "./components/ProductsTable";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
-import { type EditableLabel } from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import { RadioGroupWrapper } from "@/components/ui/wrappers/radio-group-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
+import { type EditableLabel } from "@/components/ui/tables/table-edit";
 // import { parseDate } from "@/constants/date";
 import { paymentMethods, saleConditions, useCreateSale, useGetSaleById } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
@@ -29,8 +29,9 @@ import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { parseDate } from "@/constants/date";
 import { useAllBranches } from "@/queries/branches.queries";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 import { useAuthStore } from "@/stores/auth.store";
+import PageTitle from "@/components/ui/title";
 
 const getSaleTemplate = (): Sale => ({
   customer: {
@@ -289,18 +290,16 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   return (
     <Box height="89vh" display="flex" flexDirection="column">
       <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
-        <Box display="flex" gap={3}>
-          <Text fontSize="2xl" fontWeight="bold">
-            {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}
-          </Text>
-          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
+        <Box display="flex" gap={1} flexDirection={"column"}>
+          <PageTitle>{mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}</PageTitle>
+          {mode === "view" && <Text fontSize="lg" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
         </Box>
 
         <Flex align="center" gap={3}>
           <Flex align="flex-end" gap={3}>
 
               
-              <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
+              <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas/listado")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
             {mode === "view" && <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} onClick={() => navigate("/ventas/devoluciones/desde/"+sale.id)}>
@@ -338,7 +337,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         </Flex>
       </Flex>
-
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
         {mode === "create" && (
           <Box flex={1.5} minW="180px">
@@ -419,7 +417,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             onChange={(e) => updateCustomerEmail(e.target.value)}
             readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
-            placeholder="Email del cliente (opcional)"
+            placeholder="Email del cliente"
           />
         </Box>
         <Box flex={2} minW="180px">
@@ -430,7 +428,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             value={saleForm.customer.birthDate}
             onChange={(dates: string[]) => updateCustomerBirthdate(dates[0])}
             readOnly= {!isClientEditable || mode === "view"}
-            placeholder="Fecha de nacimiento (opcional)"
+            placeholder="Fecha de nacimiento"
 
             />
         </Box>

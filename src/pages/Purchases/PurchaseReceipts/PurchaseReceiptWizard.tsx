@@ -18,6 +18,7 @@ import {
     purchaseReceiptStep0Schema,
     purchaseReceiptDetailsSchema,
 } from "@/schemas/purchaseReceipts.schema";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 const STEPS = [
     { title: "Datos Generales", description: "OC por proveedor y factura" },
@@ -335,6 +336,11 @@ export default function PurchaseReceiptWizard() {
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Fecha *
                     </Text>
+                    <DatePickerWrapper
+                    size="sm"
+                    value={date}
+                    onChange={(e)=>setDate(e[0])}
+                    />
                     <Input
                         size="sm"
                         type="date"
@@ -472,9 +478,9 @@ export default function PurchaseReceiptWizard() {
 
     return (
         <Box display="flex" flexDirection="column" gap={6} height="full" minHeight="0">
-            <Text fontSize="2xl" fontWeight="bold">
+            <PageTitle>
                 Recepción de Órdenes de Compra
-            </Text>
+            </PageTitle>
 
             <Steps.Root count={3} step={currentStep} onStepChange={(e: { step: number }) => setCurrentStep(e.step)}>
                 <Steps.List>

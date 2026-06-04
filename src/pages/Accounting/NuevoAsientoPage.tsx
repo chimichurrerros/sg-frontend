@@ -25,9 +25,10 @@ import { useAllAccountPlans } from "@/queries/accountPlans.queries";
 import { useCreateEntry } from "@/queries/entries.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { toaster } from "@/components/ui/toaster";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 interface RowDetail {
   accountPlanId: number;
@@ -191,7 +192,7 @@ export default function NuevoAsientoPage() {
       });
 
       toaster.create({ title: "Asiento manual creado con éxito", type: "success" });
-      navigate(`/dash/contabilidad/libro-diario?process=${activeProcess.name}`);
+      navigate(`/contabilidad/libro-diario?process=${activeProcess.name}`);
     } catch (err: any) {
       const errorMsg = err.response?.data?.ErrorMessage || err.message;
       toaster.create({ title: "Error al registrar asiento", description: errorMsg, type: "error" });
@@ -224,7 +225,7 @@ export default function NuevoAsientoPage() {
             variant="ghost"
             size="sm"
             alignSelf="start"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             p={0}
             _hover={{ bg: "transparent", color: "brand.primary" }}
           >
@@ -270,12 +271,17 @@ export default function NuevoAsientoPage() {
           {/* Entry Date */}
           <Field.Root required>
             <Field.Label fontWeight="semibold" fontSize="xs">Fecha del Asiento</Field.Label>
-            <Input
+            <DatePickerWrapper
+            value={date}
+            onChange={(e)=>setDate(e[0])}
+            readOnly={activeProcess?.isClosed || createEntryMutation.isPending}
+            />
+            {/* <Input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               disabled={activeProcess?.isClosed || createEntryMutation.isPending}
-            />
+            /> */}
           </Field.Root>
 
           {/* Description */}
@@ -388,7 +394,7 @@ export default function NuevoAsientoPage() {
         <Flex justify="flex-end" gap={4}>
           <Button
             variant="outline"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             disabled={createEntryMutation.isPending}
           >
             Cancelar

@@ -111,7 +111,7 @@ export const AddProducts = () => {
           onSuccess: () => {
             toaster.create({ title: "Producto actualizado con éxito" });
             queryClient.invalidateQueries({ queryKey: ["products"] });
-            navigate("/dash/catalogo");
+            navigate("/catalogo");
           },
           onError: (error) => {
             setCreateError(
@@ -127,7 +127,7 @@ export const AddProducts = () => {
       onSuccess: () => {
         toaster.create({ title: "Producto creado con éxito" });
         queryClient.invalidateQueries({ queryKey: ["products"] });
-        navigate("/dash/catalogo");
+        navigate("/catalogo");
       },
       onError: (error) => {
         setCreateError(
@@ -147,7 +147,7 @@ export const AddProducts = () => {
           variant="ghost"
           size="sm"
           alignSelf="start"
-          onClick={() => navigate("/dash/catalogo")}
+          onClick={() => navigate("/catalogo")}
         >
           <LuArrowLeft /> Volver al catálogo
         </Button>
@@ -336,7 +336,7 @@ export const AddProducts = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/dash/catalogo")}
+            onClick={() => navigate("/catalogo")}
             disabled={isPending}
           >
             Cancelar

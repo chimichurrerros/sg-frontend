@@ -14,10 +14,10 @@ import { useRef, useState, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { paymentOptions, saleConditionOptions, type PaymentMethod, type ProductSaleDTO, type SaleCondition } from "@/types/sales";
 import ProductsTable from "../components/ProductsTable";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { RadioGroupWrapper } from "@/components/ui/radio-group-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
-import { type EditableLabel } from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import { RadioGroupWrapper } from "@/components/ui/wrappers/radio-group-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
+import { type EditableLabel } from "@/components/ui/tables/table-edit";
 import { paymentMethodIds, paymentMethods, saleConditionIds, saleConditions } from "@/queries/sales.queries";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
@@ -26,9 +26,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { useCustomerQuoteById, useCreateCustomerQuote, useUpdateCustomerQuote, useSellCustomerQuote, useRejectCustomerQuote } from "@/queries/customer-quotes.queries";
-import type { CreateCustomerQuoteRequest, CustomerQuote } from "@/api/customer-quotes.api";
+import type { CreateCustomerQuoteRequest } from "@/api/customer-quotes.api";
 import { useAllBranches } from "@/queries/branches.queries";
 import { parseDate } from "@/constants/date";
+import PageTitle from "@/components/ui/title";
+import { useAuthStore } from "@/stores/auth.store";
 
 const getBudgetTemplate = (): CreateCustomerQuoteRequest => ({
     customer: {
@@ -73,7 +75,9 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
     const { data: budget, isPending: loadingBudget, isError: isErrorBudget, error: budgetError } = useCustomerQuoteById(Number(id), mode === "edit");
     const [editable, setEditable] = useState<boolean>((budget && budget.status === 0) || mode === "create");
     const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(editable);
-    const [branchId, setBranchId] = useState<number | null>(null);
+    const user = useAuthStore(s=>s.user)
+    const [branchId, setBranchId] = useState<number | null>(user.branchId);
+
     const { data: branches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
     const [originalBudget, setOriginalBudget] = useState<CreateCustomerQuoteRequest | null>(null);
     const navigate = useNavigate();
@@ -105,11 +109,11 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
         productsLabel.push({
             labelName: "", isComponent: true, render: (item: ProductSaleDTO) =>
                 <IconButton size="xs" variant="ghost" colorPalette="red"
-                 onClick={() => setBudgetForm({
-                     ...budgetForm, 
-                     products: budgetForm.products.filter((p) => p.productId !== item.id) ,
-                     totals: {...budgetForm.totals, total: (budgetForm.totals.total || 0) - (item.price * item.quantity)}
-                     })}>
+                    onClick={() => setBudgetForm({
+                        ...budgetForm,
+                        products: budgetForm.products.filter((p) => p.productId !== item.id),
+                        totals: { ...budgetForm.totals, total: (budgetForm.totals.total || 0) - (item.price * item.quantity) }
+                    })}>
                     <X />
                 </IconButton>
         });
@@ -193,6 +197,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
             }));
         }
     }, [branchId]);
+    ///Mandar branch en budgetform.branchid
 
     useEffect(() => {
         setEditable((budget && budget.status === 0) || mode === "create");
@@ -269,57 +274,46 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
     return (
         <Box height="89vh" display="flex" flexDirection="column">
             <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
-                <Box display="flex" gap={3}>
-                    <Text fontSize="2xl" fontWeight="bold">
+                <Box display="flex" gap={1} flexDirection="column" >
+                    <PageTitle>
                         {mode === "create" && "Nuevo"} Presupuesto {budget?.number ? budget.number : ""}
-                    </Text>
-                   {mode === "edit" && budget?.date && (
-    <>
-        <Text fontSize="2xl" fontWeight="bold" color="gray.500">
-            | Creado el: {parseDate(new Date(budget.date))}
-        </Text>
-        
-        {budget.status === 3 ? (
-            <Text fontSize="2xl" fontWeight="bold" color="red.500">
-                | Rechazado
-            </Text>
-        ) : budget.status !== 2 ? (
-            <Text fontSize="2xl" fontWeight="bold" color="red.400">
-                | {budget.status === 1 ? "Expiró" : "Expira"} el: {parseDate(new Date(budget.expirationDate))} 
-                {budget.status === 0 && ` (${Math.ceil((new Date(budget.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días)`}
-            </Text>
-        ) : (
-            <Text fontSize="2xl" fontWeight="bold" color="green.500">
-                | Presupuesto Aprobado, ver Venta N° {budget.associatedSalesOrderId}
-            </Text>
-        )}
-    </>
-)}
-                    {mode === "create" && <Text fontSize="2xl" fontWeight="bold" color="gray.400"> Los presupuestos tienen una vigencia de 10 dias hábiles antes de expirarse.</Text>}
+                    </PageTitle>
+                    {mode === "edit" && budget?.date && (
+                        <>
+                            <Text fontSize="xl" fontWeight="bold" color="gray.500">
+                                | Creado el: {parseDate(new Date(budget.date))}
+                            </Text>
+
+                            {budget.status === 3 ? (
+                                <Text fontSize="xl" fontWeight="bold" color="red.500">
+                                    | Rechazado
+                                </Text>
+                            ) : budget.status !== 2 ? (
+                                <Text fontSize="xl" fontWeight="bold" color="red.400">
+                                    | {budget.status === 1 ? "Expiró" : "Expira"} el: {parseDate(new Date(budget.expirationDate))}
+                                    {budget.status === 0 && ` (${Math.ceil((new Date(budget.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días)`}
+                                </Text>
+                            ) : (
+                                <Text fontSize="xl" fontWeight="bold" color="green.500">
+                                    | Presupuesto Aprobado, ver Venta N° {budget.associatedSalesOrderId}
+                                </Text>
+                            )}
+                        </>
+                    )}
+                    {mode === "create" && <Text fontSize="md" fontWeight="bold" color="gray.400"> Los presupuestos tienen una vigencia de 10 dias hábiles antes de expirarse.</Text>}
                 </Box>
 
                 <Flex align="center" gap={3}>
                     <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas/presupuestos")}>
-                                <ArrowLeft /> Volver al listado
-                            </IconButton>
+                        <ArrowLeft /> Volver al listado
+                    </IconButton>
                     {mode === "edit" && (
                         <>
-                            
+
                             {budget.associatedSalesOrderId &&
-                                <IconButton size="md" padding={4} variant="ghost" onClick={() => navigate("/ventas/" + budget.associatedSalesOrderId)}>
+                                <IconButton size="md" padding={4} variant="ghost" onClick={() => navigate("/ventas/listado/" + budget.associatedSalesOrderId)}>
                                     <ExternalLink /> Ver venta asociada
                                 </IconButton>}
-                        </>
-                    )}
-
-                    {mode === "create" && (
-                        <>
-                            <SelectWrapper
-                                placeholder="Sucursal"
-                                onValueChange={(value) => setBranchId(Number(value))}
-                                disabled={branchId !== null}
-                                options={branches?.branches.map((b) => ({ label: b.name, value: b.id.toString() })) || []}
-                            />
                         </>
                     )}
 
@@ -441,17 +435,17 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         <Text as="span" color="green.600">{parsePrice(budgetForm.totals.total)}</Text>
                     </Text>
                 </Flex>
-                 {/* <p>{JSON.stringify(budgetForm)}</p> */}
-                
+                {/* <p>{JSON.stringify(budgetForm)}</p> */}
+
                 <Box gap={2} display="flex" alignItems="center">
                     {editable && mode === "edit" && <>
                         <DestructiveActionDialog
-                            trigger={<IconButton size="lg" padding={4} variant="outline" color="brand.secondary" disabled = {sell.isPending || reject.isPending}>
+                            trigger={<IconButton size="lg" padding={4} variant="outline" color="brand.secondary" disabled={sell.isPending || reject.isPending}>
                                 {reject.isPending ? <Spinner /> : <X />} Rechazar Presupuesto
                             </IconButton>}
                             title="Rechazar Presupuesto"
                             description={"Al rechazar este presupuesto, se cancelará y no podrá ser aprobado posteriormente. ¿Estás seguro/a de que deseas rechazar este presupuesto?"}
-                            onAccept={() => {reject.mutate(budget.id) }}
+                            onAccept={() => { reject.mutate(budget.id) }}
                         />
                         <ConfirmActionDialog
                             trigger={<IconButton size="lg" padding={4} bgColor="brand.secondary" >
@@ -477,34 +471,36 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                                 sell.mutate(budget.id)
                             }}
                         />
-                        </>}
-                    {editable && 
-                    <ConfirmActionDialog
-                        title={mode === "create" ? "Generar Presupuesto" : "Actualizar Presupuesto"}
-                        description={mode === "create" ? "¿Estás seguro de que deseas generar este presupuesto?" : "¿Estás seguro de que deseas actualizar este presupuesto?"}
-                        onAccept={() => {
-                            if (mode === "edit" && hasNewChanges) {
-                                editBudget.mutate({ id: budget.id, data: budgetForm });
-                            } else {
-                                createBudget.mutate(budgetForm,{onSuccess:()=>{setSelectedClient("Ninguno");
-                                    setBudgetForm(getBudgetTemplate());
-                                    setBranchId(null);
-                                    }});
+                    </>}
+                    {editable &&
+                        <ConfirmActionDialog
+                            title={mode === "create" ? "Generar Presupuesto" : "Actualizar Presupuesto"}
+                            description={mode === "create" ? "¿Estás seguro de que deseas generar este presupuesto?" : "¿Estás seguro de que deseas actualizar este presupuesto?"}
+                            onAccept={() => {
+                                if (mode === "edit" && hasNewChanges) {
+                                    editBudget.mutate({ id: budget.id, data: budgetForm });
+                                } else {
+                                    createBudget.mutate(budgetForm, {
+                                        onSuccess: () => {
+                                            setSelectedClient("Ninguno");
+                                            setBudgetForm(getBudgetTemplate());
+                                        }
+                                    });
+                                }
+                            }}
+                            trigger={
+                                <IconButton
+                                    bg="brand.primary"
+                                    padding={4}
+                                    size="lg"
+                                    color="white"
+                                    ref={triggerRef}
+                                    disabled={budgetForm.products.length === 0 || createBudget.isPending || editBudget.isPending || (mode === "edit" && !hasNewChanges)}
+                                >
+                                    {createBudget.isPending || editBudget.isPending ? <Spinner /> : mode === "create" ? <CalendarPlus /> : <Pencil />} {mode === "create" ? "Generar" : "Actualizar"} Presupuesto
+                                </IconButton>
                             }
-                        }}
-                        trigger={
-                            <IconButton
-                                bg="brand.primary"
-                                padding={4}
-                                size="lg"
-                                color="white"
-                                ref={triggerRef}
-                                disabled={budgetForm.products.length === 0 || createBudget.isPending || editBudget.isPending || (mode === "edit" && !hasNewChanges)}
-                            >
-                                {createBudget.isPending || editBudget.isPending ? <Spinner /> : mode === "create" ? <CalendarPlus /> : <Pencil />} {mode === "create" ? "Generar" : "Actualizar"} Presupuesto
-                            </IconButton>
-                        }
-                    />}
+                        />}
                 </Box>
             </Flex>
         </Box>

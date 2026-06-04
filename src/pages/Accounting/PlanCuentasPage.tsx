@@ -32,8 +32,9 @@ import { useAllAccountantProcesses, useCreateAccountantProcess, useUpdateAccount
 import { useAllAccountPlans, useCreateAccountPlan, useUpdateAccountPlan, useDeleteAccountPlan } from "@/queries/accountPlans.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { toaster } from "@/components/ui/toaster";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 
 export default function PlanCuentasPage() {
   const navigate = useNavigate();
@@ -292,7 +293,7 @@ export default function PlanCuentasPage() {
             variant="ghost"
             size="sm"
             alignSelf="start"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             p={0}
             _hover={{ bg: "transparent", color: "brand.primary" }}
           >
@@ -651,22 +652,32 @@ export default function PlanCuentasPage() {
 
                   <Field.Root required>
                     <Field.Label fontWeight="semibold" fontSize="xs">Fecha Inicio</Field.Label>
-                    <Input
+                    <DatePickerWrapper
+                    value = { processForm.startDate}
+                    onChange={(e) => setProcessForm({ ...processForm, startDate: e[0] })}
+                    readOnly={isPending || !!processForm.id}
+                    />
+                    {/* <Input
                       type="date"
                       value={processForm.startDate}
-                      onChange={(e) => setProcessForm({ ...processForm, startDate: e.target.value })}
-                      disabled={isPending || !!processForm.id} // Cannot edit start date of existing period
-                    />
+                      
+                      disabled= // Cannot edit start date of existing period
+                    /> */}
                   </Field.Root>
 
                   <Field.Root required>
                     <Field.Label fontWeight="semibold" fontSize="xs">Fecha Fin</Field.Label>
-                    <Input
+                      <DatePickerWrapper
+                    value = { processForm.endDate}
+                    onChange={(e) => setProcessForm({ ...processForm, endDate: e[0] })}
+                    readOnly={isPending || !!processForm.id}
+                    />
+                    {/* <Input
                       type="date"
                       value={processForm.endDate}
                       onChange={(e) => setProcessForm({ ...processForm, endDate: e.target.value })}
                       disabled={isPending || !!processForm.id} // Cannot edit end date of existing period
-                    />
+                    /> */}
                   </Field.Root>
 
                   {/* IsClosed flag */}

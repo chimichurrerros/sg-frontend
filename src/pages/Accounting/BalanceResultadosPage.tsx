@@ -4,14 +4,14 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { LuArrowLeft, LuFilter, LuTrendingUp, LuPrinter } from "react-icons/lu";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { useBalanceResultados } from "@/queries/accounting.queries";
-import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
-import TableTree, { type TreeTableRow } from "@/components/ui/table-tree";
+import TableTree, { type TreeTableRow } from "@/components/ui/tables/table-tree";
 import type { BalanceGeneralItem } from "@/types/accounting";
 
 export default function BalanceResultadosPage() {
@@ -207,7 +207,7 @@ export default function BalanceResultadosPage() {
               variant="ghost"
               size="sm"
               alignSelf="start"
-              onClick={() => navigate("/dash/contabilidad")}
+              onClick={() => navigate("/contabilidad")}
               p={0}
               _hover={{ bg: "transparent", color: "brand.primary" }}
             >

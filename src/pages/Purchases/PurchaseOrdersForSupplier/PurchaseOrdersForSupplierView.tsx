@@ -1,4 +1,5 @@
 import { purchaseOrderForSupplierStateMap } from "@/api/purchaseOrderForSupplier.api";
+import PageTitle from "@/components/ui/title";
 import { toaster } from "@/components/ui/toaster";
 import { useGetPurchaseOrderForSupplierById, useConfirmPurchaseOrderForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import {
@@ -72,9 +73,9 @@ export default function PurchaseOrdersForSupplierView() {
   return (
     <Stack gap={6} paddingInline="5%" py={6} height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Text fontSize="2xl" fontWeight="bold">
+        <PageTitle>
           Orden de Compra N° {order.id}
-        </Text>
+        </PageTitle>
         <HStack gap={2}>
           {order.state === 1 && (
             <Button

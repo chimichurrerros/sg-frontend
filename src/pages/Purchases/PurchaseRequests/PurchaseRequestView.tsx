@@ -18,12 +18,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
+import PageTitle from "@/components/ui/title";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function PurchaseRequestView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const purchaseRequestId = Number(id);
-
+  const user = useAuthStore(s=>s.user)
   const {
     data: purchaseRequest,
     isPending,
@@ -77,9 +79,9 @@ export default function PurchaseRequestView() {
   return (
     <Stack gap={4} paddingInline="5%" height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">
+        <PageTitle>
           Pedido de Compra N° {purchaseRequest.id}
-        </Heading>
+        </PageTitle>
         <Flex gap={2}>
           <Button
             variant="ghost"
@@ -146,6 +148,7 @@ export default function PurchaseRequestView() {
             products={products}
             onDataChange={() => {}}
             readOnly
+            branchId={user.branchId}
           />
         </Box>
       </Stack>

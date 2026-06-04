@@ -85,7 +85,7 @@ export const AddService = () => {
           onSuccess: () => {
             toaster.create({ title: "Servicio actualizado con éxito" });
             queryClient.invalidateQueries({ queryKey: ["services"] });
-            navigate("/dash/catalogo");
+            navigate("/catalogo");
           },
           onError: (error) => {
             setFormError(
@@ -101,7 +101,7 @@ export const AddService = () => {
       onSuccess: () => {
         toaster.create({ title: "Servicio creado con éxito" });
         queryClient.invalidateQueries({ queryKey: ["services"] });
-        navigate("/dash/catalogo");
+        navigate("/catalogo");
       },
       onError: (error) => {
         setFormError(
@@ -121,7 +121,7 @@ export const AddService = () => {
           variant="ghost"
           size="sm"
           alignSelf="start"
-          onClick={() => navigate("/dash/catalogo")}
+          onClick={() => navigate("/catalogo")}
         >
           <LuArrowLeft /> Volver al catálogo
         </Button>
@@ -210,7 +210,7 @@ export const AddService = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/dash/catalogo")}
+            onClick={() => navigate("/catalogo")}
             disabled={isPending}
           >
             Cancelar

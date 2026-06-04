@@ -1,8 +1,8 @@
 
 export const supplierQuoteStatusMap: Record<number, string> = {
-    0: "Pendiente",
-    1: "Aprobado",
-    2: "Rechazado",
-    3: "Completado"
+    1: "Pendiente",
+    2: "Aprobado",
+    3: "Rechazado",
+    4: "Completado"
 }
   

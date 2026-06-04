@@ -28,8 +28,11 @@ export interface UserDto {
   lastName: string;
   email: string;
   phoneNumbers: string[];
-  roleName: string;        // ← "Admin" | "User"
+  roleName: string;
+  roleId?: number;
+  branchName?: string;
   branchId: number;
+  permissions: string[];
 }
 
 export interface UserWrapperDto {

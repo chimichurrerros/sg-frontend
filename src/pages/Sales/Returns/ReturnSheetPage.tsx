@@ -4,9 +4,9 @@ import { AlertDialog } from "@/components/ui/dialogs/alert-dialog";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import type { EditableLabel } from "@/components/ui/table-edit";
-import TableEditable from "@/components/ui/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import type { EditableLabel } from "@/components/ui/tables/table-edit";
+import TableEditable from "@/components/ui/tables/table-edit";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { useAllBranches } from "@/queries/branches.queries";
@@ -16,6 +16,7 @@ import { Box, Flex, HStack, IconButton, Spinner, Text, Textarea, VStack } from "
 import { ArrowLeft, CornerDownLeft, CornerDownRight, FileInputIcon, FileText, HandCoins, PackagePlus, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
 
 interface ReturnSheetPageProps {
     mode: "view" | "create";
@@ -141,10 +142,10 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
         <Box height="89vh" display="flex" flexDirection="column" gap={4}>
             <Flex justify="space-between" alignItems="center" flexShrink={0} direction="row">
                 <Box>
-                    <Text fontSize="2xl" fontWeight="bold">
+                    <PageTitle>
                         {mode === "create" && "Nueva"} Devolución
                         {mode === "view" && displayData && ` N° ${displayData.id} de la venta ${displayData.salesOrderNumber || "-"}`}
-                    </Text>
+                    </PageTitle>
                     {mode === "view" && displayData && (
                         <Text fontSize="md" fontWeight="bold" color="gray.500" mt={1}>
                             Fecha de Devolución: {parseDate(displayData.date)}
@@ -205,7 +206,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                                 colorScheme="blue"
                                 aria-label="Ver Nota de Crédito"
                                 p={4}
-                                onClick={() => navigate(`/contabilidad/notas-credito/${displayData.creditNoteId}`)}
+                                onClick={() => navigate(`/ventas/notas-de-credito/${displayData.creditNoteId}`)}
                             >
                                 <FileText size={18} /> Ver Nota de Crédito
                             </IconButton>
@@ -225,7 +226,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                                 variant="outline"
                                 color="brand.secondary"
                                 p={4}
-                                onClick={() => navigate(`/ventas/${displayData.salesOrderId}`)}
+                                onClick={() => navigate(`/ventas/listado/${displayData.salesOrderId}`)}
                                 aria-label="Ver Venta Asociada"
                             >
                                 <ShoppingCart size={18} /> Ver Venta
@@ -290,7 +291,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                         <HStack justifyContent="space-between" alignItems="flex-end">
 
                             <Text fontWeight="bold" fontSize="2xl">{mode === "create" ? "Productos de la venta" : "Productos devueltos"}</Text>
-                            {mode === "view" && <HStack><Text fontWeight="bold" fontSize="xl">Cantidad de dinero devuelto:</Text>
+                            {mode === "view" && <HStack><Text fontWeight="bold" fontSize="xl">Total devuelto:</Text>
                                 <Text fontWeight="bold" color="brand.secondary" fontSize="xl">{parsePrice(form.total || 0)}</Text>
                                 </HStack>}
                         </HStack>

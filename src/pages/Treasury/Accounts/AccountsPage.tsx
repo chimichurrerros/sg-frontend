@@ -4,7 +4,7 @@ import { useGetBanks } from "@/queries/banks.queries";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import {
   useGetAccounts,
@@ -22,6 +22,8 @@ import { Landmark, Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "@/components/ui/title";
+import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
 
 const formatBalance = (value: number) =>
   new Intl.NumberFormat("es-PY", {
@@ -44,9 +46,9 @@ export default function AccountsPage() {
     ...params,
     pageSize:
       params.pageSize &&
-      !isNaN(params.pageSize) &&
-      params.pageSize >= 5 &&
-      params.pageSize <= 30
+        !isNaN(params.pageSize) &&
+        params.pageSize >= 5 &&
+        params.pageSize <= 30
         ? params.pageSize
         : 10,
   });
@@ -135,9 +137,9 @@ export default function AccountsPage() {
       height="100%"
       minHeight="0"
     >
-      <Text fontSize="2xl" fontWeight="bold">
+      <PageTitle>
         Cuentas
-      </Text>
+      </PageTitle>
 
       <Box
         display="flex"
@@ -156,6 +158,35 @@ export default function AccountsPage() {
           </Text>
           <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
         </Box>
+        <DestructiveActionDialog 
+        title="Desactivar Cuenta"
+        description={"Estás a punto de desactivar la cuenta "+ selected?.name + " estás seguro/a?"}
+        onAccept={() => {
+            if (selected) {
+              deleteAccount(selected.id);
+              setSelected(null);
+            }
+          }}
+        trigger={<IconButton
+          padding={2}
+          variant="outline"
+          disabled={!selected}
+        >
+          <Power />
+          Activar / Desactivar
+        </IconButton>}/>
+        <IconButton
+          padding={2}
+          bgColor="brand.secondary"
+          disabled={!selected}
+          onClick={() =>
+            selected && navigate(`/tesoreria/cuentas/${selected.id}`)
+          }
+        >
+          <Pencil />
+          Editar
+        </IconButton>
+
 
         <IconButton
           padding={2}
@@ -165,32 +196,9 @@ export default function AccountsPage() {
           <Plus />
           Nuevo
         </IconButton>
-        <IconButton
-          padding={2}
-          variant="outline"
-          disabled={!selected}
-          onClick={() =>
-            selected && navigate(`/tesoreria/cuentas/${selected.id}`)
-          }
-        >
-          <Pencil />
-          Editar
-        </IconButton>
-        <IconButton
-          padding={2}
-          variant="outline"
-          colorPalette="red"
-          disabled={!selected}
-          onClick={() => {
-            if (selected) {
-              deleteAccount(selected.id);
-              setSelected(null);
-            }
-          }}
-        >
-          <Power />
-          Activar / Desactivar
-        </IconButton>
+
+
+
       </Box>
 
       <Box flex="1" minHeight="0" mb={2}>

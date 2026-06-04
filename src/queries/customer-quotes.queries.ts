@@ -39,12 +39,13 @@ export const useCreateCustomerQuote = () => {
             });
         },
         onError: (error) => {
+             const body = (error as any).response?.data;
+            const msg = body.detail
             toaster.create({
                 title: 'Error al crear presupuesto',
-                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                description: msg?msg: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
                 type: 'error',
             });
-            console.error('Error al crear presupuesto:', error);
         },
 
     });
@@ -66,9 +67,11 @@ export const useUpdateCustomerQuote = () => {
             queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
         },
         onError: (error) => {
+            const body = (error as any).response?.data;
+            const msg = body.detail
             toaster.create({
                 title: 'Error al actualizar presupuesto',
-                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                description: msg?msg: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
                 type: 'error',
             });
         },
@@ -89,9 +92,11 @@ export const useSellCustomerQuote = () => {
             queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
         },
         onError: (error) => {
+              const body = (error as any).response?.data;
+            const msg = body.detail
             toaster.create({
                 title: 'Error al aprobar presupuesto',
-                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                description: msg?msg: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
                 type: 'error',
             });
         },
@@ -112,9 +117,11 @@ export const useRejectCustomerQuote = () => {
             queryClient.invalidateQueries({ queryKey: customerQuoteKeys.lists() });
         },
         onError: (error) => {
+            const body = (error as any).response?.data;
+            const msg = body.detail
             toaster.create({
                 title: 'Error al rechazar presupuesto',
-                description: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
+                description: msg?msg: error instanceof Error ? error.message : 'Ocurrió un error desconocido',
                 type: 'error',
             });
         },

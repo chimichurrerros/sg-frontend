@@ -3,7 +3,8 @@ import { purchaseRequestStateMap } from "@/api/purchaseRequest.api";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
+import PageTitle from "@/components/ui/title";
 import { toaster } from "@/components/ui/toaster";
 import { useGetPurchaseRequests } from "@/queries/purchase-request.queries";
 import type { PaginationParams } from "@/types/types";
@@ -106,9 +107,9 @@ export default function PurchaseRequestList() {
       height="100%"
       minHeight="0"
     >
-      <Text fontSize="2xl" fontWeight="bold">
+      <PageTitle>
         Pedidos de Compra
-      </Text>
+      </PageTitle>
 
       <Box
         display="flex"

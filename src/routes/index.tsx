@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/routes/guard/ProtectedRoute";
 import { PublicRoute } from "@/routes/guard/PublicRoute";
+import { RequirePermission } from "@/routes/guard/RequirePermission";
 import { LoginPage } from "@/pages/LoginPage";
 import { HomePage } from "@/pages/HomePage";
 import { RegisterPage } from "@/pages/RegisterPage";
@@ -24,6 +25,7 @@ import BudgetSheetPage from "@/pages/Sales/Budgets/BudgetSheetPage";
 import StockListPage from "@/pages/Stock/StockListPage";
 import BillsListPage from "@/pages/Sales/Bills/BillsList";
 import BillFormPage from "@/pages/Sales/Bills/BillFormPage";
+import SaleListPage from "@/pages/Sales/SaleListPage";
 import SaleSheetPage from "@/pages/Sales/SaleSheetPage";
 import { CatalogPage } from "@/pages/Catalog/CatalogPage";
 import BanksPage from "@/pages/Treasury/Banks/BanksPage";
@@ -55,11 +57,22 @@ import PurchaseReturnView from "@/pages/Purchases/PurchaseReturns/PurchaseReturn
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
+import EmployeesPage from "@/pages/RRHH/Employees/EmployeesPage";
+import EmployeeFormPage from "@/pages/RRHH/Employees/EmployeeFormPage";
+import EmployeeHistoryPage from "@/pages/RRHH/Employees/EmployeeHistoryPage";
+import EmployeeFamilyPage from "@/pages/RRHH/Employees/EmployeeFamilyPage";
+import NovedadesPage from "@/pages/RRHH/NovedadesPage";
+import ConceptosManualesPage from "@/pages/RRHH/ConceptosManualesPage";
+import PlanillasPage from "@/pages/RRHH/PlanillasPage";
+import PlanillaDetallePage from "@/pages/RRHH/PlanillaDetallePage";
+import CrearPlanillaPage from "@/pages/RRHH/CrearPlanillaPage";
+import AttendancePage from "@/pages/RRHH/AttendancePage";
+import OrganizationPage from "@/pages/Organization/OrganizationPage";
+import AreaDetailPage from "@/pages/Organization/AreaDetailPage";
 import { AddSupplierPage } from "@/pages/Suppliers/AddSupplierPage";
 import SupplierListPage from "@/pages/Suppliers/SupplierListPage";
 import PurchaseOrderList from "@/pages/Purchases/PurchaseOrders/PurchaseOrderList";
 import PurchaseOrderFormPage from "@/pages/Purchases/PurchaseOrders/PurchaseOrderFormPage";
-import SaleListPage from "@/pages/Sales/SaleListPage";
 import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
@@ -78,40 +91,162 @@ export const router = createBrowserRouter([
         element: <HomeLayout />,
         children: [
           { path: "/dash", element: <HomePage /> },
-          { path: "/dash/contabilidad", element: <AccountingDashboardPage /> },
-          { path: "/dash/contabilidad/libro-diario", element: <LibroDiarioPage /> },
-          { path: "/dash/contabilidad/libro-mayor", element: <LibroMayorPage /> },
-          { path: "/dash/contabilidad/balance-general", element: <BalanceGeneralPage /> },
-          { path: "/dash/contabilidad/balance-sumas-saldos", element: <BalanceSumasSaldosPage /> },
-          { path: "/dash/contabilidad/balance-resultados", element: <BalanceResultadosPage /> },
-          { path: "/dash/contabilidad/plan-cuentas", element: <PlanCuentasPage /> },
-          { path: "/dash/contabilidad/nuevo-asiento", element: <NuevoAsientoPage /> },
-          { path: "/configuraciones", element: <ConfigurationsPage /> },
+
+          /* ===== CONTABILIDAD ===== */
+          {
+            element: <RequirePermission permission="entries.view" />,
+            children: [
+              { path: "/contabilidad", element: <AccountingDashboardPage /> },
+              { path: "/contabilidad/libro-diario", element: <LibroDiarioPage /> },
+              { path: "/contabilidad/libro-mayor", element: <LibroMayorPage /> },
+              { path: "/contabilidad/balance-general", element: <BalanceGeneralPage /> },
+              { path: "/contabilidad/balance-sumas-saldos", element: <BalanceSumasSaldosPage /> },
+              { path: "/contabilidad/balance-resultados", element: <BalanceResultadosPage /> },
+              { path: "/contabilidad/plan-cuentas", element: <PlanCuentasPage /> },
+              { path: "/contabilidad/nuevo-asiento", element: <NuevoAsientoPage /> },
+            ],
+          },
+
+          /* ===== CONFIGURACIONES ===== */
+          {
+            element: <RequirePermission permission="roles.view" />,
+            children: [
+              { path: "/configuraciones", element: <ConfigurationsPage /> },
+            ],
+          },
 
           /* ===== VENTAS ===== */
-          { path: "/ventas", element: <SaleListPage /> },
-          { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
-          { path: "/ventas/:id", element: <SaleSheetPage mode="view" /> },
-          { path: "/ventas/presupuestos", element: <BudgetsPage /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
-          { path: "/ventas/presupuestos/:id", element: <BudgetSheetPage mode="edit" /> },
-          { path: "/ventas/facturas", element: <BillsListPage /> },
-          { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
-          { path: "/ventas/facturas/:id", element: <BillFormPage /> },
           {
-            path: "/ventas/presupuestos/crear",
-            element: <BudgetSheetPage mode="create" />,
+            element: <RequirePermission permission="salesOrders.view" />,
+            children: [
+              { path: "/ventas/listado", element: <SaleListPage /> },
+              { path: "/ventas/listado/:id", element: <SaleSheetPage mode="view" /> },
+            ],
           },
-          {path: "/ventas/devoluciones", element: <ReturnsListPage /> },
-
-          {path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
-          {path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
-
-          {path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
-          {path: "/ventas/notas-de-credito", element: <CreditNotesPage/> },
-          {path: "/ventas/notas-de-credito/:id", element: <CreditNoteSheetPage/> },
+          {
+            element: <RequirePermission permission="salesOrders.create" />,
+            children: [
+              { path: "/ventas/nueva", element: <SaleSheetPage mode="create" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="customerQuotes.view" />,
+            children: [
+              { path: "/ventas/presupuestos", element: <BudgetsPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="customerQuotes.create" />,
+            children: [
+              { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="customerQuotes.update" />,
+            children: [
+              { path: "/ventas/presupuestos/:id", element: <BudgetSheetPage mode="edit" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="bills.view" />,
+            children: [
+              { path: "/ventas/facturas", element: <BillsListPage /> },
+              { path: "/ventas/facturas/:id", element: <BillFormPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="bills.create" />,
+            children: [
+              { path: "/ventas/facturas/nueva", element: <BillFormPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="salesReturns.view" />,
+            children: [
+              { path: "/ventas/devoluciones", element: <ReturnsListPage /> },
+              { path: "/ventas/devoluciones/:id", element: <ReturnSheetPage mode="view" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="salesReturns.create" />,
+            children: [
+              { path: "/ventas/devoluciones/desde/:sale", element: <ReturnSheetPage mode="create" /> },
+              { path: "/ventas/devoluciones/crear", element: <ReturnSheetPage mode="create" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="creditNotes.view" />,
+            children: [
+              { path: "/ventas/notas-de-credito", element: <CreditNotesPage /> },
+              { path: "/ventas/notas-de-credito/:id", element: <CreditNoteSheetPage /> },
+            ],
+          },
 
           /* ===== COMPRAS ===== */
+          {
+            element: <RequirePermission permission="purchaseRequests.view" />,
+            children: [
+              { path: "/compras/pedidos", element: <PurchaseRequestList /> },
+              { path: "/compras/pedidos/:id", element: <PurchaseRequestView /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseRequests.create" />,
+            children: [
+              { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="requestForQuotations.view" />,
+            children: [
+              { path: "/compras/solicitudes-cotizacion", element: <RequestForQuotationList /> },
+              { path: "/compras/solicitudes-cotizacion/:id", element: <RequestForQuotationView /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="supplierQuotes.view" />,
+            children: [
+              { path: "/compras/cotizaciones-proveedores", element: <SupplierQuotesList /> },
+              { path: "/compras/cotizaciones-proveedores/:id", element: <SupplierQuoteSheet mode="edit" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="supplierQuotes.create" />,
+            children: [
+              { path: "/compras/cotizaciones-proveedores/nueva", element: <SupplierQuoteSheet mode="create" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseOrders.view" />,
+            children: [
+              { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseOrders.create" />,
+            children: [
+              { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseOrders.update" />,
+            children: [
+              { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseReceipts.view" />,
+            children: [
+              { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="purchaseOrderForSuppliers.view" />,
+            children: [
+              { path: "/compras/ordenes-por-proveedor", element: <PurchaseOrdersForSupplierList /> },
+              { path: "/compras/ordenes-por-proveedor/:id", element: <PurchaseOrdersForSupplierView /> },
+            ],
+          },
           { path: "/compras/pedidos", element: <PurchaseRequestList /> },
           { path: "/compras/pedidos/nuevo", element: <PurchaseRequestCreate /> },
           { path: "/compras/pedidos/:id", element: <PurchaseRequestView /> },
@@ -144,28 +279,121 @@ export const router = createBrowserRouter([
           { path: "/tesoreria/movimientos/:id", element: <MovementView /> },
           { path: "/tesoreria/cheques", element: <ChecksList /> },
           { path: "/tesoreria/cheques/:id", element: <CheckView /> },
-          { path: "/tesoreria/ordenes-pago", element: <PaymentOrderList /> },
-          { path: "/tesoreria/ordenes-pago/nueva", element: <PaymentOrderForm /> },
-          { path: "/tesoreria/ordenes-pago/:id", element: <PaymentOrderView /> },
 
-          /* ===== GESTIONES ===== */
-          { path: "/register", element: <RegisterPage /> },
-          { path: "/register/nuevo", element: <AddUserPage /> },
-          { path: "/register/:id", element: <AddUserPage /> },
-          { path: "/register/roles/:id/permisos", element: <RolePermissionsPage /> },
-          { path: "/customers", element: <CustomersListPage /> },
+          /* ===== GESTIONES Y SEGURIDAD ===== */
+          {
+            element: <RequirePermission permission="users.view" />,
+            children: [
+              { path: "/register", element: <RegisterPage /> },
+              { path: "/register/nuevo", element: <AddUserPage /> },
+              { path: "/register/:id", element: <AddUserPage /> },
+              { path: "/register/roles/:id/permisos", element: <RolePermissionsPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="customers.view" />,
+            children: [
+              { path: "/customers", element: <CustomersListPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="branches.view" />,
+            children: [
+              { path: "/sucursales", element: <BranchesListPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="suppliers.view" />,
+            children: [
+              { path: "/proveedores", element: <SupplierListPage /> },
+              { path: "/proveedores/nuevo", element: <AddSupplierPage /> },
+              { path: "/proveedores/:id", element: <AddSupplierPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="products.view" />,
+            children: [
+              { path: "/catalogo", element: <CatalogPage /> },
+              { path: "/catalogo/nuevo-producto", element: <AddProducts /> },
+              { path: "/catalogo/productos/:id", element: <AddProducts /> },
+              { path: "/catalogo/nuevo-servicio", element: <AddService /> },
+              { path: "/catalogo/servicios/:id", element: <AddService /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="stock.view" />,
+            children: [
+              { path: "/inventario", element: <StockListPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="organizations.view" />,
+            children: [
+              { path: "/gestiones/organizacion", element: <OrganizationPage /> },
+              { path: "/gestiones/organizacion/areas/:id", element: <AreaDetailPage /> },
+            ],
+          },
 
-          { path: "/dash/catalogo", element: <CatalogPage /> },
-          { path: "/dash/catalogo/nuevo-producto", element: <AddProducts /> },
-          { path: "/dash/catalogo/productos/:id", element: <AddProducts /> },
-          { path: "/dash/catalogo/nuevo-servicio", element: <AddService /> },
-          { path: "/dash/catalogo/servicios/:id", element: <AddService /> },
-          { path: "/dash/proveedores", element: <SupplierListPage /> },
-          { path: "/dash/proveedores/nuevo", element: <AddSupplierPage /> },
-          { path: "/dash/proveedores/:id", element: <AddSupplierPage /> },
-          { path: "/ventas/presupuestos/crear", element: <BudgetSheetPage mode="create" /> },
-          { path: "/sucursales", element: <BranchesListPage /> },
-          { path: "/inventario", element: <StockListPage /> },
+          /* ===== EMPLEADOS ===== */
+          {
+            element: <RequirePermission permission="employees.view" />,
+            children: [
+              { path: "/rrhh/empleados", element: <EmployeesPage /> },
+              { path: "/rrhh/empleados/:id/cargos", element: <EmployeeHistoryPage /> },
+              { path: "/rrhh/empleados/:id/nucleo-familiar", element: <EmployeeFamilyPage /> },
+              { path: "/gestiones/organizacion/empleados", element: <EmployeesPage routeBase="/gestiones/organizacion/empleados" /> },
+              { path: "/gestiones/organizacion/empleados/:id/cargos", element: <EmployeeHistoryPage basePath="/gestiones/organizacion/empleados" /> },
+              { path: "/gestiones/organizacion/empleados/:id/nucleo-familiar", element: <EmployeeFamilyPage basePath="/gestiones/organizacion/empleados" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="employees.create" />,
+            children: [
+              { path: "/rrhh/empleados/nuevo", element: <EmployeeFormPage /> },
+              { path: "/gestiones/organizacion/empleados/nuevo", element: <EmployeeFormPage basePath="/gestiones/organizacion/empleados" /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="employees.update" />,
+            children: [
+              { path: "/rrhh/empleados/:id", element: <EmployeeFormPage /> },
+              { path: "/gestiones/organizacion/empleados/:id", element: <EmployeeFormPage basePath="/gestiones/organizacion/empleados" /> },
+            ],
+          },
+
+          /* ===== RECURSOS HUMANOS (RRHH) ===== */
+          { path: "/rrhh", element: <Navigate to="/rrhh/novedades" replace /> },
+          {
+            element: <RequirePermission permission="payrollUpdates.view" />,
+            children: [
+              { path: "/rrhh/novedades", element: <NovedadesPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="manualConcepts.view" />,
+            children: [
+              { path: "/rrhh/conceptos-manuales", element: <ConceptosManualesPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="payrollProcesses.view" />,
+            children: [
+              { path: "/rrhh/planillas", element: <PlanillasPage /> },
+              { path: "/rrhh/planillas/:id", element: <PlanillaDetallePage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="payrollProcesses.create" />,
+            children: [
+              { path: "/rrhh/planillas/nuevo", element: <CrearPlanillaPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="attendance.view" />,
+            children: [
+              { path: "/rrhh/asistencia", element: <AttendancePage /> },
+            ],
+          },
         ],
       },
     ],

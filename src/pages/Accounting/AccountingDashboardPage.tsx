@@ -7,10 +7,9 @@ import {
   Scale, 
   TableProperties, 
   TrendingUp, 
-  FilePlus, 
-  ChevronRight 
+  FilePlus 
 } from "lucide-react";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { useAllAccountantProcesses } from "@/queries/accountantProcesses.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";
@@ -132,15 +131,15 @@ export default function AccountingDashboardPage() {
 
   const handleViewReport = (reportName: string) => {
     if (reportName === "Libro Diario") {
-      navigate(`/dash/contabilidad/libro-diario?process=${selectedPeriod}`);
+      navigate(`/contabilidad/libro-diario?process=${selectedPeriod}`);
     } else if (reportName === "Libro Mayor") {
-      navigate(`/dash/contabilidad/libro-mayor?process=${selectedPeriod}`);
+      navigate(`/contabilidad/libro-mayor?process=${selectedPeriod}`);
     } else if (reportName === "Balance General") {
-      navigate(`/dash/contabilidad/balance-general?process=${selectedPeriod}`);
+      navigate(`/contabilidad/balance-general?process=${selectedPeriod}`);
     } else if (reportName === "Balance de Sumas y Saldos") {
-      navigate(`/dash/contabilidad/balance-sumas-saldos?process=${selectedPeriod}`);
+      navigate(`/contabilidad/balance-sumas-saldos?process=${selectedPeriod}`);
     } else if (reportName === "Balance de Resultados") {
-      navigate(`/dash/contabilidad/balance-resultados?process=${selectedPeriod}`);
+      navigate(`/contabilidad/balance-resultados?process=${selectedPeriod}`);
     } else {
       console.log(`Ver reporte: ${reportName} para el periodo: ${selectedPeriod}`);
     }
@@ -148,50 +147,43 @@ export default function AccountingDashboardPage() {
 
   return (
     <Box p={5} display="flex" flexDirection="column" gap={6}>
-      {/* Top Header Row with Breadcrumb & Dropdown */}
-      <Flex 
-        justify="space-between" 
-        align="center" 
-        w="100%" 
-        wrap="wrap" 
-        gap={4}
-      >
-        {/* Breadcrumb */}
-        <Flex align="center" gap={1.5} fontSize="13px" color="gray.600">
-          <Text>Contabilidad</Text>
-          <Icon as={ChevronRight} boxSize="12px" color="gray.400" />
-          <Text fontWeight="semibold" color="gray.800">
-            Panel Principal
-          </Text>
-        </Flex>
+      {/* Título */}
+      <Text fontWeight="bold" fontSize="3xl">
+        Contabilidad
+      </Text>
 
-        <Flex gap={3} align="center">
-          <Button
-            size="sm"
-            variant="outline"
-            borderColor="brand.primary"
-            color="brand.primary"
-            _hover={{ bg: "brand.primary", color: "white" }}
-            onClick={() => navigate("/dash/contabilidad/plan-cuentas")}
-          >
-            Configurar Plan & Periodos
-          </Button>
-
-          {/* Period Selector */}
-          <SelectWrapper
-            options={periodOptions}
-            value={selectedPeriod}
-            onValueChange={(val) => setSelectedPeriod(val)}
-            width="200px"
-          />
-        </Flex>
+      {/* Acciones a la derecha */}
+      <Flex justify="flex-end" align="center" gap={3} wrap="wrap">
+        <SelectWrapper
+          options={periodOptions}
+          value={selectedPeriod}
+          onValueChange={(val) => setSelectedPeriod(val)}
+          width="200px"
+        />
+        <Button
+          variant="outline"
+          borderColor="brand.primary"
+          color="brand.primary"
+          _hover={{ bg: "brand.primary", color: "white" }}
+          onClick={() => navigate("/contabilidad/plan-cuentas")}
+        >
+          Configurar Plan & Periodos
+        </Button>
+        <Button
+          bgColor="brand.primary"
+          color="white"
+          _hover={{ bg: "brand.secondary" }}
+          onClick={() => navigate("/contabilidad/nuevo-asiento")}
+        >
+          <Icon as={FilePlus} boxSize="16px" />
+          Nuevo Asiento Manual
+        </Button>
       </Flex>
 
       {/* Grid of Report Cards */}
       <Grid 
         templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} 
         gap={6} 
-        mt={2}
       >
         <ReportCard
           title="Libro Diario"
@@ -224,24 +216,6 @@ export default function AccountingDashboardPage() {
           onViewReport={() => handleViewReport("Balance de Resultados")}
         />
       </Grid>
-
-      {/* Footer Link: Nuevo Asiento Manual */}
-      <Flex mt={4}>
-        <Flex 
-          align="center" 
-          gap={2} 
-          cursor="pointer" 
-          color="brand.primary" 
-          fontWeight="semibold"
-          fontSize="14px"
-          _hover={{ color: "brand.secondary" }}
-          transition="color 0.15s ease"
-          onClick={() => navigate("/dash/contabilidad/nuevo-asiento")}
-        >
-          <Icon as={FilePlus} boxSize="16px" />
-          <Text>Nuevo Asiento Manual</Text>
-        </Flex>
-      </Flex>
     </Box>
   );
 }

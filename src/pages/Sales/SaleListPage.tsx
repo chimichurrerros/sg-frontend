@@ -3,7 +3,8 @@ import { SalesOrderStateEnum, type FullSaleOrder } from "@/api/sales.api";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
+import PageTitle from "@/components/ui/title";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import {  useGetSales } from "@/queries/sales.queries";
@@ -35,7 +36,7 @@ export default function SaleListPage() {
     },[isErrorSales, salesError])
 
     return (<Box padding={5} display="flex" flexDirection="column" gap={4}>
-        <Text fontWeight="bold" fontSize="3xl">Listado de Ventas</Text>
+        <PageTitle>Listado de Ventas</PageTitle>
         <Text fontSize="sm" fontStyle="italic" color="gray.600">Doble click o Enter sobre la fila para para abrir ficha de venta</Text>
         {/* Buttons and filters */}
         <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
@@ -52,7 +53,7 @@ export default function SaleListPage() {
                             <HandHelpingIcon /> Registrar Devolución
             </IconButton>
            
-            <IconButton padding={2} bgColor="brand.secondary"disabled={!selected} onClick={() => navigate(`/ventas/${selected?.id}`)} >
+            <IconButton padding={2} bgColor="brand.secondary"disabled={!selected} onClick={() => navigate(`/ventas/listado/${selected?.id}`)} >
                 <FolderOpen size={20} /> Abrir Ficha de Venta
             </IconButton>
             <IconButton padding={2} bgColor="brand.primary" onClick={()=> navigate("/ventas/nueva")} >
@@ -67,7 +68,7 @@ export default function SaleListPage() {
                 labels={labels}
                 data={sales?.salesOrders || []}
                 onSelect={(item: FullSaleOrder | null) => { setSelected(item) }}
-                onDoubleClick={(item: FullSaleOrder) =>   navigate(`/ventas/${item.id}`)}
+                onDoubleClick={(item: FullSaleOrder) =>   navigate(`/ventas/listado/${item.id}`)}
                 loading={isLoadingSales}
                 error={salesError}
                 isError={isErrorSales}

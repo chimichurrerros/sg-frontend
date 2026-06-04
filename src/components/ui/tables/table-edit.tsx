@@ -1,9 +1,9 @@
 import { Table, Input, Text, HStack, Box, Flex } from "@chakra-ui/react";
 import { Tooltip } from "@/components/ui/tooltip"
 import React, { useState, useEffect, useRef } from "react";
-import { LoadingScreen } from "./screens/loading-screen";
+import { LoadingScreen } from "../screens/loading-screen";
 import { getSorticon } from "./table-select";
-import EmptyDataScreen from "./screens/empty-data-screen";
+import EmptyDataScreen from "../screens/empty-data-screen";
 import { BeanOff, PackageOpenIcon } from "lucide-react";
 
 /**

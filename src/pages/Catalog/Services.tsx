@@ -1,6 +1,6 @@
 import type { ServiceResponseDto } from "@/api/service.api";
 import TableBar from "@/components/ui/table-bar";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import {
@@ -31,7 +31,11 @@ export const Services = () => {
       propName: "price",
       transformFunction: (value) => parsePrice(value),
     },
-    { labelName: "Costo", propName: "cost" },
+    {
+      labelName: "Costo",
+      propName: "cost",
+      transformFunction: (value) => parsePrice(value),
+    },
   ];
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ServiceResponseDto | null>(null);
@@ -57,7 +61,7 @@ export const Services = () => {
 
   const handleEdit = () => {
     if (!selected) return;
-    navigate(`/dash/catalogo/servicios/${selected.id}`);
+    navigate(`/catalogo/servicios/${selected.id}`);
   };
 
   if (error) {
@@ -70,7 +74,7 @@ export const Services = () => {
       <TableBar
         onDelete={handleDelete}
         onEdit={selected ? handleEdit : undefined}
-        onCreate={() => navigate("/dash/catalogo/nuevo-servicio")}
+        onCreate={() => navigate("/catalogo/nuevo-servicio")}
         selected={selected}
       />
       <TableSelect
@@ -78,7 +82,7 @@ export const Services = () => {
         labels={servicesLabels}
         onSelect={(item) => setSelected(item)}
         onDoubleClick={(item) =>
-          navigate(`/dash/catalogo/servicios/${item.id}`)
+          navigate(`/catalogo/servicios/${item.id}`)
         }
         loading={isLoading}
       />
