@@ -32,9 +32,17 @@ export const Sidebar = ({ collapsed }: Props) => {
       return next;
     });
 
-  const isActive = (path?: string) => !!path && location.pathname === path;
-  const isGroupActive = (item: NavItem) =>
-    item.children?.some((c) => location.pathname === c.path) ?? false;
+ const isActive = (path?: string) => {
+    if (!path) return false;
+    return location.pathname === path || location.pathname.startsWith(path + "/");
+};
+
+const isGroupActive = (item: NavItem) =>
+    item.children?.some(
+        (c) =>
+            !!c.path &&
+            (location.pathname === c.path || location.pathname.startsWith(c.path + "/"))
+    ) ?? false;
 
   const hasPermission = (permission?: string) => {
     if (!permission) return true;

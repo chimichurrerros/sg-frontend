@@ -192,7 +192,7 @@ export default function NuevoAsientoPage() {
       });
 
       toaster.create({ title: "Asiento manual creado con éxito", type: "success" });
-      navigate(`/dash/contabilidad/libro-diario?process=${activeProcess.name}`);
+      navigate(`/contabilidad/libro-diario?process=${activeProcess.name}`);
     } catch (err: any) {
       const errorMsg = err.response?.data?.ErrorMessage || err.message;
       toaster.create({ title: "Error al registrar asiento", description: errorMsg, type: "error" });
@@ -225,7 +225,7 @@ export default function NuevoAsientoPage() {
             variant="ghost"
             size="sm"
             alignSelf="start"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             p={0}
             _hover={{ bg: "transparent", color: "brand.primary" }}
           >
@@ -394,7 +394,7 @@ export default function NuevoAsientoPage() {
         <Flex justify="flex-end" gap={4}>
           <Button
             variant="outline"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             disabled={createEntryMutation.isPending}
           >
             Cancelar

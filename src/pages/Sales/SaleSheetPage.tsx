@@ -299,7 +299,7 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
           <Flex align="flex-end" gap={3}>
 
               
-              <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas")}>
+              <IconButton size="md" padding={4} variant="outline" onClick={() => navigate("/ventas/listado")}>
                 <ArrowLeft /> Volver al listado
               </IconButton>
             {mode === "view" && <IconButton size="md" padding={4} variant="surface" colorPalette={"yellow"} onClick={() => navigate("/ventas/devoluciones/desde/"+sale.id)}>

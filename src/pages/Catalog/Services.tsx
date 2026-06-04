@@ -61,7 +61,7 @@ export const Services = () => {
 
   const handleEdit = () => {
     if (!selected) return;
-    navigate(`/dash/catalogo/servicios/${selected.id}`);
+    navigate(`/catalogo/servicios/${selected.id}`);
   };
 
   if (error) {
@@ -74,7 +74,7 @@ export const Services = () => {
       <TableBar
         onDelete={handleDelete}
         onEdit={selected ? handleEdit : undefined}
-        onCreate={() => navigate("/dash/catalogo/nuevo-servicio")}
+        onCreate={() => navigate("/catalogo/nuevo-servicio")}
         selected={selected}
       />
       <TableSelect
@@ -82,7 +82,7 @@ export const Services = () => {
         labels={servicesLabels}
         onSelect={(item) => setSelected(item)}
         onDoubleClick={(item) =>
-          navigate(`/dash/catalogo/servicios/${item.id}`)
+          navigate(`/catalogo/servicios/${item.id}`)
         }
         loading={isLoading}
       />

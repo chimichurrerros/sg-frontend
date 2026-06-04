@@ -58,7 +58,7 @@ export default function BudgetsPage() {
                     <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
                 </Box>
                 <Box display="flex" flexDirection="row" gap={2}>
-                    <IconButton padding={2} variant="subtle" disabled={!selected || !selected.associatedSalesOrderId} onClick={() => navigate(`/ventas/${selected?.associatedSalesOrderId}`)}>
+                    <IconButton padding={2} variant="subtle" disabled={!selected || !selected.associatedSalesOrderId} onClick={() => navigate(`/ventas/listado/${selected?.associatedSalesOrderId}`)}>
                         <ExternalLink size={20} />
                         Ver Venta Asociada
                     </IconButton>
