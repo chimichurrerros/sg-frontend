@@ -3,29 +3,29 @@ import {
   Box,
   Button,
   ButtonGroup,
-  createListCollection,
   Field,
   Flex,
   Grid,
   Heading,
   Input,
-  Portal,
-  Select,
   Spinner,
   Stack,
   Table,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuArrowLeft, LuSave } from "react-icons/lu";
-import { useGetAllPurchaseRequests } from "@/queries/purchase-request.queries.ts";
+import { LuArrowLeft, LuSave, LuSearch } from "react-icons/lu";
+import { useGetAllPurchaseRequests, useGetPurchaseRequestById } from "@/queries/purchase-request.queries.ts";
 import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder } from "@/queries/purchase-orders.queries.ts";
+import { useGetSupplierQuotes } from "@/queries/supplier-quotes.queries.ts";
 import { useMe } from "@/queries/auth.queries";
 import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
 import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
-import PageTitle from "@/components/ui/title";
+import { LoadingScreen } from "@/components/ui/screens/loading-screen";
+import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 
 const formatDateTime = (value: string) => {
   const d = new Date(value);
@@ -52,6 +52,10 @@ export default function PurchaseOrderFormPage() {
 
   const { data: currentUser } = useMe();
   const { data: requestsData } = useGetAllPurchaseRequests();
+  const { data: selectedRequest } = useGetPurchaseRequestById(selectedRequestId);
+  const { data: quotesData } = useGetSupplierQuotes(
+    selectedRequestId > 0 ? { purchaseRequestId: selectedRequestId } : {}
+  );
   const { data: draftData, isLoading: loadingDraft } = useGetPurchaseOrderDraft(
     selectedRequestId > 0 ? selectedRequestId : undefined,
   );
@@ -62,6 +66,15 @@ export default function PurchaseOrderFormPage() {
   const today = parseDate(new Date());
   const details = isViewMode ? orderData?.purchaseOrder.details : draft?.details;
   const purchaseOrdersForSupplier = orderData?.purchaseOrder.purchaseOrdersForSupplier;
+
+  const missingSuppliers = (() => {
+    if (isViewMode || !selectedRequest || !draft) return [];
+    const requestedSupplierIds = selectedRequest.supplierIds ?? [];
+    const quotedSupplierIds = new Set(
+      (quotesData?.supplierQuotes ?? []).map((q) => q.supplierId)
+    );
+    return requestedSupplierIds.filter((sid) => !quotedSupplierIds.has(sid));
+  })();
 
   const detailLabels: EditableLabel<any>[] = [
     { labelName: "Producto", propName: "productName" },
@@ -78,13 +91,6 @@ export default function PurchaseOrderFormPage() {
       render: (item: any) => parsePrice(item.price * item.quantityOrdered),
     },
   ];
-
-  const requestCollection = createListCollection({
-    items: (requestsData?.purchaseRequests ?? []).map((r) => ({
-      label: `${r.id} - ${parseDate(r.date)}`,
-      value: String(r.id),
-    })),
-  });
 
   const handleSubmit = async () => {
     if (!draft) return;
@@ -119,9 +125,9 @@ export default function PurchaseOrderFormPage() {
       <Stack gap={6} paddingInline="5%" py={6} height="100%">
         {/* Header */}
         <Flex alignItems="center" justifyContent="space-between">
-          <PageTitle>
+          <Heading size="xl">
             Orden de Compra {po.number}
-          </PageTitle>
+          </Heading>
           <Button
             variant="ghost"
             size="sm"
@@ -254,7 +260,7 @@ export default function PurchaseOrderFormPage() {
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                      {supOrder.details.map((detail, idx) => (
+                      {supOrder.details.map((detail) => (
                         <Table.Row key={detail.id} _even={{ bg: "gray.50" }}>
                           <Table.Cell px={4}>{detail.productName}</Table.Cell>
                           <Table.Cell px={4}>{detail.quantityOrdered}</Table.Cell>
@@ -302,53 +308,26 @@ export default function PurchaseOrderFormPage() {
         <LuArrowLeft /> Volver a órdenes de compra
       </Button>
 
-      <Heading size="xl">
-        {isViewMode ? `Orden de Compra ${orderData?.purchaseOrder.number ?? ""}` : "Nueva Orden de Compra"}
-      </Heading>
+      <Heading size="xl">Nueva Orden de Compra</Heading>
 
       <Grid templateColumns="1fr 1fr 1fr" gap={4}>
-        {!isViewMode && (
-          <Field.Root required>
-            <Field.Label>Pedido de Productos</Field.Label>
-            <Select.Root
-              collection={requestCollection}
-              value={selectedRequestId ? [String(selectedRequestId)] : []}
-              onValueChange={(e) => setSelectedRequestId(Number(e.value[0]))}
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger>
-                  <Select.ValueText placeholder="Seleccionar pedido" />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.ClearTrigger />
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {requestCollection.items.map((item) => (
-                      <Select.Item item={item} key={item.value}>
-                        {item.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-          </Field.Root>
-        )}
+        <Field.Root required>
+          <Field.Label>Pedido de Productos</Field.Label>
+          <SelectWrapper
+            placeholder="Seleccionar pedido"
+            value={selectedRequestId ? String(selectedRequestId) : undefined}
+            onValueChange={(v) => setSelectedRequestId(Number(v))}
+            options={(requestsData?.purchaseRequests ?? []).map((r) => ({
+              label: `${r.id} - ${parseDate(r.date)}`,
+              value: String(r.id),
+            }))}
+            width="100%"
+          />
+        </Field.Root>
 
         <Field.Root>
           <Field.Label>Fecha</Field.Label>
-          <Input
-            value={isViewMode
-              ? parseDate(orderData?.purchaseOrder.date)
-              : today}
-            disabled
-          />
+          <Input value={today} disabled />
         </Field.Root>
 
         <Field.Root>
@@ -362,13 +341,26 @@ export default function PurchaseOrderFormPage() {
         <Field.Root>
           <Field.Label>Estado</Field.Label>
           <Input
-            value={purchaseOrderStates[draft?.state ?? 0] ?? "Desconocido"}
+            value={purchaseOrderStates[draft?.state ?? 1] ?? "Pendiente"}
             disabled
           />
         </Field.Root>
       </Grid>
 
-      {details && (
+ 
+      {loadingDraft && selectedRequestId > 0 && (
+        <LoadingScreen message="Cargando cotizaciones..." minHeight="200px" />
+      )}
+
+      {draft && missingSuppliers.length > 0 && !loadingDraft && (
+        <Box borderWidth="1px" borderColor="orange.300" bg="orange.50" borderRadius="md" p={4}>
+          <Text fontWeight="bold" color="orange.700" mb={1}>
+            Faltan cotizaciones de {missingSuppliers.length} proveedor(es)
+          </Text>
+        </Box>
+      )}
+
+      {details && !loadingDraft && (
         <TableEditable
           data={details}
           labels={detailLabels}
@@ -378,31 +370,33 @@ export default function PurchaseOrderFormPage() {
         />
       )}
 
-      {!draft && selectedRequestId > 0 && !loadingDraft && !isViewMode && (
-        <Text color="gray.500" fontSize="sm">
-          No se encontró cotización para esta solicitud.
-        </Text>
+      {!draft && selectedRequestId > 0 && !loadingDraft && (
+        <Box borderWidth="1px" borderRadius="lg" py={8}>
+          <EmptyDataScreen
+            title="No se pudo generar la orden"
+            message="No se encontraron cotizaciones para este pedido o falta cotizar algún producto. Verificá que todos los productos tengan al menos una cotización cargada."
+            icon={<LuSearch size={48} color="gray" />}
+          />
+        </Box>
       )}
 
-      {!isViewMode && (
-        <ButtonGroup alignSelf="end">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/compras/ordenes-de-compra")}
-            disabled={createOrder.isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            bgColor="brand.primary"
-            onClick={handleSubmit}
-            disabled={!draft || createOrder.isPending}
-            loading={createOrder.isPending}
-          >
-            <LuSave /> Guardar
-          </Button>
-        </ButtonGroup>
-      )}
+      <ButtonGroup alignSelf="end">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/compras/ordenes-de-compra")}
+          disabled={createOrder.isPending}
+        >
+          Cancelar
+        </Button>
+        <Button
+          bgColor="brand.primary"
+          onClick={handleSubmit}
+          disabled={!draft || createOrder.isPending}
+          loading={createOrder.isPending}
+        >
+          <LuSave /> Guardar
+        </Button>
+      </ButtonGroup>
     </Stack>
   );
 }
