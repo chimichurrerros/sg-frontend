@@ -142,6 +142,22 @@ export default function PayrollBatchReceipt({ processId, summaries, onClose }: P
     fetchAll();
   }, [processId, summaries]);
 
+  useEffect(() => {
+    if (!loading && receipts.length > 0) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 500);
+      const handleAfterPrint = () => {
+        onClose();
+      };
+      window.addEventListener("afterprint", handleAfterPrint);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("afterprint", handleAfterPrint);
+      };
+    }
+  }, [loading, receipts, onClose]);
+
   const handlePrint = () => {
     window.print();
   };

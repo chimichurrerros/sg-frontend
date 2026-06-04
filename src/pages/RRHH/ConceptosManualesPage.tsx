@@ -231,7 +231,7 @@ export default function ConceptosManualesPage() {
 
               <Field.Root gridColumn={{ base: "1 / -1", md: "span 2" }} invalid={!!form.formState.errors.amount} required>
                 <Field.Label>Monto (Gs.)</Field.Label>
-                <Input type="number" step="0.01" placeholder="0" {...form.register("amount")} disabled={isPending} />
+                <Input type="number" step="1" placeholder="0" {...form.register("amount")} disabled={isPending} />
                 <Field.ErrorText>{form.formState.errors.amount?.message}</Field.ErrorText>
               </Field.Root>
 

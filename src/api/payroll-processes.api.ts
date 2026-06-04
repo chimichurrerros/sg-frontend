@@ -103,6 +103,18 @@ export interface PayrollConceptSummaryResponseDto {
   concepts: ConceptSummaryItemDto[];
 }
 
+export interface PaginationDto {
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface ListPayrollDetailSummariesWrapperDto {
+  summaries: PayrollDetailSummaryResponseDto[];
+  pagination: PaginationDto;
+}
+
 export interface PayrollDetailSummaryResponseDto {
   employeeId: number;
   fileNumber: string;
@@ -148,8 +160,8 @@ export const payrollProcessesApi = {
     apiClient.get<EligibleEmployeeResponseDto[]>(`/api/payroll-processes/${id}/eligible-employees`).then((response) => response.data),
   addEmployees: (id: number, body: AddEmployeesRequestDto) =>
     apiClient.post<{ addedCount: number }>(`/api/payroll-processes/${id}/add-employees`, body).then((response) => response.data),
-  getDetailSummaries: (id: number) =>
-    apiClient.get<PayrollDetailSummaryResponseDto[]>(`/api/payroll-processes/${id}/detail-summaries`).then((response) => response.data),
+  getDetailSummaries: (id: number, page: number = 1, pageSize: number = 10) =>
+    apiClient.get<ListPayrollDetailSummariesWrapperDto>(`/api/payroll-processes/${id}/detail-summaries`, { params: { page, pageSize } }).then((response) => response.data),
   getConceptSummaries: (id: number) =>
     apiClient.get<PayrollConceptSummaryResponseDto[]>(`/api/payroll-processes/${id}/concept-summaries`).then((response) => response.data),
   removeEmployeeFromProcess: (processId: number, employeeId: number) =>

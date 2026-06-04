@@ -183,10 +183,10 @@ export const useAddEmployees = (processId?: number) => {
   });
 };
 
-export const useGetPayrollDetailSummaries = (processId?: number) => {
-  return useQuery<PayrollDetailSummaryResponseDto[]>({
-    queryKey: processId ? ["payroll-processes", processId, "detail-summaries"] as const : ["payroll-processes", "summaries", "none"] as const,
-    queryFn: () => payrollProcessesApi.getDetailSummaries(processId ?? 0),
+export const useGetPayrollDetailSummaries = (processId?: number, page: number = 1, pageSize: number = 10) => {
+  return useQuery<ListPayrollDetailSummariesWrapperDto>({
+    queryKey: processId ? ["payroll-processes", processId, "detail-summaries", page, pageSize] as const : ["payroll-processes", "summaries", "none"] as const,
+    queryFn: () => payrollProcessesApi.getDetailSummaries(processId ?? 0, page, pageSize),
     enabled: Boolean(processId),
     retry: RETRIES,
   });

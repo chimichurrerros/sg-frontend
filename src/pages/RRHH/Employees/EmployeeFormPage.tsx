@@ -310,7 +310,10 @@ export default function EmployeeFormPage({
     };
 
     if (isEditMode && employeeId) {
-      const requestData: UpdateEmployeeRequestDTO = commonData;
+      const requestData: UpdateEmployeeRequestDTO = {
+        ...commonData,
+        basicSalary: Math.round(Number(formData.baseSalary)),
+      };
       editEmployee.mutate(
         { id: employeeId, data: requestData },
         {
@@ -331,7 +334,7 @@ export default function EmployeeFormPage({
       ...commonData,
       positionId: formData.positionId,
       scheduleId: formData.scheduleId,
-      basicSalary: Number(formData.baseSalary),
+      basicSalary: Math.round(Number(formData.baseSalary)),
       positionStartDate: formData.hireDate,
     };
 
@@ -699,7 +702,7 @@ export default function EmployeeFormPage({
                         value={formatNumber((field.value ?? 0) as number | string)}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/[^0-9]/g, "");
-                          field.onChange(raw ? Number(raw) : 0);
+                          field.onChange(raw ? parseInt(raw, 10) : 0);
                         }}
                         placeholder="0"
                         disabled={formDisabled}
