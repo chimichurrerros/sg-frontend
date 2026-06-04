@@ -159,12 +159,6 @@ export const NAV_CONFIG: NavItem[] = [
         icon: Undo2,
         path: "/compras/devoluciones"
       },
-      {
-        id: "devoluciones",
-        label: "Devoluciones",
-        icon: Undo2,
-        path: "/compras/devoluciones"
-      },
     ]
 
   },
@@ -206,7 +200,7 @@ export const NAV_CONFIG: NavItem[] = [
         id: "ordenes-pago",
         label: "Órdenes de Pago",
         icon: Banknote,
-        path: "/tesoreria/ordenes-pago",
+        path: "/tesoreria/ordenes-de-pago",
       },
     ],
   },

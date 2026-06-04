@@ -297,7 +297,7 @@ export default function PaymentOrderForm() {
         Promise.all(promises)
             .then(() => {
                 toaster.create({ title: "Órdenes de pago registradas exitosamente", type: "success" });
-                navigate("/tesoreria/ordenes-pago");
+                navigate("/tesoreria/ordenes-de-pago");
             })
             .catch(() => {});
     };
@@ -628,7 +628,7 @@ export default function PaymentOrderForm() {
             </Steps.Root>
 
             <ButtonGroup size="lg" justifyContent="space-between" display="flex">
-                <Button variant="outline" onClick={() => navigate("/tesoreria/ordenes-pago")}>Cancelar</Button>
+                <Button variant="outline" onClick={() => navigate("/tesoreria/ordenes-de-pago")}>Cancelar</Button>
                 <Box display="flex" gap={3}>
                     <Button variant="outline" onClick={goBack} disabled={currentStep === 0}>Anterior</Button>
                     {currentStep < 2 ? (

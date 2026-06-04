@@ -72,7 +72,7 @@ export default function PaymentOrderList() {
                     aria-label="Ver orden de pago"
                     onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/tesoreria/ordenes-pago/${item.id}`);
+                        navigate(`/tesoreria/ordenes-de-pago/${item.id}`);
                     }}
                 >
                     <Eye size={14} />
@@ -89,7 +89,7 @@ export default function PaymentOrderList() {
     }, [params, setSearchParams]);
 
     const handleCreate = () => {
-        navigate("/tesoreria/ordenes-pago/nueva");
+        navigate("/tesoreria/ordenes-de-pago/nueva");
     };
 
     return (
@@ -116,7 +116,7 @@ export default function PaymentOrderList() {
                     />
                 }
                 onSelect={() => undefined}
-                onDoubleClick={(item) => navigate(`/tesoreria/ordenes-pago/${item.id}`)}
+                onDoubleClick={(item) => navigate(`/tesoreria/ordenes-de-pago/${item.id}`)}
             />
             <PaginationControl pagination={data?.pagination || null} onPageChange={(page) => setParams((prev) => ({ ...prev, page }))} />
         </Stack>

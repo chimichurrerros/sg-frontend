@@ -279,6 +279,9 @@ export const router = createBrowserRouter([
           { path: "/tesoreria/movimientos/:id", element: <MovementView /> },
           { path: "/tesoreria/cheques", element: <ChecksList /> },
           { path: "/tesoreria/cheques/:id", element: <CheckView /> },
+          { path: "/tesoreria/ordenes-de-pago", element: <PaymentOrderList /> },
+          { path: "/tesoreria/ordenes-de-pago/nueva", element: <PaymentOrderForm /> },
+          { path: "/tesoreria/ordenes-de-pago/:id", element: <PaymentOrderView /> },
 
           /* ===== GESTIONES Y SEGURIDAD ===== */
           {

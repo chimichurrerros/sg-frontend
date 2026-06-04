@@ -102,7 +102,7 @@ export default function PaymentOrderView() {
                         variant="surface"
                         colorScheme="blue"
                         aria-label="Volver al listado"
-                        onClick={() => navigate("/tesoreria/ordenes-pago")}
+                        onClick={() => navigate("/tesoreria/ordenes-de-pago")}
                         p={4}
                     >
                         <ArrowLeft size={18} /> Volver al listado
