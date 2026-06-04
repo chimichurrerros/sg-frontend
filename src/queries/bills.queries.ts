@@ -2,18 +2,18 @@ import {
   billsApi,
   type CreateBillRequest,
   type UpdateBillRequest,
+  type BillFilterParams,
 } from "@/api/bills.api";
-import type { PaginationParams } from "@/types/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const billsKeys = {
-  bills: (params?: PaginationParams) => ["bills", params] as const,
+  bills: (params?: BillFilterParams) => ["bills", params] as const,
   bill: (id: number) => ["bills", id] as const,
 };
 
 const RETRIES = 2;
 
-export const useAllBills = (params?: PaginationParams) => {
+export const useAllBills = (params?: BillFilterParams) => {
   return useQuery({
     queryKey: billsKeys.bills(params),
     queryFn: () => billsApi.getAll(params),

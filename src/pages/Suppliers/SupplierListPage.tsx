@@ -67,12 +67,12 @@ export default function SupplierListPage() {
   ];
 
   const handleCreate = () => {
-    navigate("/dash/proveedores/nuevo");
+    navigate("/proveedores/nuevo");
   };
 
   const handleEdit = () => {
     if (!selectedSupplier) return;
-    navigate(`/dash/proveedores/${selectedSupplier.id}`);
+    navigate(`/proveedores/${selectedSupplier.id}`);
   };
 
   const handleDelete = () => {
@@ -177,7 +177,7 @@ export default function SupplierListPage() {
           />
         }
         onSelect={(item) => setSelectedSupplier(item)}
-        onDoubleClick={(item) => navigate(`/dash/proveedores/${item.id}`)}
+        onDoubleClick={(item) => navigate(`/proveedores/${item.id}`)}
       />
 
       <PaginationControl

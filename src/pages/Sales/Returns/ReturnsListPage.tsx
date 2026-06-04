@@ -71,7 +71,7 @@ export default function ReturnsPage() {
                         <FolderOpen size={20} />
                         Ver Detalle
                     </IconButton>
-                    <IconButton padding={2} variant="outline" disabled={!selected} onClick={() => navigate(`/ventas/${selected?.salesOrderId}`)}>
+                    <IconButton padding={2} variant="outline" disabled={!selected} onClick={() => navigate(`/ventas/listado/${selected?.salesOrderId}`)}>
                         <ExternalLink size={20} />
                         Ver Venta Asociada
                     </IconButton>

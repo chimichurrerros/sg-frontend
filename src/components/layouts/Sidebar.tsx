@@ -33,7 +33,11 @@ export const Sidebar = ({ collapsed }: Props) => {
       return next;
     });
 
-  const isActive = (path?: string) => !!path && location.pathname === path.split("?")[0];
+  const isActive = (path?: string) => {
+    if (!path) return false;
+    const cleanPath = path.split("?")[0];
+    return location.pathname === cleanPath || location.pathname.startsWith(cleanPath + "/");
+};
 
   const nodeHasActiveChild = (node: { path?: string; children?: { path?: string; children?: any[] }[] }) => {
     if (node.path && isActive(node.path)) {

@@ -226,7 +226,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                                 variant="outline"
                                 color="brand.secondary"
                                 p={4}
-                                onClick={() => navigate(`/ventas/${displayData.salesOrderId}`)}
+                                onClick={() => navigate(`/ventas/listado/${displayData.salesOrderId}`)}
                                 aria-label="Ver Venta Asociada"
                             >
                                 <ShoppingCart size={18} /> Ver Venta

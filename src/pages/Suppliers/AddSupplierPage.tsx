@@ -120,7 +120,7 @@ export const AddSupplierPage = () => {
                         queryClient.invalidateQueries({
                             queryKey: suppliersKeys.suppliers,
                         });
-                        navigate("/dash/proveedores");
+                        navigate("/proveedores");
                     },
                     onError: (error) => {
                         setFormError(
@@ -137,7 +137,7 @@ export const AddSupplierPage = () => {
             onSuccess: () => {
                 toaster.create({ title: "Proveedor creado con éxito" });
                 queryClient.invalidateQueries({ queryKey: suppliersKeys.suppliers });
-                navigate("/dash/proveedores");
+                navigate("/proveedores");
             },
             onError: (error) => {
                 setFormError(
@@ -157,7 +157,7 @@ export const AddSupplierPage = () => {
                     variant="ghost"
                     size="sm"
                     alignSelf="start"
-                    onClick={() => navigate("/dash/proveedores")}
+                    onClick={() => navigate("/proveedores")}
                 >
                     <LuArrowLeft /> Volver a proveedores
                 </Button>

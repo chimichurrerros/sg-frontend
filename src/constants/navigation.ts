@@ -63,7 +63,7 @@ export const NAV_CONFIG: NavItem[] = [
         id: "ventas",
         label: "Listado de Ventas",
         icon: ListOrdered,
-        path: "/ventas",
+        path: "/ventas/listado",
         permission: "salesOrders.view",
       },
       {
@@ -205,7 +205,7 @@ export const NAV_CONFIG: NavItem[] = [
     id: "contabilidad",
     label: "Contabilidad",
     icon: FileText,
-    path: "/dash/contabilidad",
+    path: "/contabilidad",
     permission: "entries.view",
   },
   {
@@ -239,14 +239,14 @@ export const NAV_CONFIG: NavItem[] = [
         id: "proveedores",
         label: "Proveedores",
         icon: Truck,
-        path: "/dash/proveedores",
+        path: "/proveedores",
         permission: "suppliers.view",
       },
       {
         id: "catalogo",
         label: "Catálogo",
         icon: Receipt,
-        path: "/dash/catalogo",
+        path: "/catalogo",
         permission: "products.view",
       },
       {

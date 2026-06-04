@@ -216,7 +216,7 @@ export default function BalanceSumasSaldosPage() {
               variant="ghost"
               size="sm"
               alignSelf="start"
-              onClick={() => navigate("/dash/contabilidad")}
+              onClick={() => navigate("/contabilidad")}
               p={0}
               _hover={{ bg: "transparent", color: "brand.primary" }}
             >

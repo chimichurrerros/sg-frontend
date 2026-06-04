@@ -311,7 +311,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                         <>
 
                             {budget.associatedSalesOrderId &&
-                                <IconButton size="md" padding={4} variant="ghost" onClick={() => navigate("/ventas/" + budget.associatedSalesOrderId)}>
+                                <IconButton size="md" padding={4} variant="ghost" onClick={() => navigate("/ventas/listado/" + budget.associatedSalesOrderId)}>
                                     <ExternalLink /> Ver venta asociada
                                 </IconButton>}
                         </>

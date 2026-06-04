@@ -168,7 +168,7 @@ export default function LibroDiarioPage() {
             variant="ghost"
             size="sm"
             alignSelf="start"
-            onClick={() => navigate("/dash/contabilidad")}
+            onClick={() => navigate("/contabilidad")}
             p={0}
             _hover={{ bg: "transparent", color: "brand.primary" }}
           >
@@ -186,7 +186,7 @@ export default function LibroDiarioPage() {
           _hover={{ bg: "brand.primary", color: "white" }}
           onClick={() =>
             navigate(
-              `/dash/contabilidad/balance-sumas-saldos?process=${selectedProcessName}&startDate=${startDate}&endDate=${endDate}`
+              `/contabilidad/balance-sumas-saldos?process=${selectedProcessName}&startDate=${startDate}&endDate=${endDate}`
             )
           }
           display="flex"

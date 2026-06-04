@@ -60,7 +60,7 @@ export const Products = () => {
 
   const handleEdit = () => {
     if (!selected) return;
-    navigation(`/dash/catalogo/productos/${selected.id}`);
+    navigation(`/catalogo/productos/${selected.id}`);
   };
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export const Products = () => {
       <TableBar
         onDelete={handleDelete}
         onEdit={selected ? handleEdit : undefined}
-        onCreate={() => navigation("/dash/catalogo/nuevo-producto")}
+        onCreate={() => navigation("/catalogo/nuevo-producto")}
         selected={selected}
       />
 
@@ -89,7 +89,7 @@ export const Products = () => {
           setSelecteed(item);
         }}
         onDoubleClick={(item) =>
-          navigation(`/dash/catalogo/productos/${item.id}`)
+          navigation(`/catalogo/productos/${item.id}`)
         }
         loading={isLoading}
         noItemsComponent={

@@ -53,7 +53,7 @@ export default function SaleListPage() {
                             <HandHelpingIcon /> Registrar Devolución
             </IconButton>
            
-            <IconButton padding={2} bgColor="brand.secondary"disabled={!selected} onClick={() => navigate(`/ventas/${selected?.id}`)} >
+            <IconButton padding={2} bgColor="brand.secondary"disabled={!selected} onClick={() => navigate(`/ventas/listado/${selected?.id}`)} >
                 <FolderOpen size={20} /> Abrir Ficha de Venta
             </IconButton>
             <IconButton padding={2} bgColor="brand.primary" onClick={()=> navigate("/ventas/nueva")} >
@@ -68,7 +68,7 @@ export default function SaleListPage() {
                 labels={labels}
                 data={sales?.salesOrders || []}
                 onSelect={(item: FullSaleOrder | null) => { setSelected(item) }}
-                onDoubleClick={(item: FullSaleOrder) =>   navigate(`/ventas/${item.id}`)}
+                onDoubleClick={(item: FullSaleOrder) =>   navigate(`/ventas/listado/${item.id}`)}
                 loading={isLoadingSales}
                 error={salesError}
                 isError={isErrorSales}
