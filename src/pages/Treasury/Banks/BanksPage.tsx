@@ -115,27 +115,7 @@ export default function BanksPage() {
             min={5}
           />
         </Box>
-
-        <IconButton
-          padding={2}
-          colorPalette="brand"
-          onClick={() => navigate("/tesoreria/bancos/nuevo")}
-        >
-          <Plus />
-          Nuevo
-        </IconButton>
-        <IconButton
-          padding={2}
-          variant="outline"
-          disabled={!selected}
-          onClick={() =>
-            selected && navigate(`/tesoreria/bancos/${selected.id}`)
-          }
-        >
-          <Pencil />
-          Editar
-        </IconButton>
-        <DestructiveActionDialog title="Está seguro/a de desactivar este banco?"  description={"Se desactivará " + selected.name} trigger={<IconButton
+         <DestructiveActionDialog title="Está seguro/a de desactivar este banco?"  description={"Se desactivará " + selected?.name} trigger={<IconButton
           padding={2}
           variant="outline"
           disabled={!selected}
@@ -149,6 +129,27 @@ export default function BanksPage() {
               setSelected(null);
             }
           }}/>
+        <IconButton
+          padding={2}
+          bgColor={"brand.secondary"}
+          disabled={!selected}
+          onClick={() =>
+            selected && navigate(`/tesoreria/bancos/${selected.id}`)
+          }
+        >
+          <Pencil />
+          Editar
+        </IconButton>
+        <IconButton
+          padding={2}
+          colorPalette="brand"
+          onClick={() => navigate("/tesoreria/bancos/nuevo")}
+        >
+          <Plus />
+          Nuevo
+        </IconButton>
+
+       
         
       </Box>
 

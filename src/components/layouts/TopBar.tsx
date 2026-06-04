@@ -50,7 +50,7 @@ export const TopBar = ({ onToggle }: Props) => {
           : <strong>{breadcrumb}</strong>
         }
       </Text>
-
+      {user && user.branchName &&  <Text mr={6} color="gray.600" fontWeight={"semibold"}>{`Sucursal: ${user.branchName}`} </Text>}
       {/* User menu */}
       <Menu.Root>
         <Menu.Trigger asChild>

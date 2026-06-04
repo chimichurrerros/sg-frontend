@@ -1,5 +1,5 @@
-export const parseDate = (value: string | Date | null | undefined): string => {
-    if (!value) return "";
+const toDate = (value: string | Date | null | undefined): Date | null => {
+    if (!value) return null;
 
     let date: Date;
 
@@ -12,11 +12,40 @@ export const parseDate = (value: string | Date | null | undefined): string => {
         date = new Date(normalized);
     }
 
-    if (Number.isNaN(date.getTime())) return "";
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const parseDateTime = (value: string | Date | null | undefined): string => {
+    const date = toDate(value);
+    if (!date) return "";
 
     return date.toLocaleDateString("es-PY", {
         day: "2-digit",
         month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
+
+export const parseDate = (value: string | Date | null | undefined): string => {
+    const date = toDate(value);
+    if (!date) return "";
+
+    return date.toLocaleDateString("es-PY", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+};
+
+export const formatDateLong = (value: string | Date | null | undefined): string => {
+    const date = toDate(value);
+    if (!date) return "";
+
+    return date.toLocaleDateString("es-PY", {
+        day: "numeric",
+        month: "long",
         year: "numeric",
     });
 };
