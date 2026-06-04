@@ -22,7 +22,8 @@ import {
   Contact,
   HandHelping,
   FileText,
-  StickyNote
+  StickyNote,
+  Undo2
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -82,7 +83,7 @@ export const NAV_CONFIG: NavItem[] = [
       },
         {
         id: "notas-credito-ventas",
-        label: "Notas de Crédito(Ventas)",
+        label: "Notas de Crédito",
         icon:  StickyNote ,
         path: "/ventas/notas-de-credito",
       },
@@ -126,6 +127,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Recepción de OC",
         icon:   Package,
         path: "/compras/recepcion-ordenes-compra"
+      },
+      {
+        id: "devoluciones",
+        label: "Devoluciones",
+        icon: Undo2,
+        path: "/compras/devoluciones"
       },
     ]
 

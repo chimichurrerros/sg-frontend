@@ -14,7 +14,7 @@ import type { PurchaseReceiptResponse, PurchaseReceiptFilterParams } from "@/api
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { DatePickerWrapper } from "@/components/ui/date-picker-wrapper";
-import { Package } from "lucide-react";
+import { Eye, Package } from "lucide-react";
 
 export default function PurchaseReceiptList() {
     const navigate = useNavigate();
@@ -67,6 +67,23 @@ export default function PurchaseReceiptList() {
             render: (item) => parsePrice(item.total),
             isSortable: true,
             sortFunction: (a, b) => a.total - b.total,
+        },
+        {
+            labelName: "Ver",
+            isComponent: true,
+            render: (item) => (
+                <IconButton
+                    size="xs"
+                    variant="outline"
+                    aria-label="Ver recepción"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/compras/recepcion-ordenes-compra/${item.id}`);
+                    }}
+                >
+                    <Eye size={14} />
+                </IconButton>
+            ),
         },
     ];
 
@@ -173,6 +190,7 @@ export default function PurchaseReceiptList() {
                     />
                 }
                 onSelect={() => undefined}
+                onDoubleClick={(item) => navigate(`/compras/recepcion-ordenes-compra/${item.id}`)}
             />
 
             <PaginationControl

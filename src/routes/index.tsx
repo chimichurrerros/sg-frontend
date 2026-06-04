@@ -45,6 +45,10 @@ import PurchaseOrdersForSupplierList from "@/pages/Purchases/PurchaseOrdersForSu
 import PurchaseOrdersForSupplierView from "@/pages/Purchases/PurchaseOrdersForSupplier/PurchaseOrdersForSupplierView";
 import PurchaseReceiptWizard from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptWizard";
 import PurchaseReceiptList from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptList";
+import PurchaseReceiptView from "@/pages/Purchases/PurchaseReceipts/PurchaseReceiptView";
+import PurchaseReturnList from "@/pages/Purchases/PurchaseReturns/PurchaseReturnList";
+import PurchaseReturnForm from "@/pages/Purchases/PurchaseReturns/PurchaseReturnForm";
+import PurchaseReturnView from "@/pages/Purchases/PurchaseReturns/PurchaseReturnView";
 import PurchaseRequestList from "@/pages/Purchases/PurchaseRequests/PurchaseRequestList";
 import PurchaseRequestCreate from "@/pages/Purchases/PurchaseRequests/PurchaseRequestCreate";
 import PurchaseRequestView from "@/pages/Purchases/PurchaseRequests/PurchaseRequestView";
@@ -118,6 +122,10 @@ export const router = createBrowserRouter([
           { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
           { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptList /> },
           { path: "/compras/recepcion-ordenes-compra/nueva", element: <PurchaseReceiptWizard /> },
+          { path: "/compras/recepcion-ordenes-compra/:id", element: <PurchaseReceiptView /> },
+          { path: "/compras/devoluciones", element: <PurchaseReturnList /> },
+          { path: "/compras/devoluciones/nueva", element: <PurchaseReturnForm /> },
+          { path: "/compras/devoluciones/:id", element: <PurchaseReturnView /> },
           { path: "/compras/ordenes-por-proveedor", element: <PurchaseOrdersForSupplierList /> },
           { path: "/compras/ordenes-por-proveedor/:id", element: <PurchaseOrdersForSupplierView /> },
 

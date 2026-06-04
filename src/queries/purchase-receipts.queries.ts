@@ -12,10 +12,20 @@ export const purchaseReceiptsKeys = {
     detail: (id: number) => ["purchaseReceipt", id] as const,
 };
 
-export const useGetPurchaseReceipts = (params: PurchaseReceiptFilterParams) => {
+export const useGetPurchaseReceipts = (params: PurchaseReceiptFilterParams, enabled: boolean = true) => {
     return useQuery({
         queryKey: [...purchaseReceiptsKeys.all, params],
         queryFn: () => purchaseReceiptsApi.get(params),
+        enabled,
+    });
+};
+
+export const useGetPurchaseReceiptById = (id: number) => {
+    return useQuery({
+        queryKey: purchaseReceiptsKeys.detail(id),
+        queryFn: () => purchaseReceiptsApi.getById(id),
+        enabled: !!id,
+        retry: RETRIES,
     });
 };
 
