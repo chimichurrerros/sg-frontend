@@ -119,6 +119,7 @@ export default function PurchaseProductsTable({ products, onDataChange, readOnly
             error={errorProducts}
             isError={isErrorProducts}
             hideOutOfStock={false}
+            showStockMessage={false}
             trigger={
               <IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts} ref={addProdRef}>
                 {aviableProducts?.productsStock ? <Plus /> : <Spinner />} Item

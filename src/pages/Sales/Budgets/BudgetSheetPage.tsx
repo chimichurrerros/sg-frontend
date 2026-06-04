@@ -407,7 +407,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                     labels={productsLabel}
                     readOnly={!editable}
                     branchId={budgetForm.sale.branchId}
-                    careStock={false}
+                    showStock={false}
                     onDataChange={(newData: ProductSaleDTO[]) => {
                         setBudgetForm({
                             ...budgetForm,
@@ -448,7 +448,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                             onAccept={() => { reject.mutate(budget.id) }}
                         />
                         <ConfirmActionDialog
-                            trigger={<IconButton size="lg" padding={4} bgColor="brand.secondary" >
+                            trigger={<IconButton size="lg" padding={4} bgColor="brand.secondary" disabled={sell.isPending} >
                                 {sell.isPending ? <Spinner /> : <DollarSign />} Aprobar Presupuesto
                             </IconButton>}
                             title="Aprobar Presupuesto"
@@ -496,6 +496,7 @@ export default function BudgetSheetPage({ mode }: BudgetSheetPageProps) {
                                     color="white"
                                     ref={triggerRef}
                                     disabled={budgetForm.products.length === 0 || createBudget.isPending || editBudget.isPending || (mode === "edit" && !hasNewChanges)}
+                                
                                 >
                                     {createBudget.isPending || editBudget.isPending ? <Spinner /> : mode === "create" ? <CalendarPlus /> : <Pencil />} {mode === "create" ? "Generar" : "Actualizar"} Presupuesto
                                 </IconButton>
