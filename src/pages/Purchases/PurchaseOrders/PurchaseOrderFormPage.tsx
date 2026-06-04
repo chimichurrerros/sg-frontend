@@ -17,7 +17,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuArrowLeft, LuSave } from "react-icons/lu";
+import { ArrowLeft, Save } from "lucide-react";
 import { useGetAllPurchaseRequests } from "@/queries/purchase-request.queries.ts";
 import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder } from "@/queries/purchase-orders.queries.ts";
 import { useMe } from "@/queries/auth.queries";
@@ -126,7 +126,7 @@ export default function PurchaseOrderFormPage() {
             size="sm"
             onClick={() => navigate("/compras/ordenes-de-compra")}
           >
-            <LuArrowLeft /> Volver a órdenes de compra
+            <ArrowLeft size={16} /> Volver a órdenes de compra
           </Button>
         </Flex>
 
@@ -298,7 +298,7 @@ export default function PurchaseOrderFormPage() {
         alignSelf="end"
         onClick={() => navigate("/compras/ordenes-de-compra")}
       >
-        <LuArrowLeft /> Volver a órdenes de compra
+        <ArrowLeft size={16} /> Volver a órdenes de compra
       </Button>
 
       <Heading size="xl">
@@ -398,7 +398,7 @@ export default function PurchaseOrderFormPage() {
             disabled={!draft || createOrder.isPending}
             loading={createOrder.isPending}
           >
-            <LuSave /> Guardar
+            <Save size={16} /> Guardar
           </Button>
         </ButtonGroup>
       )}

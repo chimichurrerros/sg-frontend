@@ -37,6 +37,9 @@ import MovementView from "@/pages/Treasury/Movements/MovementView";
 import MovementCreate from "@/pages/Treasury/Movements/MovementCreate";
 import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
+import PaymentOrderList from "@/pages/Treasury/PaymentOrders/PaymentOrderList";
+import PaymentOrderForm from "@/pages/Treasury/PaymentOrders/PaymentOrderForm";
+import PaymentOrderView from "@/pages/Treasury/PaymentOrders/PaymentOrderView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import RequestForQuotationList from "@/pages/Purchases/RequestForQuotation/RequestForQuotationList";
 import RequestForQuotationView from "@/pages/Purchases/RequestForQuotation/RequestForQuotationView";
@@ -141,6 +144,9 @@ export const router = createBrowserRouter([
           { path: "/tesoreria/movimientos/:id", element: <MovementView /> },
           { path: "/tesoreria/cheques", element: <ChecksList /> },
           { path: "/tesoreria/cheques/:id", element: <CheckView /> },
+          { path: "/tesoreria/ordenes-pago", element: <PaymentOrderList /> },
+          { path: "/tesoreria/ordenes-pago/nueva", element: <PaymentOrderForm /> },
+          { path: "/tesoreria/ordenes-pago/:id", element: <PaymentOrderView /> },
 
           /* ===== GESTIONES ===== */
           { path: "/register", element: <RegisterPage /> },

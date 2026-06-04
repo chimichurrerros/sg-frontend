@@ -1,18 +1,19 @@
 import { purchaseOrderForSupplierStateMap } from "@/api/purchaseOrderForSupplier.api";
 import { toaster } from "@/components/ui/toaster";
-import { useGetPurchaseOrderForSupplierById } from "@/queries/purchase-orders-for-supplier.queries";
+import { useGetPurchaseOrderForSupplierById, useConfirmPurchaseOrderForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import {
   Box,
   Button,
   Flex,
-  Heading,
+  HStack,
   Spinner,
   Stack,
   Table,
   Text,
 } from "@chakra-ui/react";
+import { CheckCircle } from "lucide-react";
 import { useEffect } from "react";
-import { LuArrowLeft } from "react-icons/lu";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const formatDateTime = (value: string) => {
@@ -40,6 +41,7 @@ export default function PurchaseOrdersForSupplierView() {
     isError,
     error,
   } = useGetPurchaseOrderForSupplierById(orderId);
+  const confirmMutation = useConfirmPurchaseOrderForSupplier();
 
   useEffect(() => {
     if (isError) {
@@ -70,16 +72,27 @@ export default function PurchaseOrdersForSupplierView() {
   return (
     <Stack gap={6} paddingInline="5%" py={6} height="100%">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="xl">
+        <Text fontSize="2xl" fontWeight="bold">
           Orden de Compra N° {order.id}
-        </Heading>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/compras/ordenes-por-proveedor")}
-        >
-          <LuArrowLeft /> Volver al listado
-        </Button>
+        </Text>
+        <HStack gap={2}>
+          {order.state === 1 && (
+            <Button
+              colorScheme="green"
+              loading={confirmMutation.isPending}
+              onClick={() => confirmMutation.mutate(order.id)}
+            >
+              <CheckCircle size={18} /> Confirmar OC
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/compras/ordenes-por-proveedor")}
+          >
+            <ArrowLeft size={16} /> Volver al listado
+          </Button>
+        </HStack>
       </Flex>
 
       {/* Info Card */}

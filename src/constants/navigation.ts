@@ -13,6 +13,7 @@ import {
   Landmark,
   Building,
   CreditCard,
+  Banknote,
   BanknoteArrowUp,
   ScrollText,
   TableProperties,
@@ -161,6 +162,12 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Cheques",
         icon: ScrollText,
         path: "/tesoreria/cheques"
+      },
+      {
+        id: "ordenes-pago",
+        label: "Órdenes de Pago",
+        icon: Banknote,
+        path: "/tesoreria/ordenes-pago",
       },
     ],
   },

@@ -5,7 +5,7 @@ import PaginationControl from "@/components/ui/pagination-control";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import TableSelect, { type label } from "@/components/ui/table-select";
 import { toaster } from "@/components/ui/toaster";
-import { useGetPurchaseOrdersForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
+import { useGetPurchaseOrdersForSupplier, useConfirmPurchaseOrderForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
 import {
@@ -15,7 +15,7 @@ import {
   IconButton,
   Text,
 } from "@chakra-ui/react";
-import { Eye } from "lucide-react";
+import { CheckCircle, Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -57,6 +57,7 @@ export default function PurchaseOrdersForSupplierList() {
 
   const { data, isPending, isError, error } = useGetPurchaseOrdersForSupplier(params);
   const { data: suppliersData } = useAllSuppliers();
+  const confirmMutation = useConfirmPurchaseOrderForSupplier();
   const [selected, setSelected] = useState<PurchaseOrderForSupplier | null>(null);
 
   useEffect(() => {
@@ -101,17 +102,30 @@ export default function PurchaseOrdersForSupplierList() {
           </Text>
           <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
         </Box>
-        <IconButton
-          padding={2}
-          variant="outline"
-          disabled={!selected}
-          onClick={() =>
-            selected && navigate(`/compras/ordenes-por-proveedor/${selected.id}`)
-          }
-        >
-          <Eye />
-          Ver
-        </IconButton>
+        <HStack gap={2}>
+          <IconButton
+            padding={2}
+            variant="outline"
+            disabled={!selected}
+            onClick={() =>
+              selected && navigate(`/compras/ordenes-por-proveedor/${selected.id}`)
+            }
+          >
+            <Eye />
+            Ver
+          </IconButton>
+          <IconButton
+            padding={2}
+            variant="outline"
+            colorScheme="green"
+            disabled={!selected || selected.state !== 1}
+            loading={confirmMutation.isPending}
+            onClick={() => selected && confirmMutation.mutate(selected.id)}
+          >
+            <CheckCircle />
+            Confirmar
+          </IconButton>
+        </HStack>
       </Box>
 
       <Box borderWidth="1px" borderRadius="lg" py={3} px={6}>

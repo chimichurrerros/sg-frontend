@@ -76,4 +76,8 @@ export const purchaseOrderForSupplierApi = {
     apiClient
       .get<{ purchaseOrderForSupplier: PurchaseOrderForSupplier }>(`/api/purchaseorders-for-supplier/${id}`)
       .then((r) => r.data.purchaseOrderForSupplier),
+  updateState: (id: number, state: number) =>
+    apiClient
+      .put<{ purchaseOrderForSupplier: PurchaseOrderForSupplier }>(`/api/purchaseorders-for-supplier/${id}/state`, { state })
+      .then((r) => r.data.purchaseOrderForSupplier),
 };
