@@ -169,6 +169,9 @@ export const PERMISSION_GROUPS = [
       { name: "states.update", label: "Modificar Estado" },
       { name: "states.delete", label: "Eliminar Estado" },
       { name: "organizations.view", label: "Ver Configuración de la Empresa" },
+      { name: "organizations.create", label: "Crear Configuración de la Empresa" },
+      { name: "organizations.update", label: "Modificar Configuración de la Empresa" },
+      { name: "organizations.delete", label: "Eliminar Configuración de la Empresa" },
     ],
   },
 ];

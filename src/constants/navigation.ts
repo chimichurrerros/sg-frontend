@@ -195,10 +195,10 @@ export const NAV_CONFIG: NavItem[] = [
     icon: BadgeCheck,
     section: "Operaciones",
     children: [
-      { id: "rrhh-novedades", label: "Novedades", icon: Megaphone, path: "/rrhh/novedades" },
-      { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ListChecks, path: "/rrhh/conceptos-manuales" },
-      { id: "rrhh-asistencia", label: "Asistencia", icon: UserCheck, path: "/rrhh/asistencia" },
-      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
+      { id: "rrhh-novedades", label: "Novedades", icon: Megaphone, path: "/rrhh/novedades", permission: "payrollUpdates.view" },
+      { id: "rrhh-conceptos-manuales", label: "Conceptos Manuales", icon: ListChecks, path: "/rrhh/conceptos-manuales", permission: "manualConcepts.view" },
+      { id: "rrhh-asistencia", label: "Asistencia", icon: UserCheck, path: "/rrhh/asistencia", permission: "attendance.view" },
+      { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas", permission: "payrollProcesses.view" },
     ],
   },
   {
@@ -261,6 +261,7 @@ export const NAV_CONFIG: NavItem[] = [
         label: "Organización",
         icon: GitBranch,
         path: "/gestiones/organizacion?tab=employees",
+        permission: "organizations.view",
       },
     ],
   },
