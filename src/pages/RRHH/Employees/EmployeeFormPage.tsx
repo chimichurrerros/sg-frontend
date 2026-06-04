@@ -45,7 +45,7 @@ import type {
   MaritalStatusEnum,
 } from "@/types/employees";
 import type { DepartmentResponseDto, PositionResponseDto, ScheduleResponseDto } from "@/types/organization";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { parseApiError } from "@/utils/api-error";
 
 const employeeSchema = z.object({
@@ -696,7 +696,7 @@ export default function EmployeeFormPage({
                       <Input
                         type="text"
                         inputMode="numeric"
-                        value={formatNumber(field.value ?? 0)}
+                        value={formatNumber((field.value ?? 0) as number | string)}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/[^0-9]/g, "");
                           field.onChange(raw ? Number(raw) : 0);

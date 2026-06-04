@@ -201,9 +201,6 @@ export const NAV_CONFIG: NavItem[] = [
       { id: "rrhh-planillas", label: "Planillas", icon: Calculator, path: "/rrhh/planillas" },
     ],
   },
-      },
-    ],
-  },
   {
     id: "contabilidad",
     label: "Contabilidad",

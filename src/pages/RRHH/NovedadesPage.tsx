@@ -25,7 +25,7 @@ import {
 import { Tooltip } from "@/components/ui/tooltip";
 import { LuArrowLeft, LuCalculator, LuPencil, LuPlus, LuRefreshCw, LuSave, LuTrash2 } from "react-icons/lu";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { ConfirmActionDialog } from "@/components/ui/dialogs/confirm-dialog";
 import { toaster } from "@/components/ui/toaster";

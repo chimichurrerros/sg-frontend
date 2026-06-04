@@ -15,7 +15,7 @@ import { Search } from "lucide-react";
 import { LuChevronLeft, LuChevronRight, LuPencil, LuPlus, LuTrash2 } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { toaster } from "@/components/ui/toaster";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";

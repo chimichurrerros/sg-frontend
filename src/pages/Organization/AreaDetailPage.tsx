@@ -18,7 +18,7 @@ import {
 import { LuSearch } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";

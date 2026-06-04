@@ -3,7 +3,7 @@ import { Clock3, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Box, Button, ButtonGroup, Field, Grid, Heading, HStack, Input, InputGroup, Spinner, Stack, Text, createListCollection, Portal, Select } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import PageSizeControl from "@/components/ui/page-size-control";
 import PaginationControl from "@/components/ui/pagination-control";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
