@@ -291,7 +291,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                         <HStack justifyContent="space-between" alignItems="flex-end">
 
                             <Text fontWeight="bold" fontSize="2xl">{mode === "create" ? "Productos de la venta" : "Productos devueltos"}</Text>
-                            {mode === "view" && <HStack><Text fontWeight="bold" fontSize="xl">Cantidad de dinero devuelto:</Text>
+                            {mode === "view" && <HStack><Text fontWeight="bold" fontSize="xl">Total devuelto:</Text>
                                 <Text fontWeight="bold" color="brand.secondary" fontSize="xl">{parsePrice(form.total || 0)}</Text>
                                 </HStack>}
                         </HStack>
