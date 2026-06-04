@@ -6,7 +6,7 @@ import { toaster } from "@/components/ui/toaster";
 import { purchaseReturnStateMap } from "@/api/purchaseReturns.api";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import { ErrorScreen } from "@/components/ui/screens/error-screen";

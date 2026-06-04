@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import TableSelect, { type label } from "@/components/ui/table-select";
+import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { Box, IconButton, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { LuPlus } from "react-icons/lu";

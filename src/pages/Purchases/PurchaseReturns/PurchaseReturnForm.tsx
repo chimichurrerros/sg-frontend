@@ -1,7 +1,7 @@
 import { Box, Button, ButtonGroup, Field, Grid, Input, Spinner, Stack, Steps, Text, Textarea } from "@chakra-ui/react";
-import TableEditable, { type EditableLabel } from "@/components/ui/table-edit";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";

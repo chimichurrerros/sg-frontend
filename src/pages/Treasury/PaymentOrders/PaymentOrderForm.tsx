@@ -1,6 +1,6 @@
 import { Box, Button, ButtonGroup, Field, Grid, HStack, IconButton, Input, Stack, Steps, Text, Textarea } from "@chakra-ui/react";
-import { SelectWrapper } from "@/components/ui/select-wrapper";
-import { ComboboxWrapper } from "@/components/ui/combobox-wrapper";
+import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
+import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";
