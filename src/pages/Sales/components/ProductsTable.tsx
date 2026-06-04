@@ -20,10 +20,10 @@ interface productsTableProps {
   labels: EditableLabel<ProductSaleDTO>[];
   readOnly?: boolean;
   branchId: number | null;
-  careStock?:boolean
+  showStock?:boolean
 }
 
-export default function ProductsTable({ products, onDataChange, labels, readOnly = false, branchId, careStock = true }: productsTableProps) {
+export default function ProductsTable({ products, onDataChange, labels, readOnly = false, branchId, showStock = true }: productsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("")
   const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useProductByBranch(branchId, !readOnly)
@@ -46,10 +46,9 @@ useEffect(() => {
     const exist = products.some(p => p.id === prod.id);
 
     if (exist) {
-      console.log(products)
         onDataChange(products.map(p => {
             if (p.id !== prod.id) return p;
-            const newQuantity = careStock
+            const newQuantity = showStock
                 ? Math.min(p.quantity + 1, p.stock)
                 : p.quantity + 1;
             return { ...p, quantity: newQuantity, total: newQuantity * p.price };
@@ -71,7 +70,8 @@ useEffect(() => {
         loading={loadingProducts}
         error={errorProducts}
         isError={isErrorProducts}
-        careStock={careStock}
+        showStock={showStock}
+        hideOutOfStock={showStock}
         trigger={<IconButton padding={4} size="sm" variant="surface" disabled={!aviableProducts || !branchId}
           ref={addProdRef}
         >  {aviableProducts || !branchId ? <Plus /> : <Spinner />} Item </IconButton>} />}
