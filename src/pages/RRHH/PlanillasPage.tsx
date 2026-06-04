@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { Badge, Box, Button, Card, Heading, HStack, Input, InputGroup, Stack, Table, Text } from "@chakra-ui/react";
+import { Badge, Box, Button, Card, Heading, HStack, Input, InputGroup, Stack, Table } from "@chakra-ui/react";
 import { LuPlus, LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
-import { parseDate } from "@/constants/date";
+import { parseDate, parseDateTime } from "@/constants/date";
 import { useGetPayrollProcesses } from "@/queries/payroll-processes.queries";
-import { formatStatusColor, translatePayrollStatus, processTypeNameMap } from "@/constants/payroll";
+import { translatePayrollStatus, processTypeNameMap } from "@/constants/payroll";
 
 export default function PlanillasPage() {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ export default function PlanillasPage() {
                   onChange={(event) => setPlanillaSearch(event.target.value)}
                 />
               </InputGroup>
-              <Badge colorPalette="gray">{filteredProcesses.length} planillas</Badge>
+              <Badge colorPalette="gray">{processes.length} planillas{planillaSearch ? ` (${filteredProcesses.length} filtradas)` : ""}</Badge>
             </HStack>
 
             <Table.ScrollArea borderWidth="1px" rounded="md" maxHeight="520px">
@@ -79,11 +79,9 @@ export default function PlanillasPage() {
                     >
                       <Table.Cell>{process.name}</Table.Cell>
                       <Table.Cell>{processTypeNameMap[process.processTypeId] ?? process.processTypeName}</Table.Cell>
-                      <Table.Cell>{parseDate(process.startDate)}</Table.Cell>
+                      <Table.Cell>{parseDateTime(process.startDate)}</Table.Cell>
                       <Table.Cell>{process.payDate ? parseDate(process.payDate) : "-"}</Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={formatStatusColor(process.payrollStatusName)}>{translatePayrollStatus(process.payrollStatusName)}</Badge>
-                      </Table.Cell>
+                      <Table.Cell>{translatePayrollStatus(process.payrollStatusName)}</Table.Cell>
                     </Table.Row>
                   ))}
                   {filteredProcesses.length === 0 && (

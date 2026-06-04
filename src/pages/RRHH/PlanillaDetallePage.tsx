@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Badge, Box, Button, Card, CloseButton, createListCollection, Dialog, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
-import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote, LuPrinter } from "react-icons/lu";
+import { LuArrowLeft, LuCalculator, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote, LuPrinter } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { parseDate, parseDateTime } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { processTypeNameMap, formatStatusColor, translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
-import { useAddEmployees, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
+import { useAddEmployees, useCalculatePayrollProcess, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
+import { useGetAccounts } from "@/queries/accounts.queries";
+import { useCreateMovement } from "@/queries/bankMovements.queries";
 import type { EligibleEmployeeResponseDto, PayrollDetailSummaryResponseDto } from "@/api/payroll-processes.api";
 import { parseApiError } from "@/utils/api-error";
 import { toaster } from "@/components/ui/toaster";
@@ -27,6 +29,9 @@ export default function PlanillaDetallePage() {
   const closeAndPayMutation = useCloseAndPayPayrollProcess(Number.isFinite(processId) ? processId : undefined);
   const removeEmployeeMutation = useRemoveEmployeeFromProcess(Number.isFinite(processId) ? processId : undefined);
   const closeProcessMutation = useClosePayrollProcess(Number.isFinite(processId) ? processId : undefined);
+  const calculateMutation = useCalculatePayrollProcess(Number.isFinite(processId) ? processId : undefined);
+  const accountsQuery = useGetAccounts({ pageSize: 100 });
+  const createMovementMutation = useCreateMovement();
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [employeeSearch, setEmployeeSearch] = useState("");
@@ -39,6 +44,7 @@ export default function PlanillaDetallePage() {
   const [batchReceiptOpen, setBatchReceiptOpen] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [payConfirmOpen, setPayConfirmOpen] = useState(false);
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState("");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [removeTargetId, setRemoveTargetId] = useState<number | null>(null);
 
@@ -105,6 +111,19 @@ export default function PlanillaDetallePage() {
       }),
     [positionOptions],
   );
+
+  const bankAccountCollection = useMemo(() => {
+    const bankAccounts = accountsQuery.data?.accounts ?? [];
+    const activeAccounts = bankAccounts.filter((a) => a.isActive);
+    return createListCollection({
+      items: [
+        ...activeAccounts.map((a) => ({
+          label: `${a.name ?? "Sin nombre"} ${a.accountNumber ? `(${a.accountNumber})` : ""}`,
+          value: String(a.id),
+        })),
+      ],
+    });
+  }, [accountsQuery.data]);
 
   const filteredEligible = useMemo(() => {
     const term = employeeSearch.trim().toLowerCase();
@@ -486,6 +505,26 @@ export default function PlanillaDetallePage() {
           {isProcessOpen && (
             <Button
               colorPalette="brand"
+              onClick={() => {
+                calculateMutation.mutate(undefined, {
+                  onSuccess: () => {
+                    toaster.create({ title: "Cálculo ejecutado con éxito", type: "success" });
+                    summariesQuery.refetch();
+                  },
+                  onError: (error) => {
+                    const parsed = parseApiError(error);
+                    toaster.create({ title: "No se pudo calcular", description: parsed.message, type: "error" });
+                  },
+                });
+              }}
+              loading={calculateMutation.isPending}
+            >
+              <LuCalculator /> Calcular
+            </Button>
+          )}
+          {isProcessOpen && (
+            <Button
+              colorPalette="brand"
               onClick={() => setCloseConfirmOpen(true)}
               loading={closeProcessMutation.isPending}
             >
@@ -573,13 +612,39 @@ export default function PlanillaDetallePage() {
                 <Dialog.CloseTrigger asChild><CloseButton size="sm" /></Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body pb={4}>
-                <Text fontSize="sm">¿Estás seguro de proceder al pago de esta planilla? Se generará el asiento contable correspondiente.</Text>
+                <Stack gap={3}>
+                  <Text fontSize="sm">¿Estás seguro de proceder al pago de esta planilla? Se generará el asiento contable correspondiente.</Text>
+                  <Box>
+                    <Text fontSize="sm" fontWeight="medium" mb={1}>Cuenta Bancaria Destino</Text>
+                    <Select.Root collection={bankAccountCollection} size="sm" value={[selectedBankAccountId]} onValueChange={(e) => setSelectedBankAccountId(e.value[0] ?? "")}>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder="Seleccionar cuenta bancaria" />
+                      </Select.Trigger>
+                      <Select.Content>
+                        {bankAccountCollection.items.map((item) => (
+                          <Select.Item item={item} key={item.value}>{item.label}</Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Root>
+                  </Box>
+                </Stack>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button variant="surface" colorPalette="gray" onClick={() => setPayConfirmOpen(false)}>Cancelar</Button>
-                <Button colorPalette="brand" loading={closeAndPayMutation.isPending} onClick={async () => {
+                <Button variant="surface" colorPalette="gray" onClick={() => { setPayConfirmOpen(false); setSelectedBankAccountId(""); }}>Cancelar</Button>
+                <Button colorPalette="brand" loading={closeAndPayMutation.isPending || createMovementMutation.isPending} onClick={async () => {
+                  if (!selectedBankAccountId) {
+                    toaster.create({ title: "Selecciona una cuenta bancaria", type: "error" });
+                    return;
+                  }
                   try {
-                    await closeAndPayMutation.mutateAsync();
+                    const data = await closeAndPayMutation.mutateAsync();
+                    await createMovementMutation.mutateAsync({
+                      accountId: Number(selectedBankAccountId),
+                      amount: data.totalNetoPagado,
+                      description: "Pago de Salarios",
+                      date: new Date().toISOString(),
+                      movementType: 1,
+                    });
                     await processQuery.refetch();
                     await summariesQuery.refetch();
                   } catch (error) {
@@ -587,6 +652,7 @@ export default function PlanillaDetallePage() {
                     toaster.create({ title: "No se pudo procesar el pago", description: parsed.message, type: "error" });
                   } finally {
                     setPayConfirmOpen(false);
+                    setSelectedBankAccountId("");
                   }
                 }}>Pagar</Button>
               </Dialog.Footer>
