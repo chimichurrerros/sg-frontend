@@ -19,6 +19,7 @@ import PageTitle from "@/components/ui/title";
 
 export default function StockListPage() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
+    const [filterBranchId, setFilterBranchId] = useState<number | null>(null);
     const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -74,6 +75,19 @@ export default function StockListPage() {
                 label: b.name,
                 value: String(b.id),
             })),
+        }),
+        [branchesData],
+    );
+
+    const branchFilterCollection = useMemo(
+        () => createListCollection({
+            items: [
+                { label: "Todas las sucursales", value: "" },
+                ...(branchesData?.branches ?? []).map((b) => ({
+                    label: b.name,
+                    value: String(b.id),
+                })),
+            ],
         }),
         [branchesData],
     );
@@ -220,13 +234,16 @@ export default function StockListPage() {
     const isPending = createItem.isPending || editItem.isPending || deleteItem.isPending;
 
     const stocks = allStock?.stocks ?? [];
-    const paginatedStocks = stocks.slice((params.page - 1) * params.pageSize, params.page * params.pageSize);
+    const filteredStocks = filterBranchId
+        ? stocks.filter(s => s.branchId === filterBranchId)
+        : stocks;
+    const paginatedStocks = filteredStocks.slice((params.page - 1) * params.pageSize, params.page * params.pageSize);
 
     const pagination = {
         currentPage: params.page,
         pageSize: params.pageSize,
-        totalElements: stocks.length,
-        totalPages: Math.ceil(stocks.length / params.pageSize),
+        totalElements: filteredStocks.length,
+        totalPages: Math.ceil(filteredStocks.length / params.pageSize),
     };
 
     const currentCollection = itemType === "service" ? serviceCollection : productCollection;
@@ -239,6 +256,39 @@ export default function StockListPage() {
                 <InputGroup flex="1" startElement={<LuSearch />}>
                     <Input placeholder="Buscar en inventario..." />
                 </InputGroup>
+                <Select.Root
+                    collection={branchFilterCollection}
+                    value={filterBranchId ? [String(filterBranchId)] : [""]}
+                    onValueChange={(e) => {
+                        const val = e.value[0];
+                        setFilterBranchId(val ? Number(val) : null);
+                        setParams({ ...params, page: 1 });
+                    }}
+                    size="sm"
+                    width="180px"
+                >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                        <Select.Trigger>
+                            <Select.ValueText placeholder="Filtrar por sucursal" />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                            <Select.Indicator />
+                        </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                        <Select.Positioner>
+                            <Select.Content>
+                                {branchFilterCollection.items.map((item) => (
+                                    <Select.Item item={item} key={item.value}>
+                                        {item.label}
+                                        <Select.ItemIndicator />
+                                    </Select.Item>
+                                ))}
+                            </Select.Content>
+                        </Select.Positioner>
+                    </Portal>
+                </Select.Root>
                 <Box display="flex" flexDirection="row" gap={2}>
                     <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
                     <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
