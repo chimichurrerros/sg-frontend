@@ -19,12 +19,13 @@ import PurchaseProductsTable, {
   type PurchaseProductRow,
 } from "../components/PurchaseProductsTable";
 import PageTitle from "@/components/ui/title";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function PurchaseRequestView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const purchaseRequestId = Number(id);
-
+  const user = useAuthStore(s=>s.user)
   const {
     data: purchaseRequest,
     isPending,
@@ -147,6 +148,7 @@ export default function PurchaseRequestView() {
             products={products}
             onDataChange={() => {}}
             readOnly
+            branchId={user.branchId}
           />
         </Box>
       </Stack>
