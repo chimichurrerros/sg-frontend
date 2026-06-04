@@ -69,6 +69,7 @@ export default function SupplierQuoteSheet({ mode }: SupplierQuoteSheetProps) {
       labelName: "Cantidad Pedida", propName: "quantityRequested",
       isEditable: true,
       isSortable: true,
+      inputType:"number",
       validate: (value: number | string) => Number(value) > 0,
       sortFunction: (a: ProductRow, b: ProductRow) => a.quantityRequested - b.quantityRequested,
     },

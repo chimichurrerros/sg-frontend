@@ -290,9 +290,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
   return (
     <Box height="89vh" display="flex" flexDirection="column">
       <Flex justify="space-between" alignItems="center" justifyContent="space-between" mb={2} flexShrink={0}>
-        <Box display="flex" gap={3}>
-          <PageTitle> {mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}</PageTitle>
-          {mode === "view" && <Text fontSize="2xl" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
+        <Box display="flex" gap={1} flexDirection={"column"}>
+          <PageTitle>{mode === "create" && "Nueva"} Venta {saleForm.sale.saleNumber ? `N°${saleForm.sale.saleNumber}` : ""}</PageTitle>
+          {mode === "view" && <Text fontSize="lg" fontWeight="bold" color="gray.600"> | Realizada el:  {parseDate(sale?.date)}</Text>}
         </Box>
 
         <Flex align="center" gap={3}>
@@ -337,7 +337,6 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
 
         </Flex>
       </Flex>
-
       <Flex gap={4} align="flex-end" mb={2} wrap="wrap" justifyContent="space-between" flexShrink={0}>
         {mode === "create" && (
           <Box flex={1.5} minW="180px">
