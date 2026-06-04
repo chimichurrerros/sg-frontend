@@ -96,7 +96,7 @@ export const NAV_CONFIG: NavItem[] = [
       },
       {
         id: "notas-credito-ventas",
-        label: "Notas de Crédito(Ventas)",
+        label: "Notas de Crédito",
         icon: StickyNote,
         path: "/ventas/notas-de-credito",
         permission: "creditNotes.view",
