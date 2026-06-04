@@ -256,6 +256,12 @@ export const NAV_CONFIG: NavItem[] = [
         path: "/inventario",
         permission: "stock.view",
       },
+      {
+        id: "organizacion",
+        label: "Organización",
+        icon: GitBranch,
+        path: "/gestiones/organizacion?tab=employees",
+      },
     ],
   },
   {

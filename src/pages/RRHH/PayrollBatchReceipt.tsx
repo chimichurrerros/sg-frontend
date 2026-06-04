@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
 import { LuX } from "react-icons/lu";
+import { LuPrinter } from "react-icons/lu";
 import { payrollProcessesApi, type PayrollEmployeeReceiptDto, type PayrollDetailSummaryResponseDto } from "@/api/payroll-processes.api";
 import { parsePrice } from "@/constants/price";
 
@@ -121,7 +122,6 @@ function ReceiptHalf({ receipt }: { receipt: PayrollEmployeeReceiptDto }) {
 }
 
 export default function PayrollBatchReceipt({ processId, summaries, onClose }: PayrollBatchReceiptProps) {
-  const printRef = useRef<HTMLDivElement>(null);
   const [receipts, setReceipts] = useState<PayrollEmployeeReceiptDto[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -141,6 +141,22 @@ export default function PayrollBatchReceipt({ processId, summaries, onClose }: P
     };
     fetchAll();
   }, [processId, summaries]);
+
+  useEffect(() => {
+    if (!loading && receipts.length > 0) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 500);
+      const handleAfterPrint = () => {
+        onClose();
+      };
+      window.addEventListener("afterprint", handleAfterPrint);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("afterprint", handleAfterPrint);
+      };
+    }
+  }, [loading, receipts, onClose]);
 
   const handlePrint = () => {
     window.print();
@@ -243,7 +259,7 @@ export default function PayrollBatchReceipt({ processId, summaries, onClose }: P
       >
         <Box className="receipt-no-print" display="flex" justifyContent="space-between" mb={2}>
           <Button variant="outline" size="sm" colorPalette="brand" onClick={handlePrint}>
-            Imprimir
+            <LuPrinter /> Imprimir
           </Button>
           <Button variant="outline" size="sm" onClick={onClose}>
             <LuX /> Cerrar
@@ -256,7 +272,7 @@ export default function PayrollBatchReceipt({ processId, summaries, onClose }: P
             <Text mt={4}>Cargando recibos...</Text>
           </Box>
         ) : (
-          <Box ref={printRef}>
+          <Box>
             {receipts.map((receipt, idx) => (
               <Box key={idx}>
                 {idx > 0 && <div className="receipt-employee-break" />}

@@ -1016,7 +1016,7 @@ export default function NovedadesPage() {
                   <Field.Label>Monto <Text as="span" color="red.500">*</Text></Field.Label>
                   <Input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     placeholder="0"
                     {...manualRegister("amount")}

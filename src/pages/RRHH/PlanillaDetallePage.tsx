@@ -1,35 +1,50 @@
 import { useMemo, useState } from "react";
 import { Badge, Box, Button, Card, CloseButton, createListCollection, Dialog, Grid, Heading, HStack, Input, InputGroup, Portal, Select, Spinner, Stack, Table, Text } from "@chakra-ui/react";
-import { LuArrowLeft, LuCalculator, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote, LuPrinter } from "react-icons/lu";
+import { LuArrowLeft, LuCheck, LuRefreshCw, LuSearch, LuTrash2, LuBanknote, LuPrinter, LuPlus } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { parseDate, parseDateTime } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import { processTypeNameMap, formatStatusColor, translatePayrollStatus, PayrollStatusId } from "@/constants/payroll";
-import { useAddEmployees, useCalculatePayrollProcess, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
+import { useAddEmployees, useCloseAndPayPayrollProcess, useGetEligibleEmployees, useGetPayrollDetailSummaries, useGetPayrollProcess, useRemoveEmployeeFromProcess, useClosePayrollProcess } from "@/queries/payroll-processes.queries";
 import { useGetAccounts } from "@/queries/accounts.queries";
 import { useCreateMovement } from "@/queries/bankMovements.queries";
 import type { EligibleEmployeeResponseDto, PayrollDetailSummaryResponseDto } from "@/api/payroll-processes.api";
 import { parseApiError } from "@/utils/api-error";
 import { toaster } from "@/components/ui/toaster";
+import PaginationControl from "@/components/ui/pagination-control";
+import PageSizeControl from "@/components/ui/page-size-control";
+import type { PaginationParams } from "@/types/types";
 import EmployeePayrollDetailModal from "./EmployeePayrollDetailModal";
 import ConceptSummaryModal from "./ConceptSummaryModal";
 import PayrollBatchReceipt from "./PayrollBatchReceipt";
 
 const formatDate = (value?: string | null) => (value ? parseDate(value) : "-");
 
+const toLocalISO = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const offset = -d.getTimezoneOffset();
+  const sign = offset >= 0 ? "+" : "-";
+  const abs = Math.abs(offset);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+};
+
 export default function PlanillaDetallePage() {
   const navigate = useNavigate();
   const params = useParams<{ id: string }>();
   const processId = Number(params.id);
 
+  const [summarySearch, setSummarySearch] = useState("");
+  const [summaryPage, setSummaryPage] = useState(1);
+  const [summaryPageSize, setSummaryPageSize] = useState(10);
+
   const processQuery = useGetPayrollProcess(Number.isFinite(processId) ? processId : undefined);
   const eligibleQuery = useGetEligibleEmployees(Number.isFinite(processId) ? processId : undefined);
-  const summariesQuery = useGetPayrollDetailSummaries(Number.isFinite(processId) ? processId : undefined);
+  const summariesQuery = useGetPayrollDetailSummaries(Number.isFinite(processId) ? processId : undefined, summaryPage, summaryPageSize);
   const addEmployeesMutation = useAddEmployees(Number.isFinite(processId) ? processId : undefined);
   const closeAndPayMutation = useCloseAndPayPayrollProcess(Number.isFinite(processId) ? processId : undefined);
   const removeEmployeeMutation = useRemoveEmployeeFromProcess(Number.isFinite(processId) ? processId : undefined);
   const closeProcessMutation = useClosePayrollProcess(Number.isFinite(processId) ? processId : undefined);
-  const calculateMutation = useCalculatePayrollProcess(Number.isFinite(processId) ? processId : undefined);
   const accountsQuery = useGetAccounts({ pageSize: 100 });
   const createMovementMutation = useCreateMovement();
 
@@ -47,10 +62,13 @@ export default function PlanillaDetallePage() {
   const [selectedBankAccountId, setSelectedBankAccountId] = useState("");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [removeTargetId, setRemoveTargetId] = useState<number | null>(null);
+  const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
 
   const process = processQuery.data ?? null;
   const eligibleEmployees = eligibleQuery.data ?? [];
-  const summaries = summariesQuery.data ?? [];
+  const summariesWrapper = summariesQuery.data;
+  const summaries = summariesWrapper?.summaries ?? [];
+  const pagination = summariesWrapper?.pagination ?? null;
   const isProcessOpen = process?.payrollStatusId === PayrollStatusId.Open;
   const isClosed = process?.payrollStatusId === PayrollStatusId.Closed;
   const isPaid = process?.payrollStatusId === PayrollStatusId.Paid;
@@ -179,6 +197,17 @@ export default function PlanillaDetallePage() {
 
   const selectedCount = selectedIds.length;
 
+  const filteredSummaries = useMemo(() => {
+    const term = summarySearch.trim().toLowerCase();
+    if (!term) return summaries;
+    return summaries.filter((s) =>
+      [s.fileNumber, s.fullName, s.branchName, s.areaName, s.positionName]
+        .join(" ")
+        .toLowerCase()
+        .includes(term),
+    );
+  }, [summaries, summarySearch]);
+
   return (
     <Stack gap={5} p={4}>
       <HStack justify="space-between" flexWrap="wrap" gap={3}>
@@ -221,9 +250,46 @@ export default function PlanillaDetallePage() {
         </Card.Body>
       </Card.Root>
 
+      {isProcessOpen && !showEmployeeSelector && (
+        <Card.Root
+          variant="outline"
+          cursor="pointer"
+          onClick={() => setShowEmployeeSelector(true)}
+          _hover={{ bg: "gray.50", borderColor: "brand.500" }}
+          transition="all 0.15s"
+        >
+          <Card.Body py={6}>
+            <HStack justify="space-between">
+              <HStack gap={3}>
+                <Box
+                  w={10}
+                  h={10}
+                  rounded="full"
+                  bg="brand.50"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <LuPlus size={20} />
+                </Box>
+                <Stack gap={0}>
+                  <Heading size="md" fontWeight="semibold">Agregar Empleados</Heading>
+                  <Text fontSize="sm" color="fg.muted">Añadir empleados disponibles a esta planilla</Text>
+                </Stack>
+              </HStack>
+              <Badge colorPalette="brand">{eligibleEmployees.length} disponibles</Badge>
+            </HStack>
+          </Card.Body>
+        </Card.Root>
+      )}
+
+      {isProcessOpen && showEmployeeSelector && (
       <Card.Root variant="outline">
         <Card.Header>
-          <Heading size="md">Empleados Disponibles</Heading>
+          <HStack justify="space-between">
+            <Heading size="md">Empleados Disponibles</Heading>
+            <CloseButton onClick={() => setShowEmployeeSelector(false)} />
+          </HStack>
         </Card.Header>
         <Card.Body>
           <Stack gap={4}>
@@ -412,16 +478,41 @@ export default function PlanillaDetallePage() {
                 loading={addEmployeesMutation.isPending}
                 disabled={selectedIds.length === 0 || !isProcessOpen}
               >
-                <LuCheck /> Añadir
+                <LuCheck /> Agregar
               </Button>
             </HStack>
           </Stack>
         </Card.Body>
       </Card.Root>
+      )}
 
       <Card.Root variant="outline">
         <Card.Header>
-          <Heading size="md">Resultados de Pre-Liquidación</Heading>
+          <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
+            <Heading size="md">Resultados de Pre-Liquidación</Heading>
+            {summaries.length > 0 && (
+              <HStack gap={2} flexWrap="wrap">
+                <Button variant="outline" size="sm" onClick={() => setConceptSummaryOpen(true)}>
+                  Resumen
+                </Button>
+                {isProcessOpen && (
+                  <Button size="sm" colorPalette="brand" onClick={() => setCloseConfirmOpen(true)} loading={closeProcessMutation.isPending}>
+                    <LuRefreshCw /> Cerrar Planilla
+                  </Button>
+                )}
+                {isClosed && (
+                  <Button size="sm" colorPalette="brand" onClick={() => setPayConfirmOpen(true)} loading={closeAndPayMutation.isPending}>
+                    <LuBanknote /> Proceder al pago
+                  </Button>
+                )}
+                {isPaid && (
+                  <Button size="sm" colorPalette="brand" variant="outline" onClick={() => setBatchReceiptOpen(true)}>
+                    <LuPrinter /> Imprimir
+                  </Button>
+                )}
+              </HStack>
+            )}
+          </HStack>
         </Card.Header>
         <Card.Body>
           {summariesQuery.isPending ? (
@@ -433,15 +524,22 @@ export default function PlanillaDetallePage() {
             <Box py={8} textAlign="center">
               <Text color="red.500">Error al cargar los resultados de la planilla.</Text>
             </Box>
-          ) : summaries.length === 0 ? (
+          ) : (summariesWrapper && summaries.length === 0) ? (
             <Text color="fg.muted">Aún no se han añadido empleados a esta planilla.</Text>
           ) : (
             <Stack gap={4}>
+              <InputGroup startElement={<LuSearch />} maxW={{ base: "100%", md: "24rem" }}>
+                <Input
+                  placeholder="Buscar por legajo, nombre, sucursal..."
+                  value={summarySearch}
+                  onChange={(event) => setSummarySearch(event.target.value)}
+                />
+              </InputGroup>
               <HStack wrap="wrap" gap={3}>
-                <Badge colorPalette="green">Empleados: {summaries.length}</Badge>
-                <Badge colorPalette="blue">Ingresos: {parsePrice(summaries.reduce((sum, s) => sum + s.sueldoBruto, 0))}</Badge>
-                <Badge colorPalette="orange">Egresos: {parsePrice(summaries.reduce((sum, s) => sum + s.descuentos, 0))}</Badge>
-                <Badge colorPalette="purple">Neto: {parsePrice(summaries.reduce((sum, s) => sum + s.sueldoNeto, 0))}</Badge>
+                <Badge colorPalette="green">Empleados: {filteredSummaries.length}</Badge>
+                <Badge colorPalette="blue">Ingresos: {parsePrice(filteredSummaries.reduce((sum, s) => sum + s.sueldoBruto, 0))}</Badge>
+                <Badge colorPalette="orange">Egresos: {parsePrice(filteredSummaries.reduce((sum, s) => sum + s.descuentos, 0))}</Badge>
+                <Badge colorPalette="purple">Neto: {parsePrice(filteredSummaries.reduce((sum, s) => sum + s.sueldoNeto, 0))}</Badge>
               </HStack>
 
               <Table.ScrollArea borderWidth="1px" rounded="md" maxHeight="400px">
@@ -460,7 +558,7 @@ export default function PlanillaDetallePage() {
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {summaries.map((row) => (
+                    {filteredSummaries.map((row) => (
                       <Table.Row
                         key={row.employeeId}
                         cursor="pointer"
@@ -489,64 +587,37 @@ export default function PlanillaDetallePage() {
                         </Table.Cell>
                       </Table.Row>
                     ))}
+                    {filteredSummaries.length === 0 && (
+                      <Table.Row>
+                        <Table.Cell colSpan={9} textAlign="center" py={8}>
+                          Sin resultados para la búsqueda
+                        </Table.Cell>
+                      </Table.Row>
+                    )}
                   </Table.Body>
                 </Table.Root>
               </Table.ScrollArea>
+
+              {pagination && (
+                <HStack justify="space-between" align="center">
+                  <PageSizeControl
+                    params={{ page: summaryPage, pageSize: summaryPageSize }}
+                    paramsChangeFunction={(next: PaginationParams) => {
+                      setSummaryPageSize(next.pageSize ?? 10);
+                      setSummaryPage(1);
+                    }}
+                    min={5}
+                    max={30}
+                  />
+                  <PaginationControl pagination={pagination} onPageChange={(page: number) => setSummaryPage(page)} />
+                </HStack>
+              )}
             </Stack>
           )}
         </Card.Body>
       </Card.Root>
 
-      {summaries.length > 0 && (
-        <HStack justify="flex-end" gap={3} flexWrap="wrap">
-          <Button variant="outline" onClick={() => setConceptSummaryOpen(true)}>
-            Resumen
-          </Button>
-          {isProcessOpen && (
-            <Button
-              colorPalette="brand"
-              onClick={() => {
-                calculateMutation.mutate(undefined, {
-                  onSuccess: () => {
-                    toaster.create({ title: "Cálculo ejecutado con éxito", type: "success" });
-                    summariesQuery.refetch();
-                  },
-                  onError: (error) => {
-                    const parsed = parseApiError(error);
-                    toaster.create({ title: "No se pudo calcular", description: parsed.message, type: "error" });
-                  },
-                });
-              }}
-              loading={calculateMutation.isPending}
-            >
-              <LuCalculator /> Calcular
-            </Button>
-          )}
-          {isProcessOpen && (
-            <Button
-              colorPalette="brand"
-              onClick={() => setCloseConfirmOpen(true)}
-              loading={closeProcessMutation.isPending}
-            >
-              <LuRefreshCw /> Cerrar Planilla
-            </Button>
-          )}
-          {isClosed && (
-            <Button
-              colorPalette="brand"
-              onClick={() => setPayConfirmOpen(true)}
-              loading={closeAndPayMutation.isPending}
-            >
-              <LuBanknote /> Proceder al pago
-            </Button>
-          )}
-          {isPaid && summaries.length > 0 && (
-            <Button colorPalette="brand" variant="outline" onClick={() => setBatchReceiptOpen(true)}>
-              <LuPrinter /> Imprimir Recibos
-            </Button>
-          )}
-        </HStack>
-      )}
+
 
       <EmployeePayrollDetailModal
         processId={processId}
@@ -615,7 +686,7 @@ export default function PlanillaDetallePage() {
                 <Stack gap={3}>
                   <Text fontSize="sm">¿Estás seguro de proceder al pago de esta planilla? Se generará el asiento contable correspondiente.</Text>
                   <Box>
-                    <Text fontSize="sm" fontWeight="medium" mb={1}>Cuenta Bancaria Destino</Text>
+                    <Text fontSize="sm" fontWeight="medium" mb={1}>Cuenta Bancaria de Origen</Text>
                     <Select.Root collection={bankAccountCollection} size="sm" value={[selectedBankAccountId]} onValueChange={(e) => setSelectedBankAccountId(e.value[0] ?? "")}>
                       <Select.Trigger>
                         <Select.ValueText placeholder="Seleccionar cuenta bancaria" />
@@ -642,7 +713,7 @@ export default function PlanillaDetallePage() {
                       accountId: Number(selectedBankAccountId),
                       amount: data.totalNetoPagado,
                       description: "Pago de Salarios",
-                      date: new Date().toISOString(),
+                      date: toLocalISO(),
                       movementType: 1,
                     });
                     await processQuery.refetch();
