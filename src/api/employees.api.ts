@@ -40,6 +40,7 @@ export interface UpdateEmployeeRequestDTO {
   phone?: string | null;
   address?: string | null;
   isActive: boolean;
+  basicSalary?: number;
 }
 
 export interface CreateEmployeePositionHistoryRequestDto {

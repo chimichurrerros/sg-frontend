@@ -79,7 +79,7 @@ export default function PlanillasPage() {
                     >
                       <Table.Cell>{process.name}</Table.Cell>
                       <Table.Cell>{processTypeNameMap[process.processTypeId] ?? process.processTypeName}</Table.Cell>
-                      <Table.Cell>{parseDateTime(process.startDate)}</Table.Cell>
+                      <Table.Cell>{parseDate(process.startDate)}</Table.Cell>
                       <Table.Cell>{process.payDate ? parseDate(process.payDate) : "-"}</Table.Cell>
                       <Table.Cell>{translatePayrollStatus(process.payrollStatusName)}</Table.Cell>
                     </Table.Row>
