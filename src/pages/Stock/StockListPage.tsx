@@ -5,7 +5,7 @@ import { LuSearch } from "react-icons/lu";
 import { useEffect, useMemo, useState } from "react";
 import type { StockItem } from "@/types/inventory";
 import TableSelect, { type label } from "@/components/ui/tables/table-select";
-import { useAllStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
+import { useStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
@@ -20,6 +20,8 @@ import PageTitle from "@/components/ui/title";
 export default function StockListPage() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
     const [filterBranchId, setFilterBranchId] = useState<number | null>(null);
+    const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState("");
     const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -29,7 +31,7 @@ export default function StockListPage() {
     const [formBranchId, setFormBranchId] = useState<number>(0);
     const [formQuantity, setFormQuantity] = useState("");
 
-    const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useAllStock();
+    const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useStock(filterBranchId ?? undefined, search || undefined);
     const { data: branchesData } = useAllBranches();
     const { data: productsData } = useAllProducts();
     const { data: servicesData } = useAllServices();
@@ -46,6 +48,14 @@ export default function StockListPage() {
             });
         }
     }, [isErrorAllStock, errorAllStock]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearch(searchInput);
+            setParams(prev => ({ ...prev, page: 1 }));
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
     const serviceIds = new Set((servicesData?.services ?? []).map((s) => s.id));
 
@@ -234,16 +244,13 @@ export default function StockListPage() {
     const isPending = createItem.isPending || editItem.isPending || deleteItem.isPending;
 
     const stocks = allStock?.stocks ?? [];
-    const filteredStocks = filterBranchId
-        ? stocks.filter(s => s.branchId === filterBranchId)
-        : stocks;
-    const paginatedStocks = filteredStocks.slice((params.page - 1) * params.pageSize, params.page * params.pageSize);
+    const paginatedStocks = stocks.slice((params.page - 1) * params.pageSize, params.page * params.pageSize);
 
     const pagination = {
         currentPage: params.page,
         pageSize: params.pageSize,
-        totalElements: filteredStocks.length,
-        totalPages: Math.ceil(filteredStocks.length / params.pageSize),
+        totalElements: stocks.length,
+        totalPages: Math.ceil(stocks.length / params.pageSize),
     };
 
     const currentCollection = itemType === "service" ? serviceCollection : productCollection;
@@ -254,7 +261,7 @@ export default function StockListPage() {
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
-                    <Input placeholder="Buscar en inventario..." />
+                    <Input placeholder="Buscar en inventario..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
                 </InputGroup>
                 <Select.Root
                     collection={branchFilterCollection}

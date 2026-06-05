@@ -28,7 +28,12 @@ export interface CreateStockItemRequest {
 }
 
 export const stockApi = {
-    getAll: () => apiClient.get<StockGetResponse>("/api/stock/all").then((r) => r.data),
+    getAll: (branchId?: number, search?: string) => {
+        const hasParams = branchId != null || (search != null && search !== "");
+        return apiClient.get<StockGetResponse>(hasParams ? "/api/stock" : "/api/stock/all", {
+            params: hasParams ? { ...(branchId != null ? { branchId } : {}), ...(search ? { search } : {}) } : undefined,
+        }).then((r) => r.data);
+    },
     create: (body: CreateStockItemRequest) => apiClient.post<StockItemResponse>("/api/stock", body).then((r) => r.data),
     edit: (id: number, body: EditStockItemRequest) => apiClient.put<StockItemResponse>("/api/stock/" + id, body).then((r) => r.data),
     delete: (id: number) => apiClient.delete("/api/stock/" + id).then((r) => r.data)

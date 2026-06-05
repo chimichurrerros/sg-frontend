@@ -20,7 +20,10 @@ export const catalogKeys = {
 export const useAllProducts = (enabled:boolean = true) => {
   return useQuery({
     queryKey: catalogKeys.products,
-    queryFn: catalogApi.getAllProducts,
+    queryFn: () => catalogApi.getAllProducts().then(r => ({
+      ...r,
+      products: r.products.filter(p => !p.isDeleted),
+    })),
     enabled
   });
 };
@@ -36,7 +39,10 @@ export const useGetProduct = (id?: number) => {
 export const useProductByBranch = (id: number | null,enabled:boolean = true) => {
   return useQuery({
     queryKey: [...catalogKeys.products, "branch", id],
-    queryFn: () => catalogApi.getProductByBranch(id!),
+    queryFn: () => catalogApi.getProductByBranch(id!).then(r => ({
+      ...r,
+      productsStock: r.productsStock.filter(p => !p.isDeleted),
+    })),
     enabled: !!id && enabled
   });
 };
@@ -64,7 +70,10 @@ export const useDeleteProduct = () => {
 export const useAllServices = () => {
   return useQuery({
     queryKey: catalogKeys.services,
-    queryFn: servicesApi.getAll,
+    queryFn: () => servicesApi.getAll().then(r => ({
+      ...r,
+      services: r.services.filter(s => !s.isDeleted),
+    })),
   });
 };
 
