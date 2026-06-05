@@ -61,7 +61,7 @@ export interface UpdateBillRequest {
 
 export const billsApi = {
   getAll: (params?: BillFilterParams) => {
-    const queryParams: Record<string, string | number> = {};
+    const queryParams: Record<string, string | number | boolean> = {};
     if (params?.page !== undefined) queryParams.Page = params.page;
     if (params?.pageSize !== undefined) queryParams.PageSize = params.pageSize;
     if (params?.customerName !== undefined) queryParams.CustomerName = params.customerName;
