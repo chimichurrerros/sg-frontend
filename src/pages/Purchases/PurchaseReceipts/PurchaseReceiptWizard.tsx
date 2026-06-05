@@ -75,7 +75,6 @@ export default function PurchaseReceiptWizard() {
     const watchedBranchId = watch("branchId");
     const watchedBillNumber = watch("billNumber");
     const watchedDate = watch("date");
-    const watchedObservation = watch("observation");
 
     const pofsList = useMemo(() =>
         (pofsData?.purchaseOrdersForSupplier || []).filter((p) => p.state === 1),
@@ -162,7 +161,7 @@ export default function PurchaseReceiptWizard() {
 
     const goNext = async () => {
         if (currentStep === 0) {
-            const valid = await trigger(["pofsId", "supplierId", "branchId", "billNumber", "date"]);
+            const valid = await trigger(["pofsId", "supplierId", "branchId", "billNumber", "stamp", "date"]);
             if (!valid) return;
             loadProducts();
         }
@@ -323,16 +322,17 @@ export default function PurchaseReceiptWizard() {
                     />
                     <Field.ErrorText>{errors.billNumber?.message}</Field.ErrorText>
                 </Field.Root>
-                <Box>
+                <Field.Root invalid={!!errors.stamp}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Timbrado
                     </Text>
                     <Input
                         size="sm"
                         {...register("stamp")}
-                        placeholder="Timbrado de la factura"
+                        placeholder="12345678"
                     />
-                </Box>
+                    <Field.ErrorText>{errors.stamp?.message}</Field.ErrorText>
+                </Field.Root>
                 <Field.Root invalid={!!errors.date}>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
                         Fecha *

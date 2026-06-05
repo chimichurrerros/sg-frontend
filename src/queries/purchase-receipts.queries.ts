@@ -30,13 +30,8 @@ export const useGetPurchaseReceiptById = (id: number) => {
 };
 
 export const useCreatePurchaseReceipt = () => {
-    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: CreatePurchaseReceiptRequest) => purchaseReceiptsApi.create(data),
-        onSuccess: () => {
-            toaster.create({ title: "Recepción creada exitosamente", type: "success" });
-            queryClient.invalidateQueries({ queryKey: purchaseReceiptsKeys.all });
-        },
         onError: (error: Error) => {
             const axiosError = error as { response?: { data?: { title?: string } } };
             const errorMessage = axiosError.response?.data?.title || error.message;
