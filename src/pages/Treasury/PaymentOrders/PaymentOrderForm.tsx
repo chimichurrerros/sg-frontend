@@ -243,6 +243,11 @@ export default function PaymentOrderForm() {
         const errs: Record<string, string> = {};
         if (!supplierId) errs.supplier = "Seleccione un proveedor";
         if (selectedBills.length === 0) errs.bills = "Seleccione al menos una factura para pagar";
+        if (selectedBills.length > 0) {
+            const pofsId = selectedBills[0].purchaseOrderForSupplierId;
+            const allSame = selectedBills.every((b) => b.purchaseOrderForSupplierId === pofsId);
+            if (!allSame) errs.bills = "Todas las facturas deben pertenecer a la misma Orden de Compra por Proveedor";
+        }
         setErrors(errs);
         return Object.keys(errs).length === 0;
     };
@@ -309,8 +314,10 @@ export default function PaymentOrderForm() {
             };
         });
 
+        const pofsId = selectedBills[0]?.purchaseOrderForSupplierId;
+        if (!pofsId) return;
         createPayment({
-            billIds: selectedBills.map((b) => b.id),
+            purchaseOrderForSupplierId: pofsId,
             paymentDate: toISODate(paymentDate),
             notes: notes.trim() || undefined,
             methods,

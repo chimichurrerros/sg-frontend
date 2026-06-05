@@ -83,7 +83,7 @@ export interface PaymentMethodRequest {
 }
 
 export interface CreatePaymentOrderRequest {
-    billIds: number[];
+    purchaseOrderForSupplierId: number;
     paymentDate: string;
     notes?: string | null;
     methods: PaymentMethodRequest[];
