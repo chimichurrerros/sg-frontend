@@ -16,17 +16,17 @@ import type { CreditNote, GetCreditNoteParams } from "@/api/credit-notes-api";
 import { LuCalendar } from "react-icons/lu";
 import PageTitle from "@/components/ui/title";
 
-export default function CreditNotesPage() {
+export default function PurchaseCreditNotesPage() {
     const [selected, setSelected] = React.useState<CreditNote | null>(null);
-    const [params, setParams] = useState<GetCreditNoteParams>({ page: 1, pageSize: 10, type: "1" });
+    const [params, setParams] = useState<GetCreditNoteParams>({ page: 1, pageSize: 10, type: "2" });
     const { data: creditNotesData, isPending, isError, error } = useGetCreditNotes(params);
     const navigate = useNavigate();
 
     const labels: label<CreditNote>[] = [
         { labelName: "ID", propName: "id", isSortable: true, sortFunction: (a, b) => a.id - b.id },
         { labelName: "Nº Factura", propName: "billNumber", isSortable: true, sortFunction: (a, b) => a.billNumber.localeCompare(b.billNumber) },
-        { labelName: "Cliente", propName: "customerName", isSortable: true, sortFunction: (a, b) => a.customerName.localeCompare(b.customerName) },
-        { labelName: "RUC", propName: "customerRuc", isSortable: true, sortFunction: (a, b) => a.customerRuc.localeCompare(b.customerRuc) },
+        { labelName: "Proveedor", propName: "customerName", isSortable: true, sortFunction: (a, b) => a.customerName.localeCompare(b.customerName) },
+        { labelName: "RUC Proveedor", propName: "customerRuc", isSortable: true, sortFunction: (a, b) => a.customerRuc.localeCompare(b.customerRuc) },
         { labelName: "Fecha", propName: "date", transformFunction: (value) => parseDate(value), isSortable: true, sortFunction: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime() },
         {
             labelName: "Motivo", propName: "reason", isSortable: true, transformFunction: (value: string) => {
@@ -55,7 +55,7 @@ export default function CreditNotesPage() {
 
     return (
         <Box padding={5} display="flex" flexDirection="column" gap={4}>
-            <PageTitle>Listado de Notas de Crédito</PageTitle>
+            <PageTitle>Listado de Notas de Crédito de Compra</PageTitle>
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <Box display="flex" flexDirection="row" gap={2} alignItems="center">
@@ -63,7 +63,7 @@ export default function CreditNotesPage() {
                     <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
                 </Box>
                 <Box display="flex" flexDirection="row" gap={2}>
-                    <IconButton padding={2} variant="subtle" disabled={!selected} onClick={() => navigate(`/ventas/notas-de-credito/${selected?.id}`)}>
+                    <IconButton padding={2} variant="subtle" disabled={!selected} onClick={() => navigate(`/compras/notas-de-credito/${selected?.id}`)}>
                         <FileText size={20} />
                         Ver Detalle
                     </IconButton>
@@ -91,13 +91,13 @@ export default function CreditNotesPage() {
                         onChange={(e) => setParams({ ...params, billNumber: e.target.value, page: 1 })}
                     />
                     <Input
-                        placeholder="Nombre del cliente..."
+                        placeholder="Nombre del proveedor..."
                         width={"20%"}
                         value={params.customerName || ""}
                         onChange={(e) => setParams({ ...params, customerName: e.target.value, page: 1 })}
                     />
                     <Input
-                        placeholder="RUC del cliente..."
+                        placeholder="RUC del proveedor..."
                         width={"15%"}
                         value={params.customerRuc || ""}
                         onChange={(e) => setParams({ ...params, customerRuc: e.target.value, page: 1 })}
@@ -154,20 +154,8 @@ export default function CreditNotesPage() {
                             </DatePicker.Positioner>
                         </Portal>
                     </DatePicker.Root>
-                    {/* <DatePickerWrapper
-                        value={params.minDate}
-                        width={"15%"}
-                        placeholder="Fecha desde"
-                        onChange={(dates: string[]) => setParams({ ...params, minDate: dates[0], page: 1 })}
-                    />
-                    <DatePickerWrapper
-                        value={params.maxDate}
-                        width={"15%"}
-                        placeholder="Fecha hasta"
-                        onChange={(dates: string[]) => setParams({ ...params, maxDate: dates[0], page: 1 })}
-                    /> */}
                     <HStack justify="flex-end">
-                        <Button colorScheme="gray" onClick={() => setParams({ page: 1, pageSize: 10 })}>
+                        <Button colorScheme="gray" onClick={() => setParams({ page: 1, pageSize: 10, type: "2" })}>
                             Limpiar
                         </Button>
                     </HStack>
@@ -179,15 +167,15 @@ export default function CreditNotesPage() {
                     labels={labels}
                     data={creditNotesData?.creditNotes || []}
                     onSelect={(item: CreditNote | null) => setSelected(item)}
-                    onDoubleClick={(item: CreditNote) => navigate(`/ventas/notas-de-credito/${item.id}`)}
+                    onDoubleClick={(item: CreditNote) => navigate(`/compras/notas-de-credito/${item.id}`)}
                     loading={isPending}
                     error={error}
                     isError={isError}
                     maxHeight="60vh"
                     noItemsComponent={
                         <EmptyDataScreen
-                            title="Sin Notas de Crédito"
-                            message="No hay notas de crédito disponibles para mostrar, crea una nueva o limpia los filtros de búsqueda"
+                            title="Sin Notas de Crédito de Compra"
+                            message="No hay notas de crédito de compra disponibles para mostrar, crea una nueva o limpia los filtros de búsqueda"
                             icon={<CalendarOff size={32} />}
                         />
                     }

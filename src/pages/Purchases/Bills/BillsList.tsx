@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { billStatusEnumParse } from "@/types/bills";
 import TableSelect, { type label } from "@/components/ui/tables/table-select";
 import { useAllBills } from "@/queries/bills.queries";
-import { useGetAllCustomers } from "@/queries/customers.queries";
+import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { parseDate } from "@/constants/date";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
@@ -16,7 +16,7 @@ import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper"
 import type { Bill } from "@/api/sales.api";
 import type { BillFilterParams } from "@/api/bills.api";
 
-export default function BillsListPage() {
+export default function PurchaseBillsListPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
@@ -25,11 +25,9 @@ export default function BillsListPage() {
     page: Number(searchParams.get("page")) || 1,
     pageSize: Number(searchParams.get("pageSize")) || 10,
     number: searchParams.get("number") || undefined,
-    customerName: searchParams.get("customerName") || undefined,
-    customerRuc: searchParams.get("customerRuc") || undefined,
     startDate: searchParams.get("startDate") || undefined,
     endDate: searchParams.get("endDate") || undefined,
-    isPurchaseBill: false,
+    isPurchaseBill: true,
   }));
 
   const {
@@ -38,12 +36,12 @@ export default function BillsListPage() {
     isError: isErrorAllBills,
     error: errorAllBills,
   } = useAllBills(params);
-  const { data: customers } = useGetAllCustomers();
+  const { data: suppliers } = useAllSuppliers();
 
   useEffect(() => {
     if (isErrorAllBills) {
       toaster.create({
-        title: "Error al traer las Facturas",
+        title: "Error al traer las Facturas de Compra",
         description: errorAllBills?.message,
         type: "error",
       });
@@ -55,8 +53,6 @@ export default function BillsListPage() {
     if (params.page && params.page !== 1) sp.set("page", String(params.page));
     if (params.pageSize && params.pageSize !== 10) sp.set("pageSize", String(params.pageSize));
     if (params.number) sp.set("number", params.number);
-    if (params.customerName) sp.set("customerName", params.customerName);
-    if (params.customerRuc) sp.set("customerRuc", params.customerRuc);
     if (params.startDate) sp.set("startDate", params.startDate);
     if (params.endDate) sp.set("endDate", params.endDate);
     setSearchParams(sp, { replace: true });
@@ -66,10 +62,8 @@ export default function BillsListPage() {
     setParams((prev) => ({ ...prev, ...patch, page: 1 }));
   };
 
-  const getCustomerName = (customerId: number) =>
-    customers?.find((c) => c.id === customerId)?.name ?? "-";
-  const getCustomerRuc = (customerId: number) =>
-    customers?.find((c) => c.id === customerId)?.ruc ?? "-";
+  const getSupplierName = (supplierId: number) =>
+    suppliers?.suppliers?.find((s) => s.id === supplierId)?.businessName ?? "-";
 
   const labels: label<Bill>[] = [
     {
@@ -79,20 +73,12 @@ export default function BillsListPage() {
       sortFunction: (a: Bill, b: Bill) => a.number.localeCompare(b.number),
     },
     {
-      labelName: "Nombre",
+      labelName: "Proveedor",
       isComponent: true,
-      render: (item: Bill) => getCustomerName(item.customerId),
+      render: (item: Bill) => getSupplierName(item.customerId),
       isSortable: true,
       sortFunction: (a: Bill, b: Bill) =>
-        getCustomerName(a.customerId).localeCompare(getCustomerName(b.customerId)),
-    },
-    {
-      labelName: "RUC",
-      isComponent: true,
-      render: (item: Bill) => getCustomerRuc(item.customerId),
-      isSortable: true,
-      sortFunction: (a: Bill, b: Bill) =>
-        getCustomerRuc(a.customerId).localeCompare(getCustomerRuc(b.customerId)),
+        getSupplierName(a.customerId).localeCompare(getSupplierName(b.customerId)),
     },
     {
       labelName: "Fecha",
@@ -108,13 +94,13 @@ export default function BillsListPage() {
 
   const handleViewBill = () => {
     if (!selectedBill) return;
-    navigate(`/ventas/facturas/${selectedBill.id}`);
+    navigate(`/compras/facturas/${selectedBill.id}`);
   };
 
   return (
     <Stack gap={2} p={5}>
       <Text fontWeight="bold" fontSize="3xl">
-        Listado de Facturas
+        Listado de Facturas de Compra
       </Text>
 
       <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
@@ -135,7 +121,6 @@ export default function BillsListPage() {
         </IconButton>
       </Box>
 
-      {/* Filtros */}
       <Box borderWidth="1px" borderRadius="lg" py={3} px={6}>
         <Text mb={1} fontSize="md" fontWeight="bold">Filtros</Text>
         <Box display="flex" flexDirection="row" gap={4} alignItems="center" flexWrap="wrap">
@@ -144,18 +129,6 @@ export default function BillsListPage() {
             width="160px"
             value={params.number ?? ""}
             onChange={(e) => updateFilter({ number: e.target.value || undefined })}
-          />
-          <Input
-            placeholder="Nombre del cliente"
-            width="200px"
-            value={params.customerName ?? ""}
-            onChange={(e) => updateFilter({ customerName: e.target.value || undefined })}
-          />
-          <Input
-            placeholder="RUC del cliente"
-            width="160px"
-            value={params.customerRuc ?? ""}
-            onChange={(e) => updateFilter({ customerRuc: e.target.value || undefined })}
           />
           <DatePickerWrapper
             placeholder="Fecha inicio"
@@ -172,7 +145,7 @@ export default function BillsListPage() {
           <Button
             colorScheme="gray"
             marginLeft="auto"
-            onClick={() => setParams({ page: 1, pageSize: 10, isPurchaseBill: false })}
+            onClick={() => setParams({ page: 1, pageSize: 10, isPurchaseBill: true })}
           >
             Limpiar
           </Button>
@@ -184,18 +157,18 @@ export default function BillsListPage() {
         data={allBills?.bills ?? []}
         loading={loadingAllBills}
         labels={labels}
-        loadingMessage="Cargando Facturas..."
+        loadingMessage="Cargando Facturas de Compra..."
         height="auto"
         noItemsComponent={
           <EmptyDataScreen
-            title="No hay Facturas registradas"
-            message="Registra nuevas Facturas para verlas en esta lista."
+            title="No hay Facturas de Compra registradas"
+            message="No se encontraron facturas de compra."
           />
         }
         onSelect={(item: Bill | null) => {
           setSelectedBill(item);
         }}
-        onDoubleClick={(item: Bill) => navigate(`/ventas/facturas/${item.id}`)}
+        onDoubleClick={(item: Bill) => navigate(`/compras/facturas/${item.id}`)}
       />
       <PaginationControl
         pagination={allBills?.pagination || null}

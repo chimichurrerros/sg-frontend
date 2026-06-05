@@ -57,7 +57,7 @@ export default function CreditNoteSheetPage() {
                         variant="surface"
                         colorScheme="blue"
                         aria-label="Volver al listado"
-                        onClick={() => navigate("/contabilidad/notas-credito")}
+                        onClick={() => navigate(-1) as unknown as void}
                         p={4}
                     >
                         <ArrowLeft size={18} /> Volver al listado

@@ -41,6 +41,8 @@ import ChecksList from "@/pages/Treasury/Checks/ChecksList";
 import CheckView from "@/pages/Treasury/Checks/CheckView";
 import PaymentOrderList from "@/pages/Treasury/PaymentOrders/PaymentOrderList";
 import PaymentOrderForm from "@/pages/Treasury/PaymentOrders/PaymentOrderForm";
+import PurchaseBillsListPage from "@/pages/Purchases/Bills/BillsList";
+import PurchaseBillViewPage from "@/pages/Purchases/Bills/PurchaseBillViewPage";
 import PaymentOrderView from "@/pages/Treasury/PaymentOrders/PaymentOrderView";
 import SupplierQuotesList from "@/pages/Purchases/SupplierQuotes/SupplierQuotesList";
 import RequestForQuotationList from "@/pages/Purchases/RequestForQuotation/RequestForQuotationList";
@@ -77,6 +79,7 @@ import { CustomersListPage } from "@/pages/Customers/CustomersListPage";
 import ReturnsListPage from "@/pages/Sales/Returns/ReturnsListPage";
 import ReturnSheetPage from "@/pages/Sales/Returns/ReturnSheetPage";
 import CreditNotesPage from "@/pages/Sales/CreditNotes/CreditNotesListPage";
+import PurchaseCreditNotesPage from "@/pages/Purchases/CreditNotes/CreditNotesListPage";
 import CreditNoteSheetPage from "@/pages/Sales/CreditNotes/CreditNoteSheetPage";
 
 export const router = createBrowserRouter([
@@ -266,6 +269,20 @@ export const router = createBrowserRouter([
           { path: "/compras/devoluciones/:id", element: <PurchaseReturnView /> },
           { path: "/compras/ordenes-por-proveedor", element: <PurchaseOrdersForSupplierList /> },
           { path: "/compras/ordenes-por-proveedor/:id", element: <PurchaseOrdersForSupplierView /> },
+          {
+            element: <RequirePermission permission="creditNotes.view" />,
+            children: [
+              { path: "/compras/notas-de-credito", element: <PurchaseCreditNotesPage /> },
+              { path: "/compras/notas-de-credito/:id", element: <CreditNoteSheetPage /> },
+            ],
+          },
+          {
+            element: <RequirePermission permission="bills.view" />,
+            children: [
+              { path: "/compras/facturas", element: <PurchaseBillsListPage /> },
+              { path: "/compras/facturas/:id", element: <PurchaseBillViewPage /> },
+            ],
+          },
 
           /* ===== TESORERIA ===== */
           { path: "/tesoreria/bancos", element: <BanksPage /> },
