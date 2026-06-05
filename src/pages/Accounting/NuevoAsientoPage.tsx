@@ -285,6 +285,15 @@ export default function NuevoAsientoPage() {
           </Field.Root>
 
           {/* Description */}
+          <Field.Root required gridColumn="span 2">
+            <Field.Label fontWeight="semibold" fontSize="xs">Descripción</Field.Label>
+            <Input
+              placeholder="Ej. Registro de apertura de ejercicio, pago de servicios..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={activeProcess?.isClosed || createEntryMutation.isPending}
+            />
+          </Field.Root>
 
         </Grid>
 
