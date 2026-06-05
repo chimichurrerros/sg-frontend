@@ -397,11 +397,7 @@ export default function PurchaseOrderFormPage() {
           <LuSave /> Guardar
         </Button>
       </ButtonGroup>
-      {!draft && selectedRequestId > 0 && !loadingDraft && !isViewMode && (
-        <Text color="gray.500" fontSize="sm">
-          No se encontró cotización para esta solicitud.
-        </Text>
-      )}
+      
     </Stack>
   );
 }
