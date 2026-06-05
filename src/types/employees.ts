@@ -17,6 +17,7 @@ export interface Employee {
   areaId: number;
   areaName?: string | null;
   branchId: number | null;
+  branchName?: string | null;
   inmediatlyBossId: number | null;
   gender: GenderEnum;
   maritalStatus: MaritalStatusEnum;
