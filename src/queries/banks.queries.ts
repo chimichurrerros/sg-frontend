@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { bankAccountsApi } from "@/api/accounts.api";
 import {
   banksApi,
   type BankResponseDto,
@@ -111,5 +112,13 @@ export const useDeleteBank = () => {
         type: "error",
       });
     },
+  });
+};
+
+export const useGetAllAccounts = () => {
+  return useQuery({
+    queryKey: ["accounts", "all"],
+    queryFn: () => bankAccountsApi.getAccounts({ page: 1, pageSize: 200 }),
+    retry: RETRIES,
   });
 };

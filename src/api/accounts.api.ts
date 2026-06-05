@@ -27,9 +27,9 @@ export interface CreateAccountRequestDto {
 }
 
 export const accountTypeMap: Record<number, string> = {
-    0: "Corriente",
-    1: "Ahorro",
-    2: "Efectivo",
+    0: "Efectivo",
+    1: "Corriente", 
+    2: "Ahorro",
 };
 
 export const bankAccountsApi = {

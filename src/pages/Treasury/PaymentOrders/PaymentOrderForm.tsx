@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { useAllBills } from "@/queries/bills.queries";
-import { useGetAllBanks } from "@/queries/banks.queries";
+import { useGetAllAccounts, useGetAllBanks } from "@/queries/banks.queries";
 import { useCreatePaymentOrder } from "@/queries/paymentOrders.queries";
 import { useGetCreditNotes } from "@/queries/credit-notes.queries";
 import { paymentMethodOptions } from "@/api/paymentOrders.api";
@@ -86,23 +86,7 @@ export default function PaymentOrderForm() {
         return supplier?.businessName || supplier?.fantasyName || "";
     }, [supplierId, suppliers]);
 
-    const accounts = useMemo(() => {
-        const banks = banksData?.banks || [];
-        const all: { id: number; name: string; accountNumber: string; accountType: string; availableBalance: number; bankName: string }[] = [];
-        for (const bank of banks) {
-            for (const acc of bank.accounts || []) {
-                all.push({
-                    id: acc.id,
-                    name: acc.name || "Cuenta",
-                    accountNumber: acc.accountNumber || "",
-                    accountType: typeof acc.accountType === "string" ? acc.accountType : String(acc.accountType ?? ""),
-                    availableBalance: acc.availableBalance,
-                    bankName: bank.name || "",
-                });
-            }
-        }
-        return all;
-    }, [banksData]);
+
 
     const creditNotes = useMemo(() => creditNotesData?.creditNotes || [], [creditNotesData]);
 
@@ -114,14 +98,33 @@ export default function PaymentOrderForm() {
         [suppliers],
     );
 
-    const cashAccounts = useMemo(() =>
-        accounts.filter((a) => a.accountType === "Cash" || a.accountType === "2"),
-        [accounts],
-    );
-    const bankAccounts = useMemo(() =>
-        accounts.filter((a) => a.accountType !== "Cash" && a.accountType !== "2"),
-        [accounts],
-    );
+    // add hook
+const { data: accountsData } = useGetAllAccounts();
+
+// replace accounts useMemo
+const accounts = useMemo(() =>
+    (accountsData?.accounts || []).map((a) => ({
+        id: a.id,
+        name: a.name || "Cuenta",
+        accountNumber: a.accountNumber || "",
+        accountType: a.accountType,
+        availableBalance: a.availableBalance,
+        bankId: a.bankId,
+        bankName: "", // no bank name from this endpoint
+    })),
+    [accountsData],
+);
+
+// fix cash/bank split
+const cashAccounts = useMemo(() =>
+    accounts.filter((a) => a.bankId === null || a.bankId === undefined),
+    [accounts],
+);
+
+const bankAccounts = useMemo(() =>
+    accounts.filter((a) => a.bankId !== null && a.bankId !== undefined),
+    [accounts],
+);
 
     const cashAccountOptions = useMemo(() =>
         cashAccounts.map((a) => ({
