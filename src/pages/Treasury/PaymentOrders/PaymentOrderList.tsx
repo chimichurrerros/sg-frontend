@@ -55,7 +55,10 @@ export default function PaymentOrderList() {
         {
             labelName: "Método de Pago",
             propName: "paymentMethod",
-            transformFunction: (value: string) => paymentMethodLabelMap[value] || value || "-",
+            transformFunction: (value: string) =>
+                value
+                    ? value.split(", ").map((m) => paymentMethodLabelMap[m] || m).join(", ")
+                    : "-",
         },
         {
             labelName: "Estado",
