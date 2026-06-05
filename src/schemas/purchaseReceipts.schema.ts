@@ -5,7 +5,7 @@ export const purchaseReceiptStep0Schema = z.object({
     supplierId: z.string("Seleccione un proveedor").min(1, "Seleccione un proveedor"),
     branchId: z.string("Seleccione una sucursal").min(1, "Seleccione una sucursal"),
     billNumber: z.string("Ingrese el número de factura").min(1, "Ingrese el número de factura"),
-    stamp: z.string().optional().default(""),
+    stamp: z.string("Ingrese el timbrado de factura").min(1, "Ingrese el timbrado de factura"),
     date: z.string("Seleccione una fecha").min(1, "Seleccione una fecha"),
     observation: z.string().optional().default(""),
 });

@@ -16,17 +16,17 @@ export const QuickActions = () => {
     {
       label: "Nuevo producto",
       icon: Package,
-      path: "/dash/catalogo/nuevo-producto",
+      path: "/catalogo/nuevo-producto",
     },
     {
       label: "Nuevo servicio",
       icon: FileText,
-      path: "/dash/catalogo/nuevo-servicio",
+      path: "/catalogo/nuevo-servicio",
     },
     {
       label: "Nuevo proveedor",
       icon: UserPlus,
-      path: "/dash/proveedores/nuevo",
+      path: "/proveedores/nuevo",
     },
     {
       label: "Pedido de compra",
