@@ -85,9 +85,9 @@ export const catalogApi = {
   deleteProduct: (id: number) =>
     apiClient.delete(`/api/products/${id}`).then((r) => r.data),
 
-  getProductByBranch: (id: number) =>
+  getProductByBranch: (id: number, excludeServices?: boolean) =>
     apiClient
-      .get<{ productsStock: ProductDTO[] }>(`/api/products/by-branch/${id}`)
+      .get<{ productsStock: ProductDTO[] }>(`/api/products/by-branch/${id}`, { params: { excludeServices } })
       .then((r) => r.data),
 
   // Categories

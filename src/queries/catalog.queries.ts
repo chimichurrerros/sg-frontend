@@ -36,10 +36,10 @@ export const useGetProduct = (id?: number) => {
   });
 };
 
-export const useProductByBranch = (id: number | null,enabled:boolean = true) => {
+export const useProductByBranch = (id: number | null,enabled:boolean = true, excludeServices : boolean) => {
   return useQuery({
     queryKey: [...catalogKeys.products, "branch", id],
-    queryFn: () => catalogApi.getProductByBranch(id!).then(r => ({
+    queryFn: () => catalogApi.getProductByBranch(id!, excludeServices).then(r => ({
       ...r,
       productsStock: r.productsStock.filter(p => !p.isDeleted),
     })),
