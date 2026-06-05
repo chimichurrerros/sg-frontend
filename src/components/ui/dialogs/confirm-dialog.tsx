@@ -4,6 +4,7 @@ import { Portal } from "@chakra-ui/react/portal";
 import { Text } from "@chakra-ui/react/text"
 import { ArrowRight } from "lucide-react";
 import type React from "react";
+import { useRef, useEffect } from "react";
 
 interface confirmDialogProps {
     title: string;
@@ -14,11 +15,9 @@ interface confirmDialogProps {
     onAccept?: () => void;
     children?: React.ReactNode;
     trigger?: React.ReactNode;
+    acceptOnEnter?: boolean; 
 }
-/*
-    Dialog to confirm an action, with a cancel and accept button
-    children can be used to add additional content to the dialog, like a form or something else
-    */
+
 export const ConfirmActionDialog = ({
     title,
     description = "Confirmar acción",
@@ -28,9 +27,27 @@ export const ConfirmActionDialog = ({
     onCancel,
     children,
     trigger,
+    acceptOnEnter = true
 }: confirmDialogProps) => {
+    const acceptButtonRef = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => {
+        if (!acceptOnEnter) return;
+        
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+                acceptButtonRef.current?.click();
+            }
+        };
+        
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [acceptOnEnter]);
+
     return (
-        <Dialog.Root >
+        <Dialog.Root>
             <Dialog.Trigger asChild>
                 {trigger || <Button variant="outline">Abrir</Button>}
             </Dialog.Trigger>
@@ -65,6 +82,7 @@ export const ConfirmActionDialog = ({
                             </Dialog.ActionTrigger>
                             <Dialog.ActionTrigger asChild>
                                 <Button
+                                    ref={acceptButtonRef}
                                     variant="surface"
                                     colorPalette="blue"
                                     onClick={onAccept}
