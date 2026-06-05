@@ -7,10 +7,11 @@ export const stockKeys = {
 
 const RETRIES = 2;
 
-export const useAllStock = () => {
+export const useStock = (branchId?: number, search?: string) => {
+    const hasParams = branchId != null || (search != null && search !== "");
     return useQuery({
-        queryKey: stockKeys.stock,
-        queryFn: stockApi.getAll,
+        queryKey: hasParams ? [...stockKeys.stock, { branchId, search }] : stockKeys.stock,
+        queryFn: () => stockApi.getAll(branchId, search),
         retry: RETRIES
     })
 }

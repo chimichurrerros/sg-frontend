@@ -8,7 +8,7 @@ import {
 } from "@/queries/catalog.queries";
 import { useGetAllCustomers } from "@/queries/customers.queries";
 import { useGetAllSales } from "@/queries/sales.queries";
-import { useAllStock } from "@/queries/stock.queries";
+import { useStock } from "@/queries/stock.queries";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
 import { useAuthStore } from "@/stores/auth.store";
 import { Box, Heading, SimpleGrid, Stack, Text } from "@chakra-ui/react";
@@ -48,7 +48,7 @@ const AdminDashboard = ({ user, greeting, dateStr }: DashboardProps) => {
   const { data: customersData, isLoading: customersLoading } = useGetAllCustomers();
   const { data: suppliersData, isLoading: suppliersLoading } = useAllSuppliers();
   const { data: salesData, isLoading: salesLoading } = useGetAllSales();
-  const { data: stockData, isLoading: stockLoading } = useAllStock();
+  const { data: stockData, isLoading: stockLoading } = useStock();
 
   const productCount = productsData?.products?.length ?? 0;
   const serviceCount = servicesData?.services?.length ?? 0;
