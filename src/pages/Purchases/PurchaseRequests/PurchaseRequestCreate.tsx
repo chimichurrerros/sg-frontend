@@ -46,6 +46,7 @@ export default function PurchaseRequestCreate() {
 
     createPurchaseRequest(
       {
+        branchId: user?.branchId ?? 0,
         observation,
         details: products.map((p) => ({
           productId: p.productId,

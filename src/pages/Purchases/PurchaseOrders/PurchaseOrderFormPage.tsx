@@ -14,7 +14,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuArrowLeft, LuSave, LuSearch } from "react-icons/lu";
+import { LuSave, LuSearch } from "react-icons/lu";
 import { ArrowLeft, Save } from "lucide-react";
 import { useGetAllPurchaseRequests, useGetPurchaseRequestById } from "@/queries/purchase-request.queries.ts";
 import { useGetPurchaseOrderDraft, useCreatePurchaseOrder, useGetPurchaseOrder } from "@/queries/purchase-orders.queries.ts";
