@@ -9,7 +9,7 @@ export interface CreditNote {
     customerId:   number;
     customerName: string;
     customerRuc:  string;
-    date:         Date;
+    date:         string;
     total:        number;
     reason:       string;
     details:      CreditNoteDetail[];
@@ -36,7 +36,7 @@ export interface GetCreditNoteParams extends PaginationParams {
 
 export interface CreateCreditNoteRequest {
     billId:  number;
-    date:    Date;
+    date:    string;
     total:   number;
     reason:  string;
     details: CreateCreditNoteRequestDetail[];
