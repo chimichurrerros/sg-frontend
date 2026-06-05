@@ -309,7 +309,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                             <HStack justifyContent="space-between" alignItems="flex-end">
                                 <Text fontWeight="bold" fontSize="2xl">Productos a devolver</Text>
                                 <Box textAlign="right" display="flex" flexDirection="row" alignItems="center" gap={1}>
-                                    <Text fontWeight="bold" fontSize="xl">Cantidad de dinero a devolver:</Text>
+                                    <Text fontWeight="bold" fontSize="xl">Total :</Text>
                                     <Text fontWeight="bold" color="brand.secondary" fontSize="xl">{parsePrice(form.total || 0)}</Text>
                                 </Box>
                             </HStack>
