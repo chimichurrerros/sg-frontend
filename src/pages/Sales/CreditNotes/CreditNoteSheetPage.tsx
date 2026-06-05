@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Building2, User, CalendarDays, DollarSign, FileWarning, ExternalLink } from "lucide-react";
+import { ArrowLeft, FileText, Building2, User, CalendarDays, DollarSign, FileWarning, ExternalLink, Printer } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetCreditNoteById } from "@/queries/credit-notes.queries";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
@@ -10,11 +10,15 @@ import { Box, Flex, Grid, GridItem, HStack, IconButton, Separator, Table, Text, 
 import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import type { CreditNoteDetail } from "@/api/credit-notes-api";
 import PageTitle from "@/components/ui/title";
+import { usePrintCreditNote } from "@/components/documents/credit-note-print";
+import { useAllProducts } from "@/queries/catalog.queries";
 
 export default function CreditNoteSheetPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const {printCreditNote} = usePrintCreditNote()
     const { data: creditNote, isPending, isError, error } = useGetCreditNoteById(Number(id), true);
+    const {data: products} = useAllProducts()
     const labels: EditableLabel<CreditNoteDetail>[] = [
         { labelName: "Nombre", propName: "productName", isSortable: true, sortFunction: (a, b) => a.productName.localeCompare(b.productName) },
         { labelName: "Cantidad Devuelta", propName: "quantity", isSortable: true, sortFunction: (a, b) => a.quantity - b.quantity },
@@ -57,10 +61,17 @@ export default function CreditNoteSheetPage() {
                         variant="surface"
                         colorScheme="blue"
                         aria-label="Volver al listado"
-                        onClick={() => navigate(-1) as unknown as void}
+                        onClick={() => navigate("/ventas/notas-de-credito")}
                         p={4}
                     >
                         <ArrowLeft size={18} /> Volver al listado
+                    </IconButton>
+                                      <IconButton
+                        variant="outline"
+                        onClick={()=> printCreditNote({creditNote,products: products.products})}
+                        p={4}
+                    >
+                        <Printer size={18} /> Imprimir Nota de Crédito
                     </IconButton>
                     <IconButton
 
