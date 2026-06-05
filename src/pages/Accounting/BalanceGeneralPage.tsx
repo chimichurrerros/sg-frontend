@@ -488,7 +488,7 @@ export default function BalanceGeneralPage() {
             })()} */}
 
             {/* Total Pasivo + Patrimonio Neto Banner (moved from bottom) */}
-            <Box
+            {/* <Box
               p={4}
               bg="white"
               borderWidth="1px"
@@ -502,7 +502,7 @@ export default function BalanceGeneralPage() {
               <Text fontWeight="extrabold" fontSize="lg" color="gray.900">
                 {parsePrice(trees.totals.totalLiabilitiesAndEquity)}
               </Text>
-            </Box>
+            </Box> */}
 
             {/* Tree Tables Section */}
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6} className="print-grid">
