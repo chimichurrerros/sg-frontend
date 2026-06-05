@@ -2,6 +2,7 @@ import type {  Sale,  SaleData, SaleTotals } from "@/types/sales";
 import { apiClient } from "./client";
 import type { PaginationParams, PaginationType } from "@/types/types";
 import type { Customer } from "./customers.api";
+import type { BillDetail } from "@/types/bill-detail";
 
 export interface SendProductDTO{
     productId:number
@@ -80,6 +81,7 @@ export interface Bill {
     total:           number;
     taxTotal:        number;
     isCredit:        boolean;
+    billDetails?:   BillDetail[];
 }
 export const SalesOrderStateEnum:Record<number, string> = {
     0 : "Pendiente",

@@ -50,7 +50,7 @@ export function usePrintBill() {
                         <img src="${facturaTemplate}" style="width:100%;display:block;" />
 
                         <!-- Timbrado -->
-                        ${field(34, 610, bill.stamp || "SIN TIMBRADO")}
+                        ${field(34, 570, bill.stamp ? "TIMBRADO : "+ bill.stamp : "SIN TIMBRADO","font-size:18px;font-weight:bold;")}
 
                         <!-- Número de factura -->
                         ${field(94, 560, bill.number, "font-size:18px;font-weight:bold;")}

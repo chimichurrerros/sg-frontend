@@ -32,8 +32,23 @@ import { useAllBranches } from "@/queries/branches.queries";
 import { DatePickerWrapper } from "@/components/ui/wrappers/date-picker-wrapper";
 import { useAuthStore } from "@/stores/auth.store";
 import PageTitle from "@/components/ui/title";
+import { usePrintBill } from "@/components/documents/bill-print";
+import { useAllProducts } from "@/queries/catalog.queries";
 
-const getSaleTemplate = (): Sale => ({
+
+interface saleSheetProps {
+  mode: "view" | "create"
+}
+export function isValidRuc(ruc: string) {
+  const rucRegex = /^\d{6,8}-\d$/;
+  return rucRegex.test(ruc) || ruc === "";
+}
+
+export default function SaleSheetPage({ mode }: saleSheetProps) {
+  const [selectedClient, setSelectedClient] = useState("Ninguno");
+  const user = useAuthStore((s) => s.user);
+  const branchId = user?.branchId ?? null;
+  const getSaleTemplate = (): Sale => ({
   customer: {
     name: "",
     ruc: ""
@@ -41,7 +56,8 @@ const getSaleTemplate = (): Sale => ({
   sale: {
     date: new Date().toISOString().split('.')[0],
     cashierNumber: 3,
-    saleNumber: 0
+    saleNumber: 0,
+    branchId:user.branchId
   },
   pay: {
     method: "Efectivo",
@@ -56,27 +72,17 @@ const getSaleTemplate = (): Sale => ({
     change: 0,
   }
 });
-
-interface saleSheetProps {
-  mode: "view" | "create"
-}
-export function isValidRuc(ruc: string) {
-  const rucRegex = /^\d{6,8}-\d$/;
-  return rucRegex.test(ruc) || ruc === "";
-}
-
-export default function SaleSheetPage({ mode }: saleSheetProps) {
-  const [selectedClient, setSelectedClient] = useState("Ninguno");
   const [saleForm, setSaleForm] = useState<Sale>(getSaleTemplate());
+  
   const triggerRef = useRef<HTMLButtonElement>(null);
   const createSale = useCreateSale();
   const { id } = useParams();
   const { data: sale, isPending: loadingSale, isError: isErrorSale, error: saleError } = useGetSaleById(Number(id), mode === "view");
   // const [saveCustomer, setSaveCustomer] = useState(false);
   const { data: customers, isPending: loadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useGetAllCustomers(mode === "create");
-  const user = useAuthStore((s) => s.user);
-  const branchId = user?.branchId ?? null;
+  const { printBill } = usePrintBill();
   const { data: branches, isPending: loadingBranches, isError: isErrorBranches, error: errorBranches } = useAllBranches();
+  const {data: products} = useAllProducts()
   const [dialogAmount, setDialogAmount] = useState(0);
   const [displayValue, setDisplayValue] = useState(parsePrice(dialogAmount));
   const navigate = useNavigate();
@@ -117,46 +123,50 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
       toaster.create({ title: "Error al cargar los clientes", description: errorCustomers.message || "Error desconocido", type: "error" })
     }
   }, [isErrorCustomers, errorCustomers])
-  useEffect(() => {
-    if (!sale || mode !== "view") return;
-    setSaleForm({
-      customer: {
-        name: sale.customerName || "",
-        ruc: sale.customerRuc || "",
-        email: sale.customerEmail || "",
-        birthDate: sale.customerBirthDate || ""
-      },
-      sale: {
-        date: parseDate(sale.date),
-        cashierNumber: 0,
-        saleNumber: sale.id,
-        bill: sale.bills[0],
-        branchId: sale.branchId
-      },
-      pay: {
-        method: paymentMethods[sale.paymentMethod],
-        condition: saleConditions[sale.saleCondition]
-      },
-      products: sale.details.map((d) => ({
-        id: d.productId,
-        name: d.productName,
-        barcode: d.barcode,
-        description: d.description,
-        price: d.price,
-        quantity: d.quantityOrdered,
-        total: d.price * d.quantityOrdered,
-        taxRate: d.taxRate,
-        stock: 0,
-      })),
-      totals: {
-        subtotal: sale.total - sale.bills[0].taxTotal,
-        iva: sale.bills[0].taxTotal,
-        total: sale.total,
-        importValue: sale.importValue,
-        change: sale.importValue - (sale.total - sale.bills[0].taxTotal)
-      }
-    });
-  }, [sale, mode]);
+useEffect(() => {
+  if (!sale || mode !== "view") return;
+  
+  const firstBill = sale.bills?.[0];
+  
+  setSaleForm({
+    customer: {
+      name: sale.customerName || "",
+      ruc: sale.customerRuc || "",
+      email: sale.customerEmail || "",
+      birthDate: sale.customerBirthDate || ""
+    },
+    sale: {
+      date: parseDate(sale.date),
+      cashierNumber: 0,
+      saleNumber: sale.id,
+      bill: firstBill, 
+      branchId: sale.branchId
+    },
+    pay: {
+      method: paymentMethods[sale.paymentMethod],
+      condition: saleConditions[sale.saleCondition]
+    },
+    products: sale.details?.map((d) => ({
+      id: d.productId,
+      name: d.productName,
+      barcode: d.barcode,
+      description: d.description,
+      price: d.price,
+      quantity: d.quantityOrdered,
+      total: d.price * d.quantityOrdered,
+      taxRate: d.taxRate,
+      stock: 0,
+    })) || [],
+    totals: {
+      subtotal: sale.total - (firstBill?.taxTotal || 0),
+      iva: firstBill?.taxTotal || 0,
+      total: sale.total,
+      importValue: sale.importValue || 0,
+      change: (sale.importValue || 0) - (sale.total)
+    }
+  });
+}, [sale, mode]);
+
   useEffect(() => {
     if (mode === "create") {
       setSaleForm(getSaleTemplate());
@@ -332,7 +342,32 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
                 Sucursal: {branches?.branches.find(b => b.id == saleForm.sale.branchId)?.name || " "}
                 {loadingBranches && <Spinner size="sm" />}
               </Text>}
-              <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"}>
+              <IconButton size="md" padding={4} variant="outline" disabled={mode === "create"} onClick={() => {
+  if (!sale) {
+    toaster.create({ title: "Error", description: "No hay datos de la venta", type: "error" });
+    return;
+  }
+  
+  if (!sale.bills || sale.bills.length === 0) {
+    toaster.create({ title: "Error", description: "La venta no tiene factura asociada", type: "error" });
+    return;
+  }
+  
+  if (!products || !products.products || products.products.length === 0) {
+    toaster.create({ title: "Error", description: "No hay productos para imprimir", type: "error" });
+    return;
+  }
+  
+  const firstBill = sale.bills[0];
+  
+  printBill({ 
+    bill: firstBill, 
+    details: firstBill.billDetails || [], 
+    products: products.products, 
+    customerName: sale.customerName || "", 
+    customerRuc: sale.customerRuc || "" 
+  });
+}}>
                 <Printer /> Imprimir Factura Legal
               </IconButton>
             </Box>

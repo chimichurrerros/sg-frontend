@@ -68,7 +68,7 @@ export default function BillsListPage() {
   const getCustomerName = (customerId: number) =>
     customers?.find((c) => c.id === customerId)?.name ?? "-";
   const getCustomerRuc = (customerId: number) =>
-    customers?.find((c) => c.id === customerId)?.ruc ?? "-";
+    customers?.find((c) => c.id === customerId)?.ruc || "-"
 
   const labels: label<Bill>[] = [
     {
