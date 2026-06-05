@@ -8,6 +8,7 @@ export interface ServiceResponseDto {
     barcode: string | null;
     price: number;
     cost: number;
+    isDeleted?: boolean;
 }
 
 export interface ServicesGetResponse {

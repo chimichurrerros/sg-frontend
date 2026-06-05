@@ -16,6 +16,7 @@ export interface ProductDTO {
   taxRate: number;
   quantity: number;
   total?: number;
+  isDeleted?: boolean;
 }
 
 export interface ListProductsWrapperDTO {
