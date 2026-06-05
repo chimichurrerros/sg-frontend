@@ -5,6 +5,7 @@ export interface CreditNote {
     id:           number;
     billId:       number;
     billNumber:   string;
+    type?:        number;
     customerId:   number;
     customerName: string;
     customerRuc:  string;

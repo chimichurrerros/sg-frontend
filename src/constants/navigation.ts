@@ -159,6 +159,20 @@ export const NAV_CONFIG: NavItem[] = [
         icon: Undo2,
         path: "/compras/devoluciones"
       },
+      {
+        id: "facturas-compras",
+        label: "Facturas",
+        icon: Receipt,
+        path: "/compras/facturas",
+        permission: "bills.view",
+      },
+      {
+        id: "notas-credito-compras",
+        label: "Notas de Crédito",
+        icon: StickyNote,
+        path: "/compras/notas-de-credito",
+        permission: "creditNotes.view",
+      },
     ]
 
   },
