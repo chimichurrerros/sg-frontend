@@ -3,10 +3,9 @@ import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toaster } from "@/components/ui/toaster";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
-import { useGetAccounts } from "@/queries/accounts.queries";
-import { useGetPurchaseOrdersForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
+import { useAllBills } from "@/queries/bills.queries";
+import { useGetAllBanks } from "@/queries/banks.queries";
 import { useCreatePaymentOrder } from "@/queries/paymentOrders.queries";
 import { useGetCreditNotes } from "@/queries/credit-notes.queries";
 import { paymentMethodOptions } from "@/api/paymentOrders.api";
@@ -57,27 +56,54 @@ export default function PaymentOrderForm() {
     const today = toDisplayDate();
 
     const { data: suppliersData } = useAllSuppliers();
-    const { data: accountsData } = useGetAccounts({ pageSize: 100 });
-    const { data: creditNotesData } = useGetCreditNotes({ pageSize: 100 });
+    const { data: banksData } = useGetAllBanks();
+    const { data: creditNotesData } = useGetCreditNotes({ pageSize: 100, type: "PurchaseReturn" });
     const { mutate: createPayment, isPending: isSubmitting } = useCreatePaymentOrder();
 
     const [currentStep, setCurrentStep] = useState(0);
     const [supplierId, setSupplierId] = useState<string>("");
-    const [selectedPofsIds, setSelectedPofsIds] = useState<Set<number>>(new Set());
+    const [selectedBillIds, setSelectedBillIds] = useState<Set<number>>(new Set());
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethodLine[]>([]);
     const [paymentDate, setPaymentDate] = useState(today);
     const [notes, setNotes] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const { data: pofsData, isPending: loadingPOFS } = useGetPurchaseOrdersForSupplier(
-        { supplierId: supplierId ? Number(supplierId) : undefined, state: 2, pageSize: 100 },
+    const { data: billsData, isPending: loadingBills } = useAllBills(
+        {
+            supplierId: supplierId ? Number(supplierId) : undefined,
+            isPurchaseBill: true,
+            billState: "Pending",
+            pageSize: 100,
+        },
         !!supplierId,
     );
 
     const suppliers = useMemo(() => suppliersData?.suppliers || [], [suppliersData]);
-    const accounts = useMemo(() => (accountsData?.accounts || []).filter((a) => a.isActive), [accountsData]);
-    const cashAccounts = useMemo(() => accounts.filter((a) => a.accountType === 2), [accounts]);
-    const bankAccounts = useMemo(() => accounts.filter((a) => a.accountType !== 2), [accounts]);
+
+    const supplierName = useMemo(() => {
+        if (!supplierId) return "";
+        const supplier = suppliers.find((s) => s.id.toString() === supplierId);
+        return supplier?.businessName || supplier?.fantasyName || "";
+    }, [supplierId, suppliers]);
+
+    const accounts = useMemo(() => {
+        const banks = banksData?.banks || [];
+        const all: { id: number; name: string; accountNumber: string; accountType: string; availableBalance: number; bankName: string }[] = [];
+        for (const bank of banks) {
+            for (const acc of bank.accounts || []) {
+                all.push({
+                    id: acc.id,
+                    name: acc.name || "Cuenta",
+                    accountNumber: acc.accountNumber || "",
+                    accountType: typeof acc.accountType === "string" ? acc.accountType : String(acc.accountType ?? ""),
+                    availableBalance: acc.availableBalance,
+                    bankName: bank.name || "",
+                });
+            }
+        }
+        return all;
+    }, [banksData]);
+
     const creditNotes = useMemo(() => creditNotesData?.creditNotes || [], [creditNotesData]);
 
     const supplierOptions = useMemo(() =>
@@ -88,18 +114,19 @@ export default function PaymentOrderForm() {
         [suppliers],
     );
 
-    const accountOptions = useMemo(() =>
-        accounts.map((a) => ({
-            value: a.id.toString(),
-            label: `${a.name || "Cuenta"} ${a.accountNumber ? `- ${a.accountNumber}` : ""}`,
-        })),
+    const cashAccounts = useMemo(() =>
+        accounts.filter((a) => a.accountType === "Cash" || a.accountType === "2"),
+        [accounts],
+    );
+    const bankAccounts = useMemo(() =>
+        accounts.filter((a) => a.accountType !== "Cash" && a.accountType !== "2"),
         [accounts],
     );
 
     const cashAccountOptions = useMemo(() =>
         cashAccounts.map((a) => ({
             value: a.id.toString(),
-            label: `${a.name || "Cuenta"} ${a.accountNumber ? `- ${a.accountNumber}` : ""}`,
+            label: `${a.name} ${a.accountNumber ? `- ${a.accountNumber}` : ""} (${a.bankName}) — Disp: ${parsePrice(a.availableBalance)}`,
         })),
         [cashAccounts],
     );
@@ -107,7 +134,7 @@ export default function PaymentOrderForm() {
     const bankAccountOptions = useMemo(() =>
         bankAccounts.map((a) => ({
             value: a.id.toString(),
-            label: `${a.name || "Cuenta"} ${a.accountNumber ? `- ${a.accountNumber}` : ""}`,
+            label: `${a.name} ${a.accountNumber ? `- ${a.accountNumber}` : ""} (${a.bankName}) — Disp: ${parsePrice(a.availableBalance)}`,
         })),
         [bankAccounts],
     );
@@ -125,18 +152,15 @@ export default function PaymentOrderForm() {
         [],
     );
 
-    const pofsList = useMemo(() => {
-        const list = pofsData?.purchaseOrdersForSupplier || [];
-        return list.filter((p) => p.state === 2 || p.state === 3 || p.state === 4);
-    }, [pofsData]);
+    const billsList = useMemo(() => billsData?.bills || [], [billsData]);
 
     const selectedBills = useMemo(
-        () => pofsList.filter((p) => selectedPofsIds.has(p.id)),
-        [pofsList, selectedPofsIds],
+        () => billsList.filter((b) => selectedBillIds.has(b.id)),
+        [billsList, selectedBillIds],
     );
 
     const totalSelected = useMemo(
-        () => selectedBills.reduce((sum, p) => sum + p.total, 0),
+        () => selectedBills.reduce((sum, b) => sum + b.total, 0),
         [selectedBills],
     );
 
@@ -147,8 +171,8 @@ export default function PaymentOrderForm() {
 
     const methodsMatch = methodsTotal === totalSelected && totalSelected > 0;
 
-    const togglePofs = (id: number) => {
-        setSelectedPofsIds((prev) => {
+    const toggleBill = (id: number) => {
+        setSelectedBillIds((prev) => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id);
             else next.add(id);
@@ -158,11 +182,11 @@ export default function PaymentOrderForm() {
     };
 
     const selectAll = () => {
-        const allSelected = pofsList.every((p) => selectedPofsIds.has(p.id));
+        const allSelected = billsList.every((b) => selectedBillIds.has(b.id));
         if (allSelected) {
-            setSelectedPofsIds(new Set());
+            setSelectedBillIds(new Set());
         } else {
-            setSelectedPofsIds(new Set(pofsList.map((p) => p.id)));
+            setSelectedBillIds(new Set(billsList.map((b) => b.id)));
         }
         setErrors({});
     };
@@ -218,7 +242,7 @@ export default function PaymentOrderForm() {
     const validateStep0 = (): boolean => {
         const errs: Record<string, string> = {};
         if (!supplierId) errs.supplier = "Seleccione un proveedor";
-        if (selectedBills.length === 0) errs.bills = "Seleccione al menos una OC para pagar";
+        if (selectedBills.length === 0) errs.bills = "Seleccione al menos una factura para pagar";
         setErrors(errs);
         return Object.keys(errs).length === 0;
     };
@@ -236,9 +260,14 @@ export default function PaymentOrderForm() {
             if (isCheck) {
                 if (!m.accountId) errs[`acc-${m.id}`] = "Seleccione cuenta";
                 if (!m.checkNumber?.trim()) errs[`chk-${m.id}`] = "N° de cheque requerido";
-                if (!m.checkIssuingBank?.trim()) errs[`chkb-${m.id}`] = "Banco emisor requerido";
             }
             if (!m.amount || Number(m.amount) <= 0) errs[`amt-${m.id}`] = "Monto inválido";
+            if (!isCredit && m.accountId) {
+                const acc = accounts.find((a) => a.id === Number(m.accountId));
+                if (acc && Number(m.amount) > acc.availableBalance) {
+                    errs[`bal-${m.id}`] = `Saldo insuficiente (disponible: ${parsePrice(acc.availableBalance)})`;
+                }
+            }
         }
         if (paymentMethods.length > 0 && Math.abs(methodsTotal - totalSelected) > 0.01) {
             errs.balance = `Total de métodos (${parsePrice(methodsTotal)}) ≠ Total seleccionado (${parsePrice(totalSelected)})`;
@@ -259,9 +288,10 @@ export default function PaymentOrderForm() {
         const methods = paymentMethods.map((m) => {
             const isCredit = m.method === "CreditNote";
             const isCheck = m.method === "Check";
+            const selectedAccount = accounts.find((a) => a.id === Number(m.accountId));
             return {
                 method: m.method,
-                accountId: isCredit ? 0 : Number(m.accountId),
+                accountId: isCredit ? undefined : Number(m.accountId),
                 amount: Number(m.amount),
                 referenceNumber: m.referenceNumber?.trim() || undefined,
                 creditNoteId: isCredit ? Number(m.creditNoteId) : undefined,
@@ -271,35 +301,22 @@ export default function PaymentOrderForm() {
                           number: m.checkNumber.trim(),
                           emisionDate: m.checkEmisionDate ? new Date(m.checkEmisionDate).toISOString() : new Date().toISOString(),
                           availabilityDate: m.checkAvailabilityDate || undefined,
-                          issuingBank: m.checkIssuingBank.trim(),
+                          issuingBank: selectedAccount?.bankName || "",
                           type: Number(m.checkType),
-                          receiver: m.checkReceiver?.trim() || "",
+                          receiver: supplierName,
                       }
                     : undefined,
             };
         });
 
-        const promises = selectedBills.map(
-            (pofs) =>
-                new Promise<void>((resolve, reject) => {
-                    createPayment(
-                        {
-                            purchaseOrderForSupplierId: pofs.id,
-                            paymentDate: toISODate(paymentDate),
-                            notes: notes.trim() || undefined,
-                            methods,
-                        },
-                        { onSuccess: () => resolve(), onError: (e: Error) => reject(e) },
-                    );
-                }),
-        );
-
-        Promise.all(promises)
-            .then(() => {
-                toaster.create({ title: "Órdenes de pago registradas exitosamente", type: "success" });
-                navigate("/tesoreria/ordenes-de-pago");
-            })
-            .catch(() => {});
+        createPayment({
+            billIds: selectedBills.map((b) => b.id),
+            paymentDate: toISODate(paymentDate),
+            notes: notes.trim() || undefined,
+            methods,
+        }, {
+            onSuccess: () => navigate("/tesoreria/ordenes-de-pago"),
+        });
     };
 
     const renderStep0 = () => (
@@ -313,7 +330,7 @@ export default function PaymentOrderForm() {
                     value={supplierId}
                     onValueChange={(v) => {
                         setSupplierId(v);
-                        setSelectedPofsIds(new Set());
+                        setSelectedBillIds(new Set());
                         setErrors({});
                     }}
                     clearable
@@ -321,27 +338,28 @@ export default function PaymentOrderForm() {
                 <Field.ErrorText>{errors.supplier}</Field.ErrorText>
             </Field.Root>
 
-            {loadingPOFS && <Text fontSize="sm" color="gray.500">Cargando OC pendientes...</Text>}
+            {loadingBills && <Text fontSize="sm" color="gray.500">Cargando facturas pendientes...</Text>}
 
-            {!loadingPOFS && supplierId && pofsList.length === 0 && (
-                <Text color="gray.500" fontSize="sm">No se encontraron OC pendientes para este proveedor.</Text>
+            {!loadingBills && supplierId && billsList.length === 0 && (
+                <Text color="gray.500" fontSize="sm">No se encontraron facturas pendientes para este proveedor.</Text>
             )}
 
-            {pofsList.length > 0 && (
+            {billsList.length > 0 && (
                 <>
-                    <Text fontSize="md" fontWeight="bold" color="gray.600">Seleccione OC a pagar</Text>
+                    <Text fontSize="md" fontWeight="bold" color="gray.600">Seleccione facturas a pagar</Text>
                     <Box borderWidth="1px" borderRadius="md" overflow="hidden">
                         <Box display="flex" bg="gray.50" px={4} py={2} fontWeight="bold" fontSize="sm">
                             <Box w="40px" />
-                            <Box flex="1">OC N°</Box>
+                            <Box flex="1">Factura N°</Box>
+                            <Box w="100px">Timbrado</Box>
                             <Box w="120px">Fecha</Box>
                             <Box w="140px" textAlign="right">Total</Box>
                         </Box>
-                        {pofsList.map((pofs) => {
-                            const sel = selectedPofsIds.has(pofs.id);
+                        {billsList.map((bill) => {
+                            const sel = selectedBillIds.has(bill.id);
                             return (
                                 <HStack
-                                    key={pofs.id}
+                                    key={bill.id}
                                     px={4}
                                     py={2}
                                     borderTopWidth="1px"
@@ -349,7 +367,7 @@ export default function PaymentOrderForm() {
                                     cursor="pointer"
                                     bg={sel ? "blue.50" : "transparent"}
                                     _hover={{ bg: "gray.50" }}
-                                    onClick={() => togglePofs(pofs.id)}
+                                    onClick={() => toggleBill(bill.id)}
                                 >
                                     <Box
                                         w="22px" h="22px"
@@ -360,16 +378,17 @@ export default function PaymentOrderForm() {
                                     >
                                         {sel && <Check size={14} />}
                                     </Box>
-                                    <Box flex="1" fontWeight="medium">{pofs.number}</Box>
-                                    <Box w="120px" fontSize="sm" color="gray.600">{parseDate(pofs.date)}</Box>
-                                    <Box w="140px" textAlign="right" fontWeight="medium">{parsePrice(pofs.total)}</Box>
+                                    <Box flex="1" fontWeight="medium">{bill.number}</Box>
+                                    <Box w="100px" fontSize="sm" color="gray.600">{bill.stamp || "—"}</Box>
+                                    <Box w="120px" fontSize="sm" color="gray.600">{parseDate(bill.date)}</Box>
+                                    <Box w="140px" textAlign="right" fontWeight="medium">{parsePrice(bill.total)}</Box>
                                 </HStack>
                             );
                         })}
                     </Box>
                     <HStack justifyContent="space-between" mt={2}>
                         <Button size="xs" variant="outline" onClick={selectAll}>
-                            {pofsList.every((p) => selectedPofsIds.has(p.id)) ? "Deseleccionar todo" : "Seleccionar todo"}
+                            {billsList.every((b) => selectedBillIds.has(b.id)) ? "Deseleccionar todo" : "Seleccionar todo"}
                         </Button>
                         <Text fontWeight="bold">
                             Total: <Text as="span" color="brand.primary">{parsePrice(totalSelected)}</Text>
@@ -444,6 +463,7 @@ export default function PaymentOrderForm() {
                                             placeholder="N° Referencia"
                                         />
                                         {errors[`acc-${m.id}`] && <Text color="red.500" fontSize="xs">{errors[`acc-${m.id}`]}</Text>}
+                                        {errors[`bal-${m.id}`] && <Text color="red.500" fontSize="xs">{errors[`bal-${m.id}`]}</Text>}
                                         {isCheck && (
                                             <>
                                                 <Text fontSize="xs" fontWeight="medium" mt={1} color="gray.500">Detalles del Cheque</Text>
@@ -470,14 +490,14 @@ export default function PaymentOrderForm() {
                                                 />
                                                 <Input
                                                     size="sm"
-                                                    value={m.checkIssuingBank}
-                                                    onChange={(e) => updatePaymentMethod(m.id, { checkIssuingBank: e.target.value })}
-                                                    placeholder="Banco emisor *"
+                                                    value={accounts.find((a) => a.id === Number(m.accountId))?.bankName || ""}
+                                                    readOnly
+                                                    placeholder="Banco emisor (automático)"
+                                                    bg="gray.50"
                                                 />
-                                                {errors[`chkb-${m.id}`] && <Text color="red.500" fontSize="xs">{errors[`chkb-${m.id}`]}</Text>}
                                                 <SelectWrapper
                                                     options={[
-                                                        { value: "0", label: "Común" },
+                                                        { value: "0", label: "Común (Día)" },
                                                         { value: "1", label: "Diferido" },
                                                     ]}
                                                     width="100%"
@@ -486,9 +506,10 @@ export default function PaymentOrderForm() {
                                                 />
                                                 <Input
                                                     size="sm"
-                                                    value={m.checkReceiver}
-                                                    onChange={(e) => updatePaymentMethod(m.id, { checkReceiver: e.target.value })}
-                                                    placeholder="Receptor"
+                                                    value={supplierName}
+                                                    readOnly
+                                                    placeholder="Receptor (automático)"
+                                                    bg="gray.50"
                                                 />
                                             </>
                                         )}
@@ -548,11 +569,11 @@ export default function PaymentOrderForm() {
     const renderStep2 = () => (
         <Stack gap={6}>
             <Box p={4} bg="bg.subtle" borderRadius="md">
-                <Text fontSize="sm" fontWeight="bold" mb={2} color="gray.600">OC Seleccionadas ({selectedBills.length})</Text>
-                {selectedBills.map((pofs) => (
-                    <HStack key={pofs.id} justifyContent="space-between" py={1}>
-                        <Text>OC #{pofs.number} — {pofs.supplierName}</Text>
-                        <Text fontWeight="medium">{parsePrice(pofs.total)}</Text>
+                <Text fontSize="sm" fontWeight="bold" mb={2} color="gray.600">Facturas Seleccionadas ({selectedBills.length})</Text>
+                {selectedBills.map((bill) => (
+                    <HStack key={bill.id} justifyContent="space-between" py={1}>
+                        <Text>Factura #{bill.number}{bill.stamp ? ` (Timbrado: ${bill.stamp})` : ""}</Text>
+                        <Text fontWeight="medium">{parsePrice(bill.total)}</Text>
                     </HStack>
                 ))}
                 <HStack justifyContent="space-between" mt={3} pt={3} borderTopWidth="1px" borderColor="gray.200">

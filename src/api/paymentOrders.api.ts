@@ -67,7 +67,7 @@ export interface CheckDetailsRequest {
     accountId: number;
     number: string;
     emisionDate: string;
-    availabilityDate: string;
+    availabilityDate?: string;
     issuingBank: string;
     type: number;
     receiver: string;
@@ -75,7 +75,7 @@ export interface CheckDetailsRequest {
 
 export interface PaymentMethodRequest {
     method: string;
-    accountId: number;
+    accountId?: number;
     amount: number;
     referenceNumber?: string | null;
     checkDetails?: CheckDetailsRequest | null;
@@ -83,7 +83,7 @@ export interface PaymentMethodRequest {
 }
 
 export interface CreatePaymentOrderRequest {
-    purchaseOrderForSupplierId: number;
+    billIds: number[];
     paymentDate: string;
     notes?: string | null;
     methods: PaymentMethodRequest[];
@@ -92,7 +92,7 @@ export interface CreatePaymentOrderRequest {
 export const paymentOrderStateMap: Record<string, string> = {
     "Pending": "Pendiente",
     "Processed": "Procesado",
-    "Cancelled": "Cancelado",
+    "Paid": "Pagado",
 };
 
 export const paymentMethodOptions = [

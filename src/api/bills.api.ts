@@ -21,6 +21,10 @@ export interface BillFilterParams {
   startDate?: string;
   endDate?: string;
   customerRuc?: string;
+  isPurchaseBill?: boolean;
+  purchaseOrderForSupplierId?: number;
+  billState?: "Pending" | "Paid" | "Voided";
+  supplierId?: number;
 }
 
 export interface CreateBillRequest {
@@ -67,6 +71,10 @@ export const billsApi = {
     if (params?.startDate !== undefined) queryParams.StartDate = params.startDate;
     if (params?.endDate !== undefined) queryParams.EndDate = params.endDate;
     if (params?.customerRuc !== undefined) queryParams.CustomerRuc = params.customerRuc;
+    if (params?.isPurchaseBill !== undefined) queryParams.IsPurchaseBill = params.isPurchaseBill;
+    if (params?.billState !== undefined) queryParams.BillState = params.billState;
+    if (params?.supplierId !== undefined) queryParams.SupplierId = params.supplierId;
+    if (params?.purchaseOrderForSupplierId !== undefined) queryParams.PurchaseOrderForSupplierId = params.purchaseOrderForSupplierId;
     return apiClient
       .get<BillsGetResponse>("/api/bills", { params: queryParams })
       .then((r) => r.data);

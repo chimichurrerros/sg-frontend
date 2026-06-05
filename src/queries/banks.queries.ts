@@ -31,6 +31,14 @@ export const useGetBankById = (id: number) => {
   });
 };
 
+export const useGetAllBanks = () => {
+  return useQuery<{ banks: BankResponseDto[] }>({
+    queryKey: ["banks", "all"],
+    queryFn: () => banksApi.getAllBanks(),
+    retry: RETRIES,
+  });
+};
+
 export const useCreateBank = () => {
   const queryClient = useQueryClient();
   return useMutation({

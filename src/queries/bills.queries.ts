@@ -13,11 +13,12 @@ export const billsKeys = {
 
 const RETRIES = 2;
 
-export const useAllBills = (params?: BillFilterParams) => {
+export const useAllBills = (params?: BillFilterParams, enabled = true) => {
   return useQuery({
     queryKey: billsKeys.bills(params),
     queryFn: () => billsApi.getAll(params),
     retry: RETRIES,
+    enabled,
   });
 };
 

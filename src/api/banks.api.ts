@@ -6,6 +6,9 @@ export interface BankAccountResponseDto {
     name: string | null;
     currentBalance: number;
     availableBalance: number;
+    accountType?: string | number | null;
+    accountNumber?: string | null;
+    isActive?: boolean;
 }
 
 export interface BankResponseDto {
@@ -41,4 +44,7 @@ export const banksApi = {
 
     deleteBank: (id: number) =>
         apiClient.delete(`/api/banks/${id}`).then((r) => r.data),
+
+    getAllBanks: () =>
+        apiClient.get<{ banks: BankResponseDto[] }>("/api/banks/all").then((r) => r.data),
 };

@@ -71,6 +71,7 @@ export interface Bill {
     customerId:      number;
     salesOrderId:    number;
     purchaseOrderId: number;
+    purchaseOrderForSupplierId?: number;
     stamp:           string;
     number:          string;
     date:            string;

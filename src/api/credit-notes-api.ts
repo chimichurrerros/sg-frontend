@@ -29,7 +29,8 @@ export interface GetCreditNoteParams extends PaginationParams {
     reason?:         string;
     date?:           string;
     minDate?:        string;
-    maxDate?:        string;  
+    maxDate?:        string;
+    type?:           string;
 } 
 
 export interface CreateCreditNoteRequest {
@@ -46,7 +47,20 @@ export interface CreateCreditNoteRequestDetail {
     price:     number;
 }
 export const creditNotesApi = {
-    get: (params: GetCreditNoteParams) => apiClient.get<{creditNotes:CreditNote[],pagination: PaginationType}>("/api/credit-notes",{params}).then(r=>r.data),
+    get: (params: GetCreditNoteParams) => {
+        const queryParams: Record<string, string | number | undefined> = {};
+        if (params.page !== undefined) queryParams.page = params.page;
+        if (params.pageSize !== undefined) queryParams.pageSize = params.pageSize;
+        if (params.customerName) queryParams.customerName = params.customerName;
+        if (params.customerRuc) queryParams.customerRuc = params.customerRuc;
+        if (params.billNumber) queryParams.billNumber = params.billNumber;
+        if (params.reason) queryParams.reason = params.reason;
+        if (params.date) queryParams.date = params.date;
+        if (params.minDate) queryParams.minDate = params.minDate;
+        if (params.maxDate) queryParams.maxDate = params.maxDate;
+        if (params.type) queryParams.type = params.type;
+        return apiClient.get<{creditNotes:CreditNote[],pagination: PaginationType}>("/api/credit-notes",{params: queryParams}).then(r=>r.data);
+    },
     getById:(id:number)=>apiClient.get<{creditNote: CreditNote}>("/api/credit-notes/"+id).then(r=>r.data.creditNote),
     create:(body:CreateCreditNoteRequest)=>apiClient.post<{creditNote:CreditNote}>("/api/credit-notes",body).then(r=>r.data)
 }
