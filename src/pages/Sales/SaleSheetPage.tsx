@@ -396,9 +396,9 @@ export default function SaleSheetPage({ mode }: saleSheetProps) {
             value={saleForm.customer.ruc}
             readOnly={!isClientEditable || mode === "view"}
             bg={!isClientEditable ? "gray.100" : "white"}
-            maxLength={8}
+            maxLength={10}
             onChange={(e) => {
-              const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 7);
+              const clean = e.target.value.replace(/[^\d]/g, "").slice(0, 9);
               const formatted = clean.length > 1
                 ? clean.slice(0, -1) + "-" + clean.slice(-1)
                 : clean;

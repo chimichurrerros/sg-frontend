@@ -5,7 +5,7 @@ import { LuSearch } from "react-icons/lu";
 import { useEffect, useMemo, useState } from "react";
 import type { StockItem } from "@/types/inventory";
 import TableSelect, { type label } from "@/components/ui/tables/table-select";
-import { useAllStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
+import { useStock, useCreateStockItem, useEditStockItem, useDeleteStockItem } from "@/queries/stock.queries";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { toaster } from "@/components/ui/toaster";
 import { DestructiveActionDialog } from "@/components/ui/dialogs/destructive-action-dialog";
@@ -19,6 +19,9 @@ import PageTitle from "@/components/ui/title";
 
 export default function StockListPage() {
     const [params, setParams] = useState<PaginationParams>({ page: 1, pageSize: 10 });
+    const [filterBranchId, setFilterBranchId] = useState<number | null>(null);
+    const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState("");
     const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -28,7 +31,7 @@ export default function StockListPage() {
     const [formBranchId, setFormBranchId] = useState<number>(0);
     const [formQuantity, setFormQuantity] = useState("");
 
-    const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useAllStock();
+    const { data: allStock, isPending: loadingAllStock, isError: isErrorAllStock, error: errorAllStock, refetch } = useStock(filterBranchId ?? undefined, search || undefined);
     const { data: branchesData } = useAllBranches();
     const { data: productsData } = useAllProducts();
     const { data: servicesData } = useAllServices();
@@ -45,6 +48,14 @@ export default function StockListPage() {
             });
         }
     }, [isErrorAllStock, errorAllStock]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearch(searchInput);
+            setParams(prev => ({ ...prev, page: 1 }));
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
     const serviceIds = new Set((servicesData?.services ?? []).map((s) => s.id));
 
@@ -74,6 +85,19 @@ export default function StockListPage() {
                 label: b.name,
                 value: String(b.id),
             })),
+        }),
+        [branchesData],
+    );
+
+    const branchFilterCollection = useMemo(
+        () => createListCollection({
+            items: [
+                { label: "Todas las sucursales", value: "" },
+                ...(branchesData?.branches ?? []).map((b) => ({
+                    label: b.name,
+                    value: String(b.id),
+                })),
+            ],
         }),
         [branchesData],
     );
@@ -237,8 +261,41 @@ export default function StockListPage() {
 
             <Box display="flex" flexDirection="row" gap={2} justifyContent="space-between" alignItems="center">
                 <InputGroup flex="1" startElement={<LuSearch />}>
-                    <Input placeholder="Buscar en inventario..." />
+                    <Input placeholder="Buscar en inventario..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
                 </InputGroup>
+                <Select.Root
+                    collection={branchFilterCollection}
+                    value={filterBranchId ? [String(filterBranchId)] : [""]}
+                    onValueChange={(e) => {
+                        const val = e.value[0];
+                        setFilterBranchId(val ? Number(val) : null);
+                        setParams({ ...params, page: 1 });
+                    }}
+                    size="sm"
+                    width="180px"
+                >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                        <Select.Trigger>
+                            <Select.ValueText placeholder="Filtrar por sucursal" />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                            <Select.Indicator />
+                        </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                        <Select.Positioner>
+                            <Select.Content>
+                                {branchFilterCollection.items.map((item) => (
+                                    <Select.Item item={item} key={item.value}>
+                                        {item.label}
+                                        <Select.ItemIndicator />
+                                    </Select.Item>
+                                ))}
+                            </Select.Content>
+                        </Select.Positioner>
+                    </Portal>
+                </Select.Root>
                 <Box display="flex" flexDirection="row" gap={2}>
                     <Text fontSize="sm" color="gray.500" alignSelf="center">Registros por Pág. </Text>
                     <PageSizeControl paramsChangeFunction={setParams} params={params} max={30} min={5} />
