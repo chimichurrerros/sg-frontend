@@ -30,7 +30,7 @@ interface PurchaseProductsTableProps {
 export default function PurchaseProductsTable({ products, onDataChange, readOnly, branchId }: PurchaseProductsTableProps) {
   const addProdRef = useRef<HTMLButtonElement>(null);
   const [productCode, setProductCode] = useState("");
-  const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useProductByBranch(branchId);
+  const { data: aviableProducts, isPending: loadingProducts, isError: isErrorProducts, error: errorProducts } = useProductByBranch(branchId, true, true);
   let nextId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
 
   useHotkeys("ctrl+i", () => {
