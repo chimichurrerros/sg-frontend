@@ -1,6 +1,6 @@
 import { Box, Spinner } from "@chakra-ui/react";
 import { Text, Button, HStack, Grid, GridItem, Checkbox } from "@chakra-ui/react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BillDetail } from "@/types/bill-detail";
@@ -14,12 +14,13 @@ import type { PaginationType } from "@/types/types";
 import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import PageTitle from "@/components/ui/title";
+import { usePrintBill } from "@/components/documents/bill-print";
 
 export default function BillFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const billId = id ? parseInt(id) : 0;
-
+  // const { config, print } = useSmartPrint("factura");
   const [number, setNumber] = useState("");
   const [date, setDate] = useState("");
   const [salesOrderId, setSalesOrderId] = useState(0);
@@ -27,6 +28,7 @@ export default function BillFormPage() {
   const [customerRuc, setCustomerRuc] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [isCredit, setIsCredit] = useState(false);
+  const { printBill } = usePrintBill();
 
   const [details, setDetails] = useState<BillDetail[]>([]);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
@@ -115,7 +117,7 @@ export default function BillFormPage() {
   if (isLoading) {
     return (
       <Box display="flex" flexDirection="column" gap={4} height="full" alignItems="center" justifyContent="center">
-        <LoadingScreen message="Cargando Factura..."/>
+        <LoadingScreen message="Cargando Factura..." />
       </Box>
     );
   }
@@ -126,9 +128,26 @@ export default function BillFormPage() {
         <PageTitle>
           Factura {number}
         </PageTitle>
-        <Button variant="outline" onClick={() => navigate("/ventas/facturas")}>
-          <ArrowLeft size={18} /> Volver al listado
-        </Button>
+        <Box display="flex" gap={3}>
+          <Button variant="outline" onClick={() => navigate("/ventas/facturas")}>
+            <ArrowLeft size={18} /> Volver al listado
+          </Button>
+          <Button variant="outline"  onClick={()=>printBill({ bill:billData.bill, details: billDetailsData.billDetails, products:productsData.products, customerName, customerRuc })}>
+            <Printer size={18} /> Imprimir
+          </Button>
+          {/* <BillPrint
+            bill={billData.bill}
+            details={billDetailsData.billDetails}
+            products={productsData.products}
+            customerName={customerName}
+            customerRuc={customerRuc}
+          /> */}
+          {/* <FacturaParaguaya
+            config={config}
+            bill={billData.bill}
+            billDetails={billDetailsData.billDetails}
+          /> */}
+        </Box>
       </HStack>
 
       <Box borderWidth="1px" borderRadius="md" overflow="hidden">
@@ -172,7 +191,7 @@ export default function BillFormPage() {
       <TableEditable
         data={details}
         labels={detailLabels}
-        onDataChange={() => {}}
+        onDataChange={() => { }}
         readOnly={true}
         height="auto"
       />
