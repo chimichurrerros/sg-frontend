@@ -323,7 +323,7 @@ useEffect(() => {
               <Box display="flex" flexDirection="column" alignItems="flex-start">
                 <Text fontWeight="bold" fontSize="sm" color="gray.600" whiteSpace="nowrap" mb={1}>FACTURA N°</Text>
                 <InputGroup endElement={
-                  <IconButton size="xs" variant="ghost" onClick={() => navigate(`/ventas/facturas/${sale?.bills[0]?.id}`)}>
+                  <IconButton size="xs" variant="ghost" disabled={sale.bills.length ===0 } onClick={() => navigate(`/ventas/facturas/${sale?.bills[0]?.id}`)}>
                     <ExternalLink size={16} />
                   </IconButton>
                 }>
