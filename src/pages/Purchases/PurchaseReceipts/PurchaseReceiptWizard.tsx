@@ -36,8 +36,6 @@ interface DetailItem {
     price: number;
 }
 
-type POFSExtended = PurchaseOrderForSupplier & { branchId: number; branchName: string };
-
 export default function PurchaseReceiptWizard() {
     const navigate = useNavigate();
 
@@ -68,7 +66,7 @@ export default function PurchaseReceiptWizard() {
     });
 
     const [currentStep, setCurrentStep] = useState(0);
-    const [selectedPOFS, setSelectedPOFS] = useState<POFSExtended | null>(null);
+    const [selectedPOFS, setSelectedPOFS] = useState<PurchaseOrderForSupplier | null>(null);
     const [details, setDetails] = useState<DetailItem[]>([]);
     const [detailErrors, setDetailErrors] = useState<string[]>([]);
 
@@ -79,12 +77,8 @@ export default function PurchaseReceiptWizard() {
     const watchedDate = watch("date");
 
     const pofsList = useMemo(() =>
-        (pofsData?.purchaseOrders || [])
-            .flatMap((po) =>
-                (po.purchaseOrdersForSupplier || [])
-                    .filter((p) => p.state === 1)
-                    .map((pofs) => ({ ...pofs, branchId: po.branchId, branchName: po.branchName })),
-            ),
+        (pofsData?.purchaseOrdersForSupplier || [])
+            .filter((p) => p.state === 1),
         [pofsData],
     );
     const suppliers = useMemo(() => suppliersData?.suppliers || [], [suppliersData]);
@@ -120,7 +114,6 @@ export default function PurchaseReceiptWizard() {
             setSelectedPOFS(pofs);
             if (pofs) {
                 setValue("supplierId", pofs.supplierId.toString());
-                setValue("branchId", pofs.branchId.toString());
             }
         } else {
             setSelectedPOFS(null);
@@ -311,7 +304,7 @@ export default function PurchaseReceiptWizard() {
                                 placeholder="Seleccione una sucursal"
                                 value={field.value}
                                 onValueChange={field.onChange}
-                                disabled={!!watchedPofsId || loadingBranches}
+                                disabled={loadingBranches}
                             />
                         )}
                     />
