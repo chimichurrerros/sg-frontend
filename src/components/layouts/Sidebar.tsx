@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Stack, Text, Icon, Collapsible } from "@chakra-ui/react";
 import { ChevronRight } from "lucide-react";
 import { NAV_CONFIG, type NavItem } from "@/constants/navigation";
 import LogoERP from "@/assets/LogoERP";
 import { useAuthStore } from "@/stores/auth.store";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 const SIDEBAR_W = "220px";
 const SIDEBAR_COL = "48px";
@@ -17,9 +18,20 @@ export const Sidebar = ({ collapsed }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const [openGroups, setOpenGroups] = useState<Set<string>>(
-    new Set(["ventas", "rrhh", "gestiones"]),
-  );
+  const { getLocalStorage, saveLocalStorage } = useLocalStorage();
+
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    const saved = getLocalStorage("sidebarOpenGroups");
+    if (Array.isArray(saved)) {
+      return new Set(saved);
+    }
+    return new Set([]);
+  });
+
+  useEffect(() => {
+    saveLocalStorage("sidebarOpenGroups", Array.from(openGroups));
+  }, [openGroups]);
+
   let lastSectionShown: string | undefined;
 
   const toggleGroup = (id: string) =>
@@ -37,7 +49,7 @@ export const Sidebar = ({ collapsed }: Props) => {
     if (!path) return false;
     const cleanPath = path.split("?")[0];
     return location.pathname === cleanPath || location.pathname.startsWith(cleanPath + "/");
-};
+  };
 
   const nodeHasActiveChild = (node: { path?: string; children?: { path?: string; children?: any[] }[] }) => {
     if (node.path && isActive(node.path)) {
