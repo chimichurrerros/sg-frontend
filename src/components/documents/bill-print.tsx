@@ -53,7 +53,7 @@ export function usePrintBill() {
                         ${field(34, 570, bill.stamp ? "TIMBRADO : "+ bill.stamp : "SIN TIMBRADO","font-size:18px;font-weight:bold;")}
 
                         <!-- Número de factura -->
-                        ${field(94, 560, bill.number, "font-size:18px;font-weight:bold;")}
+                        ${field(94, 560, bill.number, "font-size:18px;font-weight:bold;color:red")}
 
                         <!-- Fecha -->
                         ${field(133, 140, day)}
