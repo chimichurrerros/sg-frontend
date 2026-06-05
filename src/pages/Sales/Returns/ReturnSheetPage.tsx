@@ -96,6 +96,7 @@ export default function ReturnSheetPage({ mode }: ReturnSheetPageProps) {
                 salesOrderNumber: selectedSale.number,
                 salesOrderId: selectedSale.id
             })
+            setReturnProducts([])
         }
     }, [selectedSale])
 
