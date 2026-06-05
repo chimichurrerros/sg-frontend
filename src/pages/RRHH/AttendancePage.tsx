@@ -127,7 +127,7 @@ export default function AttendancePage() {
 
   const branchOptions = useMemo(
     () =>
-      Array.from(new Set(employees.map((e) => String(e.branchId ?? ""))))
+      Array.from(new Set(employees.map((e) => e.branchName ?? String(e.branchId ?? ""))))
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b, "es", { numeric: true })),
     [employees],
@@ -154,7 +154,7 @@ export default function AttendancePage() {
       createListCollection({
         items: [
           { label: "Todas las Sucursales", value: "" },
-          ...branchOptions.map((o) => ({ label: `Sucursal #${o}`, value: o })),
+          ...branchOptions.map((o) => ({ label: o, value: o })),
         ],
       }),
     [branchOptions],
@@ -188,9 +188,13 @@ export default function AttendancePage() {
       const emp = employeeMap.get(att.employeeId);
       const matchesSearch =
         !term ||
+        (att.employeeFullName ?? "").toLowerCase().includes(term) ||
         (emp?.firstName ?? "").toLowerCase().includes(term) ||
         (emp?.lastName ?? "").toLowerCase().includes(term) ||
-        (emp?.legajo ?? "").toLowerCase().includes(term);
+        (emp?.legajo ?? "").toLowerCase().includes(term) ||
+        (emp?.branchName ?? "").toLowerCase().includes(term) ||
+        (emp?.areaName ?? "").toLowerCase().includes(term) ||
+        (emp?.positionName ?? "").toLowerCase().includes(term);
       const matchesBranch = !branchFilter || String(emp?.branchId ?? "") === branchFilter;
       const matchesArea = !areaFilter || (emp?.areaName ?? String(emp?.areaId ?? "")) === areaFilter;
       const matchesPosition = !positionFilter || (emp?.positionName ?? "-") === positionFilter;
@@ -711,7 +715,7 @@ export default function AttendancePage() {
                         return (
                           <Table.Row key={att.id}>
                             <Table.Cell>{att.employeeFullName}</Table.Cell>
-                            <Table.Cell>{emp?.branchId ? `#${emp.branchId}` : "-"}</Table.Cell>
+                            <Table.Cell>{emp?.branchName ?? "-"}</Table.Cell>
                             <Table.Cell>{emp?.areaName ?? "-"}</Table.Cell>
                             <Table.Cell>{emp?.positionName ?? "-"}</Table.Cell>
                             <Table.Cell>{att.date}</Table.Cell>

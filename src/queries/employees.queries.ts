@@ -17,6 +17,7 @@ const mapEmployeeDtoToEmployee = (employee: EmployeeWrapperDto["employee"]): Emp
   areaId: employee.areaId,
   areaName: employee.areaName,
   branchId: employee.branchId,
+  branchName: employee.branchName,
   inmediatlyBossId: employee.inmediatlyBossId,
   gender: employee.gender,
   maritalStatus: employee.maritalStatus as Employee["maritalStatus"],

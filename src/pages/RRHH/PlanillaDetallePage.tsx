@@ -224,6 +224,11 @@ export default function PlanillaDetallePage() {
               {translatePayrollStatus(process.payrollStatusName)}
             </Badge>
           )}
+          {isPaid && (
+            <Button size="sm" colorPalette="brand" variant="outline" onClick={() => setBatchReceiptOpen(true)}>
+              <LuPrinter /> Imprimir
+            </Button>
+          )}
         </HStack>
       </HStack>
 
@@ -718,6 +723,7 @@ export default function PlanillaDetallePage() {
                     });
                     await processQuery.refetch();
                     await summariesQuery.refetch();
+                    navigate("/rrhh/planillas");
                   } catch (error) {
                     const parsed = parseApiError(error as unknown);
                     toaster.create({ title: "No se pudo procesar el pago", description: parsed.message, type: "error" });

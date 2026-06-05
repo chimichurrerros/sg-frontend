@@ -12,7 +12,7 @@ import { useGetPositions } from "@/queries/positions.queries";
 import { useGetSchedules } from "@/queries/schedules.queries";
 import { useCreateEmployeeHistory, useDeleteEmployeeHistory, useGetEmployee, useGetEmployeeHistory, useUpdateEmployeeHistory } from "@/queries/employees.queries";
 import { parseApiError } from "@/utils/api-error";
-import { parsePrice } from "@/constants/price";
+import { parsePrice, formatDecimal } from "@/constants/price";
 import { parseDate } from "@/constants/date";
 import type { UpdateEmployeePositionHistoryRequestDto } from "@/api/employees.api";
 import type { PositionResponseDto, ScheduleResponseDto } from "@/types/organization";
@@ -258,7 +258,23 @@ export default function EmployeeHistoryPage({ basePath = "/rrhh/empleados" }: { 
 
               <Field.Root gridColumn={{ base: "1 / -1", md: "span 4" }} invalid={!!form.formState.errors.basicSalary}>
                 <Field.Label>Salario Base</Field.Label>
-                <Input type="number" min={1} step="1" {...form.register("basicSalary", { valueAsNumber: true })} disabled={formDisabled || isPending} />
+                <Controller
+                  name="basicSalary"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatDecimal(Number(field.value ?? 0))}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        field.onChange(raw ? parseInt(raw, 10) : 0);
+                      }}
+                      placeholder="0"
+                      disabled={formDisabled || isPending}
+                    />
+                  )}
+                />
                 <Field.ErrorText>{form.formState.errors.basicSalary?.message}</Field.ErrorText>
               </Field.Root>
 

@@ -10,7 +10,8 @@ import { useAllEmployees } from "@/queries/employees.queries";
 import { useGetPayrollUpdates } from "@/queries/payroll-updates.queries";
 import { useCreateManualConcept, useDeleteManualConcept, useGetPendingManualConcepts, useUpdateManualConcept } from "@/queries/manual-concepts.queries";
 import { parseApiError } from "@/utils/api-error";
-import { formatDateLong } from "@/constants/date";
+import { parseDate } from "@/constants/date";
+import { parsePrice } from "@/constants/price";
 import type { ManualConceptIncidentResponseDto } from "@/api/manual-concepts.api";
 
 const manualSchema = z.object({
@@ -311,8 +312,8 @@ export default function ConceptosManualesPage() {
                     >
                       <Table.Cell>{item.employeeFullName ?? item.employeeId}</Table.Cell>
                       <Table.Cell>{item.conceptName ?? item.payrollUpdateId}</Table.Cell>
-                      <Table.Cell>{formatDateLong(item.occurrenceDate)}</Table.Cell>
-                      <Table.Cell textAlign="end">{item.amount}</Table.Cell>
+                      <Table.Cell>{parseDate(item.occurrenceDate)}</Table.Cell>
+                      <Table.Cell textAlign="end">{parsePrice(item.amount)}</Table.Cell>
                       <Table.Cell>{manualConceptStatusLabels[item.statusName ?? ""] ?? item.statusName ?? "Pendiente"}</Table.Cell>
                     </Table.Row>
                   ))}
