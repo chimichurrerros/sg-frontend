@@ -37,8 +37,20 @@ export interface PurchaseOrderForSupplier {
   details: PurchaseOrderForSupplierDetail[];
 }
 
-export interface PurchaseOrdersForSupplierGetResponse {
+export interface PurchaseOrderItem {
+  id: number;
+  branchId: number;
+  branchName: string;
+  purchaseRequestId: number;
+  number: string;
+  date: string;
+  total: number;
+  state: number;
   purchaseOrdersForSupplier: PurchaseOrderForSupplier[];
+}
+
+export interface PurchaseOrdersForSupplierGetResponse {
+  purchaseOrders: PurchaseOrderItem[];
   pagination: PaginationType;
 }
 

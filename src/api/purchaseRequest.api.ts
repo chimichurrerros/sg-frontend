@@ -2,6 +2,7 @@ import type { PaginationParams, PaginationType } from "@/types/types";
 import { apiClient } from "./client";
 
 export interface PurchaseRequestCreateRequest {
+  branchId: number;
   observation: string;
   details: PurchaseRequestCreateDetails[];
   supplierIds?: number[];
