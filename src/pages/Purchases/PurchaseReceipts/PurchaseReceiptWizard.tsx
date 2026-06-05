@@ -4,12 +4,13 @@ import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
 import { ComboboxWrapper } from "@/components/ui/wrappers/combobox-wrapper";
 import PageTitle from "@/components/ui/title";
 import { useMemo, useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";
+import { parsePrice } from "@/constants/price";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { Package, CheckCircle2 } from "lucide-react";
 import { useAllSuppliers } from "@/queries/suppliers.queries";
-import { useAllBranches } from "@/queries/branches.queries";
 import { useGetAllPurchaseOrdersForSupplier } from "@/queries/purchase-orders-for-supplier.queries";
 import { useCreatePurchaseReceipt } from "@/queries/purchase-receipts.queries";
 import type { PurchaseOrderForSupplier } from "@/api/purchaseOrderForSupplier.api";
@@ -39,9 +40,9 @@ interface DetailItem {
 export default function PurchaseReceiptWizard() {
     const navigate = useNavigate();
 
+    const user = useAuthStore((s) => s.user);
     const { data: pofsData, isPending: loadingPOFS } = useGetAllPurchaseOrdersForSupplier();
     const { data: suppliersData, isPending: loadingSuppliers } = useAllSuppliers();
-    const { data: branchesData, isPending: loadingBranches } = useAllBranches();
     const { mutate: createReceipt, isPending: isSubmitting } = useCreatePurchaseReceipt();
 
     const {
@@ -72,17 +73,15 @@ export default function PurchaseReceiptWizard() {
 
     const watchedPofsId = watch("pofsId");
     const watchedSupplierId = watch("supplierId");
-    const watchedBranchId = watch("branchId");
     const watchedBillNumber = watch("billNumber");
     const watchedDate = watch("date");
 
     const pofsList = useMemo(() =>
         (pofsData?.purchaseOrdersForSupplier || [])
-            .filter((p) => p.state === 1),
+            .filter((p) => p.state !== 3 && p.state !== 4 && p.state !== 5),
         [pofsData],
     );
     const suppliers = useMemo(() => suppliersData?.suppliers || [], [suppliersData]);
-    const branches = useMemo(() => branchesData?.branches || [], [branchesData]);
 
     const pofsOptions = useMemo(() =>
         pofsList.map((pofs) => ({
@@ -100,13 +99,11 @@ export default function PurchaseReceiptWizard() {
         [suppliers],
     );
 
-    const branchOptions = useMemo(() =>
-        branches.map((b) => ({
-            value: b.id.toString(),
-            label: b.name,
-        })),
-        [branches],
-    );
+    useEffect(() => {
+        if (user?.branchId) {
+            setValue("branchId", user.branchId.toString());
+        }
+    }, [user, setValue]);
 
     useEffect(() => {
         if (watchedPofsId) {
@@ -162,7 +159,7 @@ export default function PurchaseReceiptWizard() {
 
     const goNext = async () => {
         if (currentStep === 0) {
-            const valid = await trigger(["pofsId", "supplierId", "branchId", "billNumber", "stamp", "date"]);
+            const valid = await trigger(["pofsId", "supplierId", "billNumber", "stamp", "date"]);
             if (!valid) return;
             loadProducts();
         }
@@ -226,14 +223,12 @@ export default function PurchaseReceiptWizard() {
             },
             transform: (v) => Number(v),
         },
-        {
-            labelName: "Precio Unit.", propName: "price", isEditable: true, inputType: "number",
-            validate: (v) => {
-                const n = Number(v);
-                return !isNaN(n) && n >= 0;
-            },
-            transform: (v) => Number(v),
-        },
+       {
+    labelName: "Precio Unit.", propName: "price", isEditable: true, inputType: "number",
+    formatFunction: (v) => parsePrice(Number(v)),  // ← add this
+    validate: (v) => { const n = Number(v); return !isNaN(n) && n >= 0; },
+    transform: (v) => Number(v),
+},
     ];
 
     const renderStep0 = () => (
@@ -290,25 +285,11 @@ export default function PurchaseReceiptWizard() {
                     />
                     <Field.ErrorText>{errors.supplierId?.message}</Field.ErrorText>
                 </Field.Root>
-                <Field.Root invalid={!!errors.branchId}>
+                <Field.Root>
                     <Text fontSize="sm" fontWeight="medium" mb={1}>
-                        Sucursal *
+                        Sucursal
                     </Text>
-                    <Controller
-                        name="branchId"
-                        control={control}
-                        render={({ field }) => (
-                            <SelectWrapper
-                                options={branchOptions}
-                                width="100%"
-                                placeholder="Seleccione una sucursal"
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                disabled={loadingBranches}
-                            />
-                        )}
-                    />
-                    <Field.ErrorText>{errors.branchId?.message}</Field.ErrorText>
+                    <Input size="sm" value={user?.branchName ?? "—"} disabled />
                 </Field.Root>
             </Grid>
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
@@ -412,7 +393,6 @@ export default function PurchaseReceiptWizard() {
     const renderStep2 = () => {
         const pofs = selectedPOFS;
         const supplier = suppliers.find((s) => s.id.toString() === watchedSupplierId);
-        const branch = branches.find((b) => b.id.toString() === watchedBranchId);
         return (
             <Stack gap={6}>
                 <Box p={4} bg="bg.subtle" borderRadius="md">
@@ -427,7 +407,7 @@ export default function PurchaseReceiptWizard() {
                         </Box>
                         <Box>
                             <Text fontSize="sm" color="gray.500">Sucursal</Text>
-                            <Text fontWeight="medium">{branch?.name || "-"}</Text>
+                            <Text fontWeight="medium">{user?.branchName || "-"}</Text>
                         </Box>
                         <Box>
                             <Text fontSize="sm" color="gray.500">Factura</Text>
@@ -464,7 +444,7 @@ export default function PurchaseReceiptWizard() {
                         <Box>
                             <Text fontSize="sm" color="gray.500">Total</Text>
                             <Text fontWeight="bold" fontSize="lg">
-                                {totalAmount.toLocaleString("es-PY", { style: "currency", currency: "PYG" })}
+                                {parsePrice(totalAmount)}
                             </Text>
                         </Box>
                     </Grid>

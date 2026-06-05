@@ -240,7 +240,7 @@ export const router = createBrowserRouter([
           {
             element: <RequirePermission permission="purchaseReceipts.view" />,
             children: [
-              { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptWizard /> },
+              { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptList /> },
             ],
           },
           {
@@ -261,7 +261,6 @@ export const router = createBrowserRouter([
           { path: "/compras/ordenes-de-compra", element: <PurchaseOrderList /> },
           { path: "/compras/ordenes-de-compra/nuevo", element: <PurchaseOrderFormPage /> },
           { path: "/compras/ordenes-de-compra/:id", element: <PurchaseOrderFormPage /> },
-          { path: "/compras/recepcion-ordenes-compra", element: <PurchaseReceiptList /> },
           { path: "/compras/recepcion-ordenes-compra/nueva", element: <PurchaseReceiptWizard /> },
           { path: "/compras/recepcion-ordenes-compra/:id", element: <PurchaseReceiptView /> },
           { path: "/compras/devoluciones", element: <PurchaseReturnList /> },

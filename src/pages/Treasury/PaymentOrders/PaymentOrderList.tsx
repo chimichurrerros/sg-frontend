@@ -8,7 +8,7 @@ import { useGetPaymentOrders } from "@/queries/paymentOrders.queries";
 import { parseDate } from "@/constants/date";
 import { parsePrice } from "@/constants/price";
 import type { PaymentOrderResponseDto, PaymentOrderFilterParams } from "@/api/paymentOrders.api";
-import { paymentOrderStateMap } from "@/api/paymentOrders.api";
+import { paymentOrderStateMap, paymentMethodLabelMap } from "@/api/paymentOrders.api";
 import PaginationControl from "@/components/ui/pagination-control";
 import PageSizeControl from "@/components/ui/page-size-control";
 import { Banknote, Eye } from "lucide-react";
@@ -55,7 +55,7 @@ export default function PaymentOrderList() {
         {
             labelName: "Método de Pago",
             propName: "paymentMethod",
-            transformFunction: (value: string) => value || "-",
+            transformFunction: (value: string) => paymentMethodLabelMap[value] || value || "-",
         },
         {
             labelName: "Estado",

@@ -23,7 +23,7 @@ import { useMe } from "@/queries/auth.queries";
 import { parseDate } from "@/constants/date";
 import { toaster } from "@/components/ui/toaster";
 import { parsePrice } from "@/constants/price";
-import TableEditable, { type EditableLabel } from "@/components/ui/tables/table-edit";
+
 import { LoadingScreen } from "@/components/ui/screens/loading-screen";
 import EmptyDataScreen from "@/components/ui/screens/empty-data-screen";
 import { SelectWrapper } from "@/components/ui/wrappers/select-wrapper";
@@ -43,6 +43,33 @@ const purchaseOrderStates: Record<number, string> = {
   4: "Recibido",
   5: "Cancelado",
 };
+
+const SimpleDetailsTable = ({ data }: { data: any[] }) => (
+  <Table.ScrollArea>
+    <Table.Root size="sm">
+      <Table.Header>
+        <Table.Row bg="gray.100">
+          <Table.ColumnHeader px={4} fontWeight="bold">Producto</Table.ColumnHeader>
+          <Table.ColumnHeader px={4} fontWeight="bold">Proveedor</Table.ColumnHeader>
+          <Table.ColumnHeader px={4} fontWeight="bold">Cantidad</Table.ColumnHeader>
+          <Table.ColumnHeader px={4} fontWeight="bold">Precio Unit.</Table.ColumnHeader>
+          <Table.ColumnHeader px={4} fontWeight="bold">Subtotal</Table.ColumnHeader>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {(data || []).map((d: any) => (
+          <Table.Row key={d.id} _even={{ bg: "gray.50" }}>
+            <Table.Cell px={4}>{d.productName}</Table.Cell>
+            <Table.Cell px={4}>{d.supplierName}</Table.Cell>
+            <Table.Cell px={4}>{d.quantityOrdered}</Table.Cell>
+            <Table.Cell px={4}>{parsePrice(d.price)}</Table.Cell>
+            <Table.Cell px={4}>{parsePrice(d.price * d.quantityOrdered)}</Table.Cell>
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table.Root>
+  </Table.ScrollArea>
+);
 
 export default function PurchaseOrderFormPage() {
   const navigate = useNavigate();
@@ -76,22 +103,6 @@ export default function PurchaseOrderFormPage() {
     );
     return requestedSupplierIds.filter((sid) => !quotedSupplierIds.has(sid));
   })();
-
-  const detailLabels: EditableLabel<any>[] = [
-    { labelName: "Producto", propName: "productName" },
-    { labelName: "Proveedor", propName: "supplierName" },
-    { labelName: "Cantidad", propName: "quantityOrdered" },
-    {
-      labelName: "Precio Unitario",
-      isComponent: true,
-      render: (item: any) => parsePrice(item.price),
-    },
-    {
-      labelName: "Precio Subtotal",
-      isComponent: true,
-      render: (item: any) => parsePrice(item.price * item.quantityOrdered),
-    },
-  ];
 
   const handleSubmit = async () => {
     if (!draft) return;
@@ -262,7 +273,11 @@ export default function PurchaseOrderFormPage() {
                     </Table.Header>
                     <Table.Body>
                       {supOrder.details.map((detail) => (
-                        <Table.Row key={detail.id} _even={{ bg: "gray.50" }}>
+                        <Table.Row 
+                            key={detail.id} 
+                          _even={{ bg: "gray.50" }}
+                          _hover={{ bg: "blue.50" }}  // distinct hover color
+                        >
                           <Table.Cell px={4}>{detail.productName}</Table.Cell>
                           <Table.Cell px={4}>{detail.quantityOrdered}</Table.Cell>
                           <Table.Cell px={4}>{detail.quantityReceived}</Table.Cell>
@@ -283,15 +298,7 @@ export default function PurchaseOrderFormPage() {
             <Box bg="gray.50" px={6} py={3} borderBottomWidth="1px" borderColor="gray.200">
               <Text fontWeight="bold">Productos</Text>
             </Box>
-            {details && (
-              <TableEditable
-                data={details}
-                labels={detailLabels}
-                onDataChange={() => {}}
-                readOnly={true}
-                height="auto"
-              />
-            )}
+            {details && <SimpleDetailsTable data={details} />}
           </Box>
         )}
       </Stack>
@@ -361,15 +368,7 @@ export default function PurchaseOrderFormPage() {
         </Box>
       )}
 
-      {details && !loadingDraft && (
-        <TableEditable
-          data={details}
-          labels={detailLabels}
-          onDataChange={() => {}}
-          readOnly={true}
-          height="auto"
-        />
-      )}
+      {details && !loadingDraft && <SimpleDetailsTable data={details} />}
 
       {!draft && selectedRequestId > 0 && !loadingDraft && (
         <Box borderWidth="1px" borderRadius="lg" py={8}>
@@ -402,26 +401,6 @@ export default function PurchaseOrderFormPage() {
         <Text color="gray.500" fontSize="sm">
           No se encontró cotización para esta solicitud.
         </Text>
-      )}
-
-      {!isViewMode && (
-        <ButtonGroup alignSelf="end">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/compras/ordenes-de-compra")}
-            disabled={createOrder.isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            bgColor="brand.primary"
-            onClick={handleSubmit}
-            disabled={!draft || createOrder.isPending}
-            loading={createOrder.isPending}
-          >
-            <Save size={16} /> Guardar
-          </Button>
-        </ButtonGroup>
       )}
     </Stack>
   );

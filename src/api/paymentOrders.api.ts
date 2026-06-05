@@ -102,6 +102,13 @@ export const paymentMethodOptions = [
     { value: "CreditNote", label: "Nota de Crédito" },
 ];
 
+export const paymentMethodLabelMap: Record<string, string> = {
+    Transfer: "Transferencia",
+    Cash: "Efectivo",
+    Check: "Cheque",
+    CreditNote: "Nota de Crédito",
+};
+
 export const paymentOrdersApi = {
     get: (params: PaymentOrderFilterParams) => {
         const queryParams: Record<string, string | number> = {};
