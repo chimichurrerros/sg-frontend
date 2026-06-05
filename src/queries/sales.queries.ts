@@ -48,6 +48,7 @@ export const useCreateSale = () => {
         onSuccess: () => {
             toaster.create({ title: "Venta registrada exitosamente", type: "success" })
             queryClient.invalidateQueries({ queryKey: salesKeys.sales })
+            queryClient.invalidateQueries({ queryKey: ["products"] });
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.title || error.message;
